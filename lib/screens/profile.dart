@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:e_catalog/auth.dart';
 
 class Profile extends StatelessWidget {
 
@@ -35,6 +37,17 @@ class Profile extends StatelessWidget {
                 title: Text(
                   'Admin Section'
                 ),
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.exit_to_app
+                ),
+                title: Text(
+                  'Signout'
+                ),
+                onTap: (){
+                  Provider.of<Auth>(context, listen: false).signOut(context);
+                }
               ),
             ]
           ).toList()

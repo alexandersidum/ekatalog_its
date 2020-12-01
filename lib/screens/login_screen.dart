@@ -9,6 +9,9 @@ import 'package:e_catalog/components/custom_text_field.dart';
 import 'package:e_catalog/constants.dart';
 
 //Login sebagai seller metodenya belum
+//Perlu fungsi validasi dan Exception Handling
+//Diperbagus UI nya disamakan dengan fais nanti?
+
 
 class LoginScreen extends StatefulWidget {
 
@@ -18,7 +21,7 @@ class LoginScreen extends StatefulWidget {
   _LoginScreenState createState() => _LoginScreenState();
 }
 
-//Perlu fungsi validasi
+
 
 class _LoginScreenState extends State<LoginScreen> {
 

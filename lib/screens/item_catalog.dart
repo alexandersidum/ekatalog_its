@@ -63,7 +63,7 @@ class ItemCatalogState extends State<ItemCatalog>{
     //Perlu diperbaiki??
     onSearch?sortItem(searchedList(searchText)):sortItem(itemList);
 
-    return SafeArea(
+    return Container(
       child: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -125,7 +125,7 @@ class UpperContainer extends SliverPersistentHeaderDelegate{
         height: MediaQuery.of(context).size.height*0.07,
         decoration: BoxDecoration(
           color: kBlueDarkColor,
-          borderRadius: BorderRadius.circular(10)
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(10))
         ),
         child: TextField(
           onChanged: onChangedSearch,

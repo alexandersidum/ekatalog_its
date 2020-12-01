@@ -2,6 +2,7 @@ class Item {
 
 //Masih prototype
 //Perlu isAccepted, Deskripsi, sellerUid, stock, tanggal
+//enum untuk status item
 
   String name;
   String image;
