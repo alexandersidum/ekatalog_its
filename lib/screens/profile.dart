@@ -1,3 +1,4 @@
+import 'package:e_catalog/models/account.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:e_catalog/auth.dart';
@@ -8,6 +9,7 @@ class Profile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var accountInfo = Provider.of<Account>(context);
     return Container(
       child: ListView(
         children: ListTile.divideTiles(
@@ -16,12 +18,12 @@ class Profile extends StatelessWidget {
               ListTile(
                 leading: Icon(
                   Icons.account_circle,
-
                 ),
                 title: Text(
                   'Account'
                 ),
               ),
+              accountInfo.role==1?
               ListTile(
                 leading: Icon(
                   Icons.add_shopping_cart
@@ -29,15 +31,15 @@ class Profile extends StatelessWidget {
                 title: Text(
                   'Seller Section'
                 ),
-              ),
+              ):accountInfo.role==2?
               ListTile(
                 leading: Icon(
                   Icons.group
                 ),
                 title: Text(
-                  'Admin Section'
+                  'PP Section'
                 ),
-              ),
+              ):null,
               ListTile(
                 leading: Icon(
                   Icons.exit_to_app

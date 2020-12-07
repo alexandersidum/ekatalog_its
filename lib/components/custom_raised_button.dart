@@ -1,3 +1,4 @@
+import 'package:e_catalog/constants.dart';
 import 'package:flutter/material.dart';
 
 class CustomRaisedButton extends StatelessWidget {
@@ -5,33 +6,27 @@ class CustomRaisedButton extends StatelessWidget {
   String text;
   Function callback;
   Color color;
-  CustomRaisedButton({this.text, this.callback, this.color});
+  Widget buttonChild;
+  double buttonHeight;
+  CustomRaisedButton({this.text, this.callback, this.color, this.buttonChild, this.buttonHeight});
   
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal:20, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal:10),
       child: Material(
         color: color,
         elevation: 2,
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(15),
         child: MaterialButton(
-          height: MediaQuery.of(context).size.height/15,
+          height: this.buttonHeight,
           onPressed: callback,
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children : <Widget>[
               Expanded(
                 flex: 5,
-                child: Text(
-                  text,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    letterSpacing: 2,
-                    fontSize: 15,
-                    color: Colors.white
-                  ),
-                )
+                child: buttonChild,
               ),
             ],
           ),

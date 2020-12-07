@@ -14,7 +14,6 @@ class CustomTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(5),
       child: TextField(
         onChanged: callback,
         controller: controller,
@@ -29,7 +28,10 @@ class CustomTextField extends StatelessWidget {
           filled: true,
           fillColor: color,
         ) : InputDecoration(
-          border: InputBorder.none,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(7),
+            borderSide: BorderSide.none
+          ),
           hintText: hintText,
           contentPadding: EdgeInsets.only(top:15, left : 10),
           filled: true,

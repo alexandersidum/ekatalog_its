@@ -63,51 +63,53 @@ class ItemCatalogState extends State<ItemCatalog>{
     //Perlu diperbaiki??
     onSearch?sortItem(searchedList(searchText)):sortItem(itemList);
 
-    return Container(
-      child: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            backgroundColor: kBlueDarkColor,
-            stretch: false,
-            centerTitle: true,
-            title: Text("E-Katalog"),
-            floating: false,
-            pinned: false,
-          ),
-          SliverPersistentHeader(
-            delegate: UpperContainer(
-              onChangedSearch: (search){
-                searchText = search;
-                setState(() {
-                  if(search!=null||search!=''){
-                    onSearch=true;
-                    selectedList = searchedList(searchText);
-                  }
-                  else{
-                    selectedList = itemList.map((e) => Item(image: e.image,name: e.name,isReady: e.isReady,price: e.price,seller: e.seller)).toList();
-                  }
-                });
-              },
-              maxExtent: size.height*0.1, 
-              minExtent: size.height*0.1,
-              ),
-            floating : true,
-            pinned: true,
-          ),
-          SliverStaggeredGrid.countBuilder(
-            //Crossaxiscount belum menyesuaikan size hp
-            crossAxisCount: 2, 
-            staggeredTileBuilder: (index) => StaggeredTile.fit(1), 
-            itemBuilder: (context, index) {
-                        Item currentItem = selectedList!=null?selectedList[index]:itemList[index];
-                        return ItemTile(item: currentItem, size: size,);
-                      }, 
-            itemCount: selectedList!=null?selectedList.length:itemList.length
-          ),
-        ],
+    return SafeArea(
+      child: Container(
+        child: CustomScrollView(
+          slivers: [
+            SliverAppBar(
+              backgroundColor: kBlueMainColor,
+              stretch: false,
+              centerTitle: true,
+              title: Text("E-Katalog"),
+              floating: false,
+              pinned: false,
+            ),
+            SliverPersistentHeader(
+              delegate: UpperContainer(
+                onChangedSearch: (search){
+                  searchText = search;
+                  setState(() {
+                    if(search!=null||search!=''){
+                      onSearch=true;
+                      selectedList = searchedList(searchText);
+                    }
+                    else{
+                      selectedList = List.from(itemList);
+                      // selectedList = itemList.map((e) => Item(image: e.image,name: e.name,isReady: e.isReady,price: e.price,seller: e.seller)).toList();
+                    }
+                  });
+                },
+                maxExtent: size.height*0.1, 
+                minExtent: size.height*0.1,
+                ),
+              floating : true,
+              pinned: true,
+            ),
+            SliverStaggeredGrid.countBuilder(
+              //Crossaxiscount belum menyesuaikan size hp 
+              crossAxisCount: 2, 
+              staggeredTileBuilder: (index) => StaggeredTile.fit(2), 
+              itemBuilder: (context, index) {
+                          Item currentItem = selectedList!=null?selectedList[index]:itemList[index];
+                          return ItemTile(item: currentItem, size: size,);
+                        }, 
+              itemCount: selectedList!=null?selectedList.length:itemList.length
+            ),
+          ],
+        ),
       ),
     );
-    
   }
 }
 
@@ -124,16 +126,25 @@ class UpperContainer extends SliverPersistentHeaderDelegate{
         padding: EdgeInsets.symmetric(horizontal: 10, vertical: 7),
         height: MediaQuery.of(context).size.height*0.07,
         decoration: BoxDecoration(
-          color: kBlueDarkColor,
+          color: kBlueMainColor,
           borderRadius: BorderRadius.vertical(bottom: Radius.circular(10))
         ),
         child: TextField(
           onChanged: onChangedSearch,
           decoration: InputDecoration(
+            contentPadding: EdgeInsets.only(top:5, left:5),
             suffixIcon: Icon(Icons.search),
             filled: true,
             fillColor: Colors.white,
-            border: InputBorder.none,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.all(
+                Radius.circular(5)
+              ),
+              borderSide: BorderSide(
+                width: 0, 
+                style: BorderStyle.none,
+            ),
+            ),
             hintText: 'Search'),
         ),
       );
@@ -190,7 +201,7 @@ class TopContainer extends StatelessWidget {
       width: double.infinity,
       height: size.height*0.17,
       decoration: BoxDecoration(
-        color: kBlueDarkColor,
+        color: kBlueMainColor,
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(10),
           bottomRight: Radius.circular(10)

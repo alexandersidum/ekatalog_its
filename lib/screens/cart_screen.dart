@@ -7,7 +7,7 @@ import 'package:e_catalog/constants.dart';
 class CartScreen extends StatelessWidget {
   CartScreen({Key key}) : super(key: key);
 
-  //Kenapa kalau function itemupdate di pass lewat constructor bisa , kalau di function tidak
+  //function itemupdate di pass lewat constructor bisa , kalau di function tidak?
 
   List<Widget> itemListBuilder(List<CartItem> item, BuildContext context,
     Function itemUpdate, Function itemDelete) {

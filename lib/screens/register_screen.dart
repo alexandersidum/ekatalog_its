@@ -38,7 +38,7 @@ class _RegistrationScreenState extends State<RegistrationScreen>{
     var role = int.parse(_roleController.text);
     var displayName = _displayNameController.text.toString();
     var name = _nameController.text.toString();
-    await Provider.of<Auth>(context, listen: false).signUp(email, password, role, name, displayName, onCompleteRegis);
+    Provider.of<Auth>(context, listen: false).signUp(email, password, role, name, displayName, onCompleteRegis);
   }
 
   @override

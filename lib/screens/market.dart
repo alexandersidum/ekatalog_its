@@ -60,7 +60,7 @@ class MarketState extends State<Market> {
                   name : name,
                   price : price,
                   seller : seller,
-                  isReady: true,
+                  //placeholder
                   image: 'https://picsum.photos/300/300',
                 )
                 , (String status, String coba){

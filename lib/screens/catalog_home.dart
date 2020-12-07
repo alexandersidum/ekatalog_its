@@ -1,5 +1,5 @@
 import 'package:e_catalog/models/item.dart';
-import 'package:e_catalog/models/user.dart';
+import 'package:e_catalog/models/account.dart';
 import 'package:e_catalog/screens/cart_screen.dart';
 import 'package:e_catalog/screens/item_catalog.dart';
 import 'package:e_catalog/screens/market.dart';
@@ -9,7 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:e_catalog/auth.dart';
 import 'package:e_catalog/utilities/database.dart';
 import 'package:e_catalog/constants.dart';
-import 'package:collection/collection.dart';
+import 'playground.dart';
 
 //BottomNavbar belum diimplementasikan
 //Single item atau detail item page belum
@@ -37,10 +37,14 @@ class CatalogHomeState extends State<CatalogHome> {
     ),
     CartScreen(
       key: PageStorageKey('cart')),
-    Market(
-      key: PageStorageKey('market')),
+    // Market(
+    //   key: PageStorageKey('market')),
+    Tester(
+      key: PageStorageKey('tester')),
     Profile(
-      key: PageStorageKey('profile'))
+      key: PageStorageKey('profile')),
+    // ProposalScreen(
+    //   key: PageStorageKey('Proposal'))
   ];
 
   //Placeholder sementara
@@ -117,20 +121,21 @@ class CatalogHomeState extends State<CatalogHome> {
 
   @override
   Widget build(BuildContext context) {
+    var _auth = Provider.of<Auth>(context, listen: false);
     return MultiProvider(
       providers: [
         Provider<Database>(
             create: (context) => Database(
-                  uid: Provider.of<Auth>(context, listen: false).getUser.uid,
+                  uid: _auth.getUser.uid,
                 )),
-        Provider<User>(
-          create: (context) => User(
-              //Provider for user information
-              ),
+        ProxyProvider<Auth,Account>(
+          //Provider for user information
+          create: (context) => _auth.getUserInfo,
+          update: (context, auth, account)=>auth.getUserInfo,
         ),
         StreamProvider<List<Item>>(
           create: (context) => Database(
-            uid: Provider.of<Auth>(context, listen: false).getUser.uid,
+            uid: _auth.getUser.uid,
           ).getItems(),
           updateShouldNotify: (_,__)=>true,
         ),
@@ -147,9 +152,12 @@ class CatalogHomeState extends State<CatalogHome> {
             // }),
             title: Text("eKatalog ITS"),
             centerTitle: true,
-            backgroundColor: kBlueDarkColor,
+            backgroundColor: kBlueMainColor,
             elevation: 0,
-          ):null,
+          ):AppBar(
+            toolbarHeight: 0,
+            backgroundColor: kBlueMainColor,
+          ),
           // drawer: NavDrawer(listDrawer: listDrawer),
           body: PageStorage(bucket: bucket, child: _listPage[selectedIndex]),
 
@@ -158,7 +166,7 @@ class CatalogHomeState extends State<CatalogHome> {
             type: BottomNavigationBarType.fixed,
             selectedItemColor: Colors.white,
             unselectedItemColor: Colors.grey,
-            backgroundColor: kBlueDarkColor,
+            backgroundColor: kBlueMainColor,
             items: _bottomNavBarItem,
             currentIndex: selectedIndex,
             onTap: (index) {

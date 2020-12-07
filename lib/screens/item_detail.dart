@@ -185,7 +185,7 @@ class ItemDetailState extends State<ItemDetail> {
                 child: IconButton(
                     icon: Icon(
                       Icons.add_circle,
-                      color: kGrayMainColor,
+                      color: kGrayTextColor,
                       size: size.height * 0.05,
                     ),
                     onPressed: () {
@@ -199,7 +199,7 @@ class ItemDetailState extends State<ItemDetail> {
                 width: size.width * 0.1,
                 child: TextField(
                   style: TextStyle(
-                      color: kGrayMainColor,
+                      color: kGrayTextColor,
                       fontWeight: FontWeight.w800,
                       fontSize: size.height * 0.035),
                   textAlign: TextAlign.center,
@@ -221,7 +221,7 @@ class ItemDetailState extends State<ItemDetail> {
                 child: IconButton(
                     icon: Icon(
                       Icons.remove_circle,
-                      color: kGrayMainColor,
+                      color: kGrayTextColor,
                       size: size.height * 0.05,
                     ),
                     onPressed: () {

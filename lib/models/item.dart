@@ -6,20 +6,35 @@ class Item {
 
   String name;
   String image;
+  String description;
   String seller;
-  bool isReady;
+  String sellerUid;
+  int sellerPrice;
+  int ukpbjPrice;
+  int taxPercentage;
+  int stock;
   int price;
+  var status;
 
-  Item({this.name, this.image, this.seller, this.isReady, this.price});
+  Item({this.name, this.image, this.description,this.ukpbjPrice, this.sellerPrice, this.seller, this.stock, this.price, this.taxPercentage, this.sellerUid, this.status});
+  // {
+  //   this.status = stringToEnum(this.status);
+  // }
 
   factory Item.fromDb(Map<String, dynamic> parsedData){
     return(
       Item(
         name: parsedData['name'],
         image: parsedData['image'],
+        description: parsedData['description'],
         seller : parsedData['seller'],
-        isReady : parsedData['isReady'],
+        sellerUid : parsedData['sellerUid'],
+        sellerPrice: parsedData['sellerPrice'],
+        ukpbjPrice: parsedData['ukpbjPrice'],
+        stock : parsedData['stock'],
         price : parsedData['price'],
+        taxPercentage : parsedData['taxPercentage'],
+        status : parsedData['status'],
       ));
   }
 
@@ -28,9 +43,37 @@ class Item {
       'name' : this.name,
       'image' : this.image,
       'seller' : this.seller,
-      'isReady' : this.isReady,
       'price' : this.price
     };
   }
 
+  ItemStatus getStatus(){
+    switch (this.status) {
+      case 0:
+        return ItemStatus.BelumDiterima;
+        break;
+      case 1:
+        return ItemStatus.Diterima;
+        break;
+      case 2:
+        return ItemStatus.Ditolak;
+        break;
+      default:
+        return ItemStatus.Error;
+    }
+  }
+
+  String enumToString(Object a)=> a.toString().split(".").last;
+
+  ItemStatus stringToEnum(String a){
+    ItemStatus.values.forEach((element) {
+      if (a == enumToString(element )){
+        return element;
+      }
+     });
+  }
+}
+
+enum ItemStatus{
+  Diterima, Ditolak, BelumDiterima, Error
 }
