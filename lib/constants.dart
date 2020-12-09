@@ -10,7 +10,7 @@ final kOrangeButtonColor = Color(0xFFFFC33A);
 
 final kLightBlueButtonColor = Color(0xFF3AD0FF);
 
-final kRedButtonColor = Color(0xFFE23434);
+final kRedButtonColor = Color(0xFFE14848);
 
 final kGrayTextColor = Color(0xFF625858);
 

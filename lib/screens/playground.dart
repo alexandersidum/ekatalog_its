@@ -18,29 +18,15 @@ class TesterState extends State<Tester>  {
   @override
   void initState() { 
     super.initState();
-    CekLogin();
   }
 
-  void CekLogin()async{
-    _auth.currentUser().then((value) {
-      testText=value.email.toString();
-      setState(() {
-      });
-      } );
-  }
 
   var testText = 'Belum';
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<Account>(
-      builder: (context,acc,child){
-        var sel = acc as Seller;
-        return Center(
-          // child:Text(auth.getUser.email)
-          child: Text('${acc.name} ${acc.role} ${acc.uid} ${sel.location} ${sel.namaPerusahaan}'),
-        );
-      }
+    return Center(child: 
+    Text(Provider.of<Auth>(context).getUserInfo.name),
     );
     
 }}

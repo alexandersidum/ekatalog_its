@@ -8,13 +8,15 @@ class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
   final bool isObscure;
   final Function callback;
+  final int maxLine;
 
-  CustomTextField({this.keyboardType = TextInputType.text, this.iconData, this.color=Colors.white, this.hintText='...', this.controller, this.isObscure = false, this.callback});
+  CustomTextField({this.keyboardType = TextInputType.text, this.iconData, this.color=Colors.white, this.hintText='...', this.controller, this.isObscure = false, this.callback, this.maxLine});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: TextField(
+      child: TextFormField(
+        maxLines: maxLine!=null?8:1,
         onChanged: callback,
         controller: controller,
         obscureText: isObscure,

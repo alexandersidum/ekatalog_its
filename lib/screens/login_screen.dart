@@ -8,9 +8,13 @@ import '../components/custom_raised_button.dart';
 import 'package:e_catalog/components/custom_text_field.dart';
 import 'package:e_catalog/constants.dart';
 
-//Login sebagai seller metodenya belum
+//Setelah registrasi apa perlu login lagi?
 //Perlu fungsi validasi dan Exception Handling
-//Diperbagus UI nya disamakan dengan fais nanti?
+// The method 'findAncestorStateOfType' was called on null.
+// Receiver: null
+// Tried calling: findAncestorStateOfType<NavigatorState>()
+
+
 
 class LoginScreen extends StatefulWidget {
   static const routeId = 'loginScreen';
@@ -28,42 +32,39 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   void initState() {
     super.initState();
-    checkLogin();
   }
 
   void loginCallback() async {
     setState(() {
       isLoading = true;
     });
-    try {
       await Provider.of<Auth>(context, listen: false)
-          .signIn(emailController.text, passwordController.text, (isSuccess) {
-        if (isSuccess) {
+        .signIn(emailController.text, passwordController.text, (AuthResultStatus status) {
+        if(status==AuthResultStatus.successful){
           Navigator.pushReplacementNamed(context, CatalogHome.routeId);
-        } else {
-          validationText = 'Login Gagal';
-        }
-      });
-    } catch (e) {
-      validationText = 'Login Gagal';
-    } finally{
-      setState(() {
-      isLoading = false;
+        } 
+        validationText = AuthExceptionHandler.generateExceptionMessage(status);
+        isLoading = false;
+        setState(() {
+        });
     });
-    }
+    
     
   }
 
-  void checkLogin() async {
+  void checkLogin()  async{
     await Provider.of<Auth>(context, listen: false).checkAuth().then((value) {
-      value != null
-          ? Navigator.pushReplacementNamed(context, CatalogHome.routeId)
-          : null;
+      if(value){
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacementNamed(context, CatalogHome.routeId);
+      });
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    checkLogin();
     var size = MediaQuery.of(context).size;
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -155,15 +156,20 @@ class _LoginScreenState extends State<LoginScreen> {
                                 color: Colors.white,
                               ),
                               Container(
+                                padding: EdgeInsets.all(size.height/100),
                                 child: Text(
-                                  validationText
+                                  validationText,
+                                  style: kCalibriBold.copyWith(
+                                    color : kRedButtonColor,
+                                    fontSize: size.height/40,
+                                  ),
                                 ),
                               ),
                               SizedBox(
                                 height: size.height * 0.06,
                               ),
                               CustomRaisedButton(
-                                buttonHeight: size.height/10,
+                                buttonHeight: size.height/12,
                                 callback: (){
                                   loginCallback();
                                 },
@@ -180,7 +186,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 height: size.height * 0.02,
                               ),
                               CustomRaisedButton(
-                                buttonHeight: size.height/13,
+                                buttonHeight: size.height/18,
                                 callback: (){
                                   Navigator.pushNamed(context, RegistrationScreen.routeId);
                                   },

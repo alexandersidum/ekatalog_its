@@ -7,6 +7,7 @@ class Item {
   String name;
   String image;
   String description;
+  String category;
   String seller;
   String sellerUid;
   int sellerPrice;
@@ -16,7 +17,7 @@ class Item {
   int price;
   var status;
 
-  Item({this.name, this.image, this.description,this.ukpbjPrice, this.sellerPrice, this.seller, this.stock, this.price, this.taxPercentage, this.sellerUid, this.status});
+  Item({this.name, this.image, this.description,this.category, this.ukpbjPrice, this.sellerPrice, this.seller, this.stock, this.price, this.taxPercentage, this.sellerUid, this.status});
   // {
   //   this.status = stringToEnum(this.status);
   // }

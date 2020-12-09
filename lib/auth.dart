@@ -1,97 +1,130 @@
+import 'dart:io';
+import 'package:path/path.dart' as p;
 import 'package:e_catalog/models/account.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'screens/login_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
+//Kenapa selalu imageurlnya kosong
 //Ubah Password belum
 //Register belum sempurna
 //Signout belum sempurna
 
-class Auth with ChangeNotifier {
+class Auth {
   FirebaseAuth _auth = FirebaseAuth.instance;
-  Firestore _firestore = Firestore.instance;
-  FirebaseUser _user;
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseStorage _fstorage = FirebaseStorage.instance;
+  User _user;
   Account _userInfo;
 
   Auth() {
-    _auth.onAuthStateChanged.listen((currentUser) {
+    _auth.authStateChanges().listen((currentUser) {
       _user = currentUser;
     });
   }
 
-  Future<FirebaseUser> checkAuth() {
-    return _auth.currentUser();
+  Future<bool> checkAuth() async {
+    if (_auth.currentUser != null) {
+      await checkUserInfo(_auth.currentUser.uid);
+      return true;
+    } else {
+      return false;
+    }
   }
 
-  void signUp(String _email, String _password, int role, String name,
-      String displayName, Function onComplete) async {
+  void signUp(
+      String _email,
+      String _password,
+      int role,
+      int unit,
+      String name,
+      String namaPerusahaan,
+      String lokasiPerusahaan,
+      int telepon,
+      Function onComplete,
+      File image) async {
     //ExceptionHandlingnya masih ga work
     try {
       await _auth
           .createUserWithEmailAndPassword(email: _email, password: _password)
-          .then((result) {
-        _firestore.collection('users').document().setData({
-          'uid': result.user.uid,
-          'email': result.user.email,
-          'name': name,
-          'role': role,
-          'displayName': displayName
-        }).then((value) => onComplete('COMPLETE REGIS'));
+          .then((result) async {
+        if (result.user != null) {
+          await uploadImage(image).then((value) {
+            _firestore.collection('users').doc(result.user.uid).set({
+              'uid': result.user.uid,
+              'registrationDate': FieldValue.serverTimestamp(),
+              'email': result.user.email,
+              'name': name,
+              'role': role,
+              'unit': unit,
+              'telepon': telepon,
+              'namaPerusahaan': namaPerusahaan,
+              'alamat': lokasiPerusahaan,
+              'imageUrl': value != null ? value : ""
+            }).then((value) => onComplete(AuthResultStatus.successful));
+          });
+        } else {
+          onComplete(AuthResultStatus.undefined);
+        }
       });
     } catch (error) {
-      switch (error) {
-        case "ERROR_EMAIL_ALREADY_IN_USE":
-          {
-            //yang dilakukan apa?
-            onComplete('ERROR_EMAIL_ALREADY_IN_USE');
-            break;
-          }
-        case "ERROR_WEAK_PASSWORD":
-          {
-            //yang dilakukan
-            break;
-          }
-        //Case lainnya
-      }
+      onComplete(AuthExceptionHandler.handleException(error));
     }
   }
 
-  Future<void> signIn(
-      String email, String password, Function onComplete) async {
-    await _auth.signInWithEmailAndPassword(email: email, password: password).then(
-      (value) {
-        if (value.user!=null){
-          checkUserInfo(value.user.uid);
-          onComplete(true);
-        }else{
-          onComplete(false);
-        }
-      });
-    notifyListeners();
+  Future<String> uploadImage(File image) async {
+    String fileName = p.basename(image.path);
+    Reference storageRef = _fstorage.ref().child('upload/$fileName');
+    await storageRef.putFile(image);
+    return await storageRef.getDownloadURL();
   }
 
-  Future<Account> checkUserInfo(uid) async{
-    await _firestore.collection('users').document(uid).get().then((value) {
-      if(value.exists) {
-        int role = value.data['role'];
+  void signIn(
+      String email, String password, Function onComplete) async {
+    if (email.isNotEmpty && password.isNotEmpty) {
+      try{
+        await _auth
+          .signInWithEmailAndPassword(email: email, password: password)
+          .then((value) async {
+        if (value.user != null) {
+          await checkUserInfo(value.user.uid);
+          onComplete(AuthResultStatus.successful);
+        } else {
+          onComplete(AuthResultStatus.undefined);
+        }
+      });
+      }catch(error){
+        onComplete(AuthExceptionHandler.handleException(error));
+      }
+      
+    } else {
+      onComplete(AuthResultStatus.undefined);
+    }
+  }
+
+  Future<Account> checkUserInfo(uid) async {
+    await _firestore.collection('users').doc(uid).get().then((value) {
+      if (value.exists) {
+        int role = value.data()[['role']];
         switch (role) {
           case 0:
-            _userInfo = Account.fromDb(value.data);
+            _userInfo = Account.fromDb(value.data());
             break;
           case 1:
-            _userInfo = Seller.fromDb(value.data);
+            _userInfo = Seller.fromDb(value.data());
             break;
           case 2:
-            _userInfo = PejabatPengadaan.fromDb(value.data);
+            _userInfo = PejabatPengadaan.fromDb(value.data());
             break;
           default:
-            _userInfo = Account.fromDb(value.data);
+            _userInfo = Account.fromDb(value.data());
         }
-        }
-    } 
-    );
+      }
+    });
+    return _userInfo;
   }
 
   Future<void> signOut(BuildContext context) async {
@@ -99,7 +132,92 @@ class Auth with ChangeNotifier {
         context, LoginScreen.routeId, (Route<dynamic> route) => false));
   }
 
-  FirebaseUser get getUser => _user;
+  User get getUser => _user;
   Account get getUserInfo => _userInfo;
+}
 
+class AuthExceptionHandler {
+  static handleException(e) {
+    print(e.code);
+    var status;
+    switch (e.code) {
+      case "ERROR_INVALID_EMAIL":
+      case "invalid-email":
+        status = AuthResultStatus.invalidEmail;
+        break;
+      case "ERROR_WRONG_PASSWORD":
+      case "wrong-password":
+        status = AuthResultStatus.wrongPassword;
+        break;
+      case "ERROR_USER_NOT_FOUND":
+      case "user-not-found":
+        status = AuthResultStatus.userNotFound;
+        break;
+      case "ERROR_USER_DISABLED":
+      case "user-disabled":
+        status = AuthResultStatus.userDisabled;
+        break;
+      case "ERROR_TOO_MANY_REQUESTS":
+        status = AuthResultStatus.tooManyRequests;
+        break;
+      case "ERROR_OPERATION_NOT_ALLOWED":
+      case "operation-not-allowed":
+        status = AuthResultStatus.operationNotAllowed;
+        break;
+      case "ERROR_EMAIL_ALREADY_IN_USE":
+      case "account-exists-with-different-credential":
+      case "email-already-in-use":
+        status = AuthResultStatus.emailAlreadyExists;
+        break;
+      default:
+        status = AuthResultStatus.undefined;
+    }
+    return status;
+  }
+
+  ///
+  /// Accepts AuthExceptionHandler.errorType
+  ///
+  static generateExceptionMessage(exceptionCode) {
+    String errorMessage;
+    switch (exceptionCode) {
+      case AuthResultStatus.invalidEmail:
+        errorMessage = "Email yang dimasukkan tidak valid.";
+        break;
+      case AuthResultStatus.wrongPassword:
+        errorMessage = "Username/Password Salah.";
+        break;
+      case AuthResultStatus.userNotFound:
+        errorMessage = "User tidak ditemukan.";
+        break;
+      case AuthResultStatus.userDisabled:
+        errorMessage = "User telah dinonaktifkan.";
+        break;
+      case AuthResultStatus.tooManyRequests:
+        errorMessage = "Too many requests. Try again later.";
+        break;
+      case AuthResultStatus.operationNotAllowed:
+        errorMessage = "Signing in with Email and Password is not enabled.";
+        break;
+      case AuthResultStatus.emailAlreadyExists:
+        errorMessage = "Email telah digunakan pada akun lain.";
+        break;
+      default:
+        errorMessage = "Terjadi kesalahan dalam proses.";
+    }
+
+    return errorMessage;
+  }
+}
+
+enum AuthResultStatus {
+  successful,
+  emailAlreadyExists,
+  wrongPassword,
+  invalidEmail,
+  userNotFound,
+  userDisabled,
+  operationNotAllowed,
+  tooManyRequests,
+  undefined,
 }

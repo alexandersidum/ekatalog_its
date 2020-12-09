@@ -6,7 +6,7 @@ class Database {
   Database({this.uid});
 
   final String uid;
-  Firestore _firestore = Firestore.instance;
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   String itemsPath = 'items';
   String usersPath = 'users';
@@ -15,8 +15,8 @@ class Database {
 
   Stream<List<Item>> getItems() {
     return _firestore.collection(itemsPath).snapshots().map(
-        (QuerySnapshot snapshot) => snapshot.documents
-            .map((DocumentSnapshot document) => Item.fromDb(document.data)).toList());
+        (QuerySnapshot snapshot) => snapshot.docs
+            .map((DocumentSnapshot document) => Item.fromDb(document.data())).toList());
   }
 
   //Belum diberi method
@@ -30,7 +30,7 @@ class Database {
 
   Future<void> addItem(Item item, Function callback) async{
     await _firestore.collection(itemsPath).add(item.toMap()).then((value) async{
-      value!=null? callback(value.path.toString(), await _firestore.document(value.path).documentID.toString()) : callback('GAGAL', 'GAGAL');
+      value!=null? callback(value.path.toString(), await _firestore.doc(value.path).id.toString()) : callback('GAGAL', 'GAGAL');
     }).timeout(Duration(seconds: 10)).catchError((error){callback('GAGAL EROR $error');});
   }
 

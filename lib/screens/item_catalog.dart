@@ -1,4 +1,3 @@
-
 import 'package:e_catalog/components/item_tile.dart';
 import 'package:e_catalog/models/item.dart';
 import 'package:flutter/material.dart';
@@ -24,7 +23,7 @@ class ItemCatalogState extends State<ItemCatalog>{
   String searchText;
   sortedBy sorted = sortedBy.init;
   bool isInit = true;
-  var listCategory = ['AC', 'Notebook', 'PC', 'Printer', 'Proyektor', 'Router', 'Furniture'];
+  var listCategory = ['AC', 'Notebook', 'PC', 'Printer', 'Proyektor', 'Router', 'Furniture','JAJAAJA','ASDOASDASJ'];
   var listSelectedCategory = [];
   var selectedList = [];
 
@@ -96,10 +95,39 @@ class ItemCatalogState extends State<ItemCatalog>{
               floating : true,
               pinned: true,
             ),
+            SliverToBoxAdapter(
+              child: SingleChildScrollView(scrollDirection: Axis.horizontal,
+                child: Row(
+                    children: listCategory.map((e) => Container(
+                    width: size.width/7,
+                    height: size.height/20,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(e,
+                    style: kCalibri,),
+                  )).toList(),
+                ),
+              )),
+              // child: ListView(
+
+              //   scrollDirection: Axis.horizontal,
+              //   shrinkWrap: true,
+              //   children: listCategory.map((e) => Container(
+              //     width: size.width/7,
+              //     height: size.height/20,
+              //     decoration: BoxDecoration(
+              //       borderRadius: BorderRadius.circular(20),
+              //     ),
+              //     child: Text(e,
+              //     style: kCalibri,),
+              //   )).toList(),
+              // ),
+            // ),
             SliverStaggeredGrid.countBuilder(
               //Crossaxiscount belum menyesuaikan size hp 
               crossAxisCount: 2, 
-              staggeredTileBuilder: (index) => StaggeredTile.fit(2), 
+              staggeredTileBuilder: (index) => StaggeredTile.fit(1), 
               itemBuilder: (context, index) {
                           Item currentItem = selectedList!=null?selectedList[index]:itemList[index];
                           return ItemTile(item: currentItem, size: size,);

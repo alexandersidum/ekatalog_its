@@ -1,6 +1,7 @@
 import 'package:e_catalog/constants.dart';
 import 'package:e_catalog/screens/item_detail.dart';
 import 'package:e_catalog/screens/seller_catalog.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'screens/login_screen.dart';
@@ -9,18 +10,25 @@ import 'screens/catalog_home.dart';
 import 'screens/login_screen.dart';
 import 'auth.dart';
 import 'models/cart.dart';
+import 'package:flutter/services.dart';
 
-void main() {
+void main() async{
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    SystemChrome.setPreferredOrientations([
+        DeviceOrientation.portraitUp,
+        DeviceOrientation.portraitDown,
+      ]);
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context)=>Cart()),
-        ChangeNotifierProvider(create: (context)=>Auth())
+        Provider(create: (context)=>Auth())
       ],
       child: MaterialApp(
         theme: ThemeData.light(),

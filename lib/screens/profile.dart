@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:e_catalog/auth.dart';
 
 class Profile extends StatelessWidget {
+  
 
   const Profile({Key key}) : super(key : key);
 
@@ -23,7 +24,6 @@ class Profile extends StatelessWidget {
                   'Account'
                 ),
               ),
-              accountInfo.role==1?
               ListTile(
                 leading: Icon(
                   Icons.add_shopping_cart
@@ -31,7 +31,7 @@ class Profile extends StatelessWidget {
                 title: Text(
                   'Seller Section'
                 ),
-              ):accountInfo.role==2?
+              ),
               ListTile(
                 leading: Icon(
                   Icons.group
@@ -39,7 +39,7 @@ class Profile extends StatelessWidget {
                 title: Text(
                   'PP Section'
                 ),
-              ):null,
+              ),
               ListTile(
                 leading: Icon(
                   Icons.exit_to_app
