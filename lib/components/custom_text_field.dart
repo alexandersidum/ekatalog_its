@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class CustomTextField extends StatelessWidget {
   final TextInputType keyboardType;
@@ -9,8 +10,9 @@ class CustomTextField extends StatelessWidget {
   final bool isObscure;
   final Function callback;
   final int maxLine;
+  final int maxLength;
 
-  CustomTextField({this.keyboardType = TextInputType.text, this.iconData, this.color=Colors.white, this.hintText='...', this.controller, this.isObscure = false, this.callback, this.maxLine});
+  CustomTextField({this.keyboardType = TextInputType.text, this.iconData, this.color=Colors.white, this.hintText='...', this.controller, this.isObscure = false, this.callback, this.maxLine, this.maxLength});
 
   @override
   Widget build(BuildContext context) {
@@ -22,6 +24,9 @@ class CustomTextField extends StatelessWidget {
         obscureText: isObscure,
         keyboardType: keyboardType,
         autofocus: false,
+        inputFormatters: maxLength!=null?[
+          LengthLimitingTextInputFormatter(maxLength)
+        ]:[],
         decoration: iconData!=null? InputDecoration(
           border: InputBorder.none,
           prefixIcon: Icon(iconData),

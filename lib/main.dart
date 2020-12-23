@@ -1,5 +1,8 @@
 import 'package:e_catalog/constants.dart';
+import 'package:e_catalog/models/menu_state.dart';
+import 'package:e_catalog/screens/add_product_screen.dart';
 import 'package:e_catalog/screens/item_detail.dart';
+import 'package:e_catalog/screens/role_menu.dart';
 import 'package:e_catalog/screens/seller_catalog.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +10,6 @@ import 'package:provider/provider.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/catalog_home.dart';
-import 'screens/login_screen.dart';
 import 'auth.dart';
 import 'models/cart.dart';
 import 'package:flutter/services.dart';
@@ -25,13 +27,19 @@ class MyApp extends StatelessWidget {
         DeviceOrientation.portraitUp,
         DeviceOrientation.portraitDown,
       ]);
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+       statusBarColor: kBlueMainColor,
+    ));
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (context)=>MenuState(menuSelected: 0)),
         ChangeNotifierProvider(create: (context)=>Cart()),
-        Provider(create: (context)=>Auth())
+        Provider(create: (context)=>Auth()),
       ],
       child: MaterialApp(
-        theme: ThemeData.light(),
+        theme: ThemeData.light().copyWith(
+          canvasColor: Colors.transparent,
+        ),
         initialRoute: LoginScreen.routeId,
         routes: {
           LoginScreen.routeId : (context)=>LoginScreen(),
@@ -39,6 +47,9 @@ class MyApp extends StatelessWidget {
           CatalogHome.routeId : (context)=>CatalogHome(),
           ItemDetail.routeId : (context)=>ItemDetail(),
           SellerCatalog.routeId : (context)=>SellerCatalog(),
+          RoleMenu.routeId : (context)=>RoleMenu(),
+          AddProductScreen.routeId : (context)=>AddProductScreen(),
+          
         },
       ),
     );

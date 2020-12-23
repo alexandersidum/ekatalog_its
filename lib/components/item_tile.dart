@@ -16,8 +16,13 @@ class ItemTile extends StatelessWidget {
         Navigator.pushNamed(context, ItemDetail.routeId, arguments: item);
       },
       child: Container(
+        padding: EdgeInsets.all(1),
         child: Card(
-          elevation: 0.4,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10)
+          ),
+          elevation: 1,
+          clipBehavior: Clip.none,
           child: Column(
             children: [
               Container(
@@ -26,12 +31,15 @@ class ItemTile extends StatelessWidget {
                 ),
                 padding: EdgeInsets.all(1),
                 width: double.infinity,
-                child: FadeInImage(
-                  placeholder: AssetImage('assets/item_placeholder_300x300.png'), 
-                  image: NetworkImage(
-                    item.image,),
-                  fit: BoxFit.cover,
-                  )
+                child: ClipRRect(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(10)),
+                  child: FadeInImage(
+                    placeholder: AssetImage('assets/item_placeholder_300x300.png'), 
+                    image: NetworkImage(
+                      item.image[0].toString(),),
+                    fit: BoxFit.cover,
+                    ),
+                )
               ),
               Container(
                 padding: EdgeInsets.all(5),

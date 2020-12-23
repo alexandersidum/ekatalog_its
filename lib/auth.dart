@@ -18,10 +18,14 @@ class Auth {
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
   FirebaseStorage _fstorage = FirebaseStorage.instance;
   User _user;
-  Account _userInfo;
+  var _userInfo;
+
+  User get getUser => _user;
+  Account get getUserInfo => _userInfo;
 
   Auth() {
     _auth.authStateChanges().listen((currentUser) {
+      print('Current User : $currentUser');
       _user = currentUser;
     });
   }
@@ -63,7 +67,8 @@ class Auth {
               'telepon': telepon,
               'namaPerusahaan': namaPerusahaan,
               'alamat': lokasiPerusahaan,
-              'imageUrl': value != null ? value : ""
+              'imageUrl': value != null ? value : "",
+              'is_accepted' : false,
             }).then((value) => onComplete(AuthResultStatus.successful));
           });
         } else {
@@ -82,7 +87,7 @@ class Auth {
     return await storageRef.getDownloadURL();
   }
 
-  void signIn(
+  Future<void> signIn(
       String email, String password, Function onComplete) async {
     if (email.isNotEmpty && password.isNotEmpty) {
       try{
@@ -105,35 +110,46 @@ class Auth {
     }
   }
 
-  Future<Account> checkUserInfo(uid) async {
+  Future<void> checkUserInfo(uid) async {
     await _firestore.collection('users').doc(uid).get().then((value) {
       if (value.exists) {
-        int role = value.data()[['role']];
-        switch (role) {
+        // is accepted untuk memfilter langsung?
+        bool isAccepted = value.data()['is_accepted'];
+        int role = value.data()['role'];
+          switch (role) {
           case 0:
-            _userInfo = Account.fromDb(value.data());
+            _userInfo = Account.generateGuest();
             break;
           case 1:
-            _userInfo = Seller.fromDb(value.data());
+            _userInfo = PejabatPengadaan.fromDb(value.data());
             break;
           case 2:
-            _userInfo = PejabatPengadaan.fromDb(value.data());
+            _userInfo = Seller.fromDb(value.data());
+            break;
+          case 3:
+            _userInfo = PejabatPembuatKomitmen.fromDb(value.data());
+            break;
+          case 4:
+            _userInfo = UnitKerjaPengadaan.fromDb(value.data());
+            break;
+          case 5:
+            _userInfo = Audit.fromDb(value.data());
+            break;
+          case 6:
+            _userInfo = BendaharaPengeluaran.fromDb(value.data());
             break;
           default:
             _userInfo = Account.fromDb(value.data());
-        }
+        }        
       }
     });
-    return _userInfo;
   }
 
   Future<void> signOut(BuildContext context) async {
     await _auth.signOut().whenComplete(() => Navigator.pushNamedAndRemoveUntil(
         context, LoginScreen.routeId, (Route<dynamic> route) => false));
   }
-
-  User get getUser => _user;
-  Account get getUserInfo => _userInfo;
+  
 }
 
 class AuthExceptionHandler {

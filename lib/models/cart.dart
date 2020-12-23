@@ -1,9 +1,8 @@
 import 'package:e_catalog/models/item.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:provider/provider.dart';
 
 class Cart with ChangeNotifier {
-  List<CartItem> cartList = [];
+  List<LineItem> cartList = [];
 
   void addToCart(Item item, int count) {
     if(count<=0) { 
@@ -14,18 +13,23 @@ class Cart with ChangeNotifier {
     if (existingItem != null) {
       existingItem.count += count;
     } else {
-      var cartItem = CartItem(item, count);
+      var cartItem = LineItem(item, count);
       cartList.add(cartItem);
     }
     notifyListeners();
   }
 
-  void deleteItemCart(CartItem item) {
+  void deleteItemCart(LineItem item) {
     cartList.remove(item);
     notifyListeners();
   }
 
-  void updateCount(CartItem selectedItem, int count) {
+  void clearCart(){
+    cartList.clear();
+    notifyListeners();
+  }
+
+  void updateCount(LineItem selectedItem, int count) {
     if (count <= 0) {
     } else {
       var selected = cartList.singleWhere((element) => element == selectedItem);
@@ -35,11 +39,11 @@ class Cart with ChangeNotifier {
   }
 }
 
-class CartItem {
+class LineItem {
   Item item;
   int count;
 
-  CartItem(this.item, this.count);
+  LineItem(this.item, this.count);
 
   void addCount() => count++;
   void minCount() => count > 1 ? count-- : null;

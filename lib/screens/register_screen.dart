@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:e_catalog/constants.dart';
-import 'package:e_catalog/screens/item_catalog.dart';
 import 'package:e_catalog/screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:e_catalog/components/custom_raised_button.dart';
@@ -10,6 +9,8 @@ import 'package:e_catalog/auth.dart';
 import 'package:image_picker/image_picker.dart';
 
 //VALIDATOR REGISTRASI BELUM PASSWORD EMAIL DLL
+//TODO Fungsi Loading Submit
+//TODO Konfirmasi password dibenarkan
 class RegistrationScreen extends StatefulWidget {
   static const routeId = 'regisScreen';
 
@@ -26,7 +27,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   TextEditingController _passwordController = TextEditingController();
 
   String validationText = '';
-  var roles = ['PP', 'Penyedia', 'PPK', 'UKPBJ', 'Audit'];
+  var roles = ['PP', 'Penyedia', 'PPK', 'UKPBJ', 'Audit', 'BPP'];
   //Unitnya harus diisi dan kodenya
   List<String> units = [
     'Sistem Informasi',
@@ -35,11 +36,10 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     'Tek.Industri',
     'Tek.Kimia'
   ];
-  var selectedRolesDesc;
-  var selectedRoles = null;
+  var selectedRoles ;
   var selectedUnit = 'Sistem Informasi';
   var imagePicker = ImagePicker();
-  File pickedImage = null;
+  File pickedImage ;
 
   void onCompleteRegis(AuthResultStatus status) {
     setState(() {
@@ -55,7 +55,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
   void signUp() async {
     var email = _emailController.text;
     var password = _passwordController.text;
-    var role = roles.indexOf(selectedRolesDesc)+1;
+    var role = roles.indexOf(selectedRoles)+1;
     var namaPerusahaan = _namaPerusahaanController.text;
     var unit = units.indexOf(selectedUnit)+1;
     var alamatPerusahaan = _lokasiPerusahaanController.text;
@@ -207,7 +207,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       child: DropdownButton(
                           isExpanded: true,
                           dropdownColor: Colors.white,
-                          value: selectedRolesDesc,
+                          value: selectedRoles,
                           items: roles
                               .map((e) => DropdownMenuItem<String>(
                                     child: Text(e),
@@ -216,7 +216,6 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                               .toList(),
                           onChanged: (value) {
                             setState(() {
-                              selectedRolesDesc = value;
                               selectedRoles = value;
                             });
                           }),
@@ -225,14 +224,14 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   SizedBox(
                     height: size.height / 100,
                   ),
-                  selectedRoles == 'PP' || selectedRoles == 'PPK'
+                  selectedRoles == 'PP' || selectedRoles == 'PPK'|| selectedRoles == 'BPP'
                       ? Text('Unit',
                           style: kCalibriBold.copyWith(
                             color: Colors.white,
                             fontSize: size.height * 0.025,
                           ))
                       : SizedBox(),
-                  selectedRoles == 'PP' || selectedRoles == 'PPK'
+                  selectedRoles == 'PP' || selectedRoles == 'PPK' || selectedRoles == 'BPP'
                       ? Container(
                           margin: EdgeInsets.only(right: size.width / 3),
                           alignment: Alignment.centerLeft,
@@ -344,7 +343,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                   Padding(
                     padding: EdgeInsets.symmetric(vertical: size.height / 30),
                     child: Text(
-                      '*Akun akan memiliki status sebagai pengunjung selama admin belum memverifikasi data registrasi',
+                      '*Akun akan memiliki status sebagai pengunjung selama admin belum memverifikasi data registrasi',
                       style: kMaven.copyWith(color: Colors.white),
                     ),
                   ),
