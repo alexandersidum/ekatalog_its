@@ -1,7 +1,7 @@
 import 'package:e_catalog/components/item_tile.dart';
 import 'package:e_catalog/constants.dart';
 import 'package:e_catalog/models/item.dart';
-import 'package:e_catalog/utilities/database.dart';
+import 'package:e_catalog/utilities/item_services.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/src/rendering/sliver_persistent_header.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -22,15 +22,15 @@ class _SellerCatalogState extends State<SellerCatalog> {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(providers: [
-      Provider<Database>(
-        create: (context) => Database(
+      Provider<ItemService>(
+        create: (context) => ItemService(
           uid: Provider.of<Auth>(context, listen: false).getUser.uid,
         ),
       ),
       StreamProvider<List<Item>>(
-          create: (context) => Database(
+          create: (context) => ItemService(
                 uid: Provider.of<Auth>(context, listen: false).getUser.uid,
-              ).getItems())
+              ).getItemsWithStatus(1))
     ], child: Etalase());
   }
 }

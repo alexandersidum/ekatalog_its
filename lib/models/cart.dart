@@ -8,15 +8,28 @@ class Cart with ChangeNotifier {
     if(count<=0) { 
       return;
     }
-    var existingItem = cartList.singleWhere((element) => element.item == item,
+    var existingItem = cartList.singleWhere((element) => element.item.id == item.id,
         orElse: () => null);
     if (existingItem != null) {
-      existingItem.count += count;
+      existingItem.changeCount(existingItem.count+=count);
     } else {
       var cartItem = LineItem(item, count);
       cartList.add(cartItem);
     }
     notifyListeners();
+  }
+
+  int countTotalPrice(){
+    if(cartList.isEmpty){
+      return 0;
+    }
+    else{
+      double output = 0;
+      cartList.forEach((e) { 
+        output += (e.item.price*e.count)*(1+e.item.taxPercentage/100);
+      });
+      return output.round();
+    }
   }
 
   void deleteItemCart(LineItem item) {
@@ -45,6 +58,7 @@ class LineItem {
 
   LineItem(this.item, this.count);
 
+  void changeCount(int count) => this.count = count;
   void addCount() => count++;
   void minCount() => count > 1 ? count-- : null;
 }

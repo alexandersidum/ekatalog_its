@@ -1,3 +1,4 @@
+import 'package:e_catalog/constants.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -18,7 +19,8 @@ class CustomTextField extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       child: TextFormField(
-        maxLines: maxLine!=null?8:1,
+        style: kCalibri,
+        maxLines: maxLine!=null?maxLine:1,
         onChanged: callback,
         controller: controller,
         obscureText: isObscure,
@@ -40,6 +42,7 @@ class CustomTextField extends StatelessWidget {
             borderSide: BorderSide.none
           ),
           hintText: hintText,
+          hintStyle: kCalibri,
           contentPadding: EdgeInsets.only(top:15, left : 10),
           filled: true,
           fillColor: color,

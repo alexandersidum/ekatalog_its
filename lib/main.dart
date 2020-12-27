@@ -2,6 +2,7 @@ import 'package:e_catalog/constants.dart';
 import 'package:e_catalog/models/menu_state.dart';
 import 'package:e_catalog/screens/add_product_screen.dart';
 import 'package:e_catalog/screens/item_detail.dart';
+import 'package:e_catalog/screens/ppk_screen/quotation_screen.dart';
 import 'package:e_catalog/screens/role_menu.dart';
 import 'package:e_catalog/screens/seller_catalog.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -49,7 +50,7 @@ class MyApp extends StatelessWidget {
           SellerCatalog.routeId : (context)=>SellerCatalog(),
           RoleMenu.routeId : (context)=>RoleMenu(),
           AddProductScreen.routeId : (context)=>AddProductScreen(),
-          
+          QuotationScreen.routeId : (context)=>QuotationScreen(),
         },
       ),
     );

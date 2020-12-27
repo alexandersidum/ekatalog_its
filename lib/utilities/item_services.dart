@@ -4,8 +4,8 @@ import 'dart:io';
 import 'package:e_catalog/models/item.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-class Database {
-  Database({this.uid});
+class ItemService {
+  ItemService({this.uid});
   //TODO apa perlu uid?
   final String uid;
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -14,8 +14,16 @@ class Database {
   String itemsPath = 'items';
   String usersPath = 'users';
 
-  Stream<List<Item>> getItems() {
+  Stream<List<Item>> getAllItems() {
     return _firestore.collection(itemsPath).snapshots().map(
+        (QuerySnapshot snapshot) => snapshot.docs
+            .map((DocumentSnapshot document) =>
+                Item.fromDb(document.data()))
+            .toList());
+  }
+
+  Stream<List<Item>> getItemsWithStatus(int status) {
+    return _firestore.collection(itemsPath).where('status', isEqualTo: status).snapshots().map(
         (QuerySnapshot snapshot) => snapshot.docs
             .map((DocumentSnapshot document) =>
                 Item.fromDb(document.data()))

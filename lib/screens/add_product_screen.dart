@@ -4,7 +4,7 @@ import 'package:e_catalog/components/custom_raised_button.dart';
 import 'package:e_catalog/components/custom_text_field.dart';
 import 'package:e_catalog/models/account.dart';
 import 'package:e_catalog/models/item.dart';
-import 'package:e_catalog/utilities/database.dart';
+import 'package:e_catalog/utilities/item_services.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:modal_progress_hud/modal_progress_hud.dart';
@@ -34,7 +34,7 @@ class AddProductScreenState extends State<AddProductScreen> {
   int sold = 0;
   String notifText = '';
   String pathText = '';
-  Database db = Database();
+  ItemService db = ItemService();
   bool isLoading = false;
   ImagePicker imagePicker = ImagePicker();
   List<File> pickedImage = List(3);
@@ -80,7 +80,7 @@ class AddProductScreenState extends State<AddProductScreen> {
       stock: int.parse(_stockController.text),
       sold: sold,
     );
-    await Database().proposeItem(
+    await db.proposeItem(
       images: pickedImage,
       callback: (bool isSuccess){
         isLoading = false;

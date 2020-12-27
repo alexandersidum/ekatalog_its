@@ -8,7 +8,7 @@ import 'package:e_catalog/screens/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:e_catalog/auth.dart';
-import 'package:e_catalog/utilities/database.dart';
+import 'package:e_catalog/utilities/item_services.dart';
 import 'package:e_catalog/constants.dart';
 import 'playground.dart';
 import 'package:e_catalog/models/menu_state.dart';
@@ -147,8 +147,8 @@ class CatalogHomeState extends State<CatalogHome> {
     selectedIndex = Provider.of<MenuState>(context).menuSelected;
     return MultiProvider(
       providers: [
-        Provider<Database>(
-            create: (context) => Database(
+        Provider<ItemService>(
+            create: (context) => ItemService(
                   uid: _auth.getUser.uid,
                 )),
         // ProxyProvider<Auth, Account>(
@@ -157,9 +157,9 @@ class CatalogHomeState extends State<CatalogHome> {
         //   update: (context, auth, account) => auth.getUserInfo,
         // ),
         StreamProvider<List<Item>>(
-          create: (context) => Database(
+          create: (context) => ItemService(
             uid: _auth.getUser.uid,
-          ).getItems(),
+          ).getItemsWithStatus(1),
           updateShouldNotify: (_, __) => true,
         ),
       ],

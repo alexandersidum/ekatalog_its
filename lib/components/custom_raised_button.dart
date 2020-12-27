@@ -12,12 +12,13 @@ class CustomRaisedButton extends StatelessWidget {
   
   @override
   Widget build(BuildContext context) {
+    var size = MediaQuery.of(context).size;
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal:10),
+      padding: EdgeInsets.symmetric(horizontal:size.width/200),
       child: Material(
         color: color,
         elevation: 2,
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(size.width/100),
         child: MaterialButton(
           height: this.buttonHeight,
           onPressed: callback,
@@ -26,7 +27,9 @@ class CustomRaisedButton extends StatelessWidget {
             children : <Widget>[
               Expanded(
                 flex: 5,
-                child: buttonChild,
+                child: Center(
+                  child: buttonChild,
+                ),
               ),
             ],
           ),

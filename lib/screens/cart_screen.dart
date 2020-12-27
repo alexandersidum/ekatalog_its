@@ -1,7 +1,9 @@
 import 'package:e_catalog/auth.dart';
+import 'package:e_catalog/components/custom_raised_button.dart';
 import 'package:e_catalog/models/account.dart';
 import 'package:e_catalog/models/cart.dart';
 import 'package:e_catalog/models/sales_order.dart';
+import 'package:e_catalog/screens/cart_confirmation_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -15,7 +17,7 @@ class CartScreen extends StatelessWidget {
   //function itemupdate di pass lewat constructor bisa , kalau di function tidak?
   //TODO Perbagus UInya Cart Screen
 
-  OrderServices _orderServices = OrderServices();
+  
 
   Widget cartTile(context, element) {
     Function itemUpdate = Provider.of<Cart>(context).updateCount;
@@ -24,6 +26,7 @@ class CartScreen extends StatelessWidget {
 
     return Container(
       height: size.height * 0.15,
+      color: Colors.white,
       margin: EdgeInsets.all(5),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Container(
@@ -32,7 +35,7 @@ class CartScreen extends StatelessWidget {
           margin: EdgeInsets.only(right: 10),
           child: Image(
             fit: BoxFit.cover,
-            image: NetworkImage(element.item.image),
+            image: NetworkImage(element.item.image[0].toString()),
           ),
         ),
         Expanded(
@@ -59,58 +62,101 @@ class CartScreen extends StatelessWidget {
                 ),
                 Container(
                   margin: EdgeInsets.only(top: size.height * 0.001),
-                  height: size.height * 0.03,
-                  child:
-                      Row(mainAxisAlignment: MainAxisAlignment.end, children: [
-                    Container(
-                      height: size.height * 0.07,
-                      child: IconButton(
-                        onPressed: () {
-                          itemDelete(element);
-                        },
-                        icon: Icon(Icons.delete),
-                      ),
-                    ),
-                    Container(
-                      height: size.height * 0.07,
-                      child: IconButton(
-                        onPressed: () {
-                          itemUpdate(element, element.count + 1);
-                        },
-                        icon: Icon(Icons.add_circle),
-                      ),
-                    ),
-                    Container(
-                      width: size.width * 0.07,
-                      height: size.height * 0.07,
-                      child: TextField(
-                        style: TextStyle(fontWeight: FontWeight.w700),
-                        decoration: InputDecoration(
-                          contentPadding: EdgeInsets.only(bottom: 6, left: 3),
-                          border: InputBorder.none,
+                  height: size.height * 0.045,
+                  child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        // Container(
+                        //   height: size.height * 0.07,
+                        //   child: IconButton(
+                        //     onPressed: () {
+                        //       itemDelete(element);
+                        //     },
+                        //     icon: Icon(Icons.delete),
+                        //   ),
+                        // ),
+                        InkWell(
+                          onTap: () {
+                            itemDelete(element);
+                          },
+                          child: Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(5),
+                            ),
+                            height: size.height * 0.05,
+                            width: size.height * 0.05,
+                            child: Center(
+                              child: FittedBox(
+                                  child:
+                                      Icon(Icons.delete_forever, color: Colors.red,
+                                      size: size.height * 0.05,)),
+                            ),
+                          ),
                         ),
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly
-                        ],
-                        onChanged: (value) {
-                          itemUpdate(element, int.parse(value));
-                        },
-                        controller: TextEditingController(
-                            text: element.count.toString()),
-                      ),
-                    ),
-                    Container(
-                      height: size.height * 0.07,
-                      child: IconButton(
-                          onPressed: () {
+                        InkWell(
+                          onTap: () {
                             itemUpdate(element, element.count - 1);
                           },
-                          icon: Icon(
-                            Icons.remove_circle,
-                          )),
-                    ),
-                  ]),
+                          child: Container(
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.horizontal(
+                                    left: Radius.circular(5)),
+                                color: kBlueDarkColor),
+                            height: size.height * 0.05,
+                            width: size.height * 0.05,
+                            child: Center(
+                              child: FittedBox(
+                                  child:
+                                      Icon(Icons.remove, color: Colors.white)),
+                            ),
+                          ),
+                        ),
+                        Container(
+                          alignment: Alignment.center,
+                          color: kGrayConcreteColor,
+                          width: size.width * 0.1,
+                          height: size.height * 0.05,
+                          child: TextField(
+                            textAlign: TextAlign.center,
+                            expands: true,
+                            maxLines: null,
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                            ),
+                            decoration: null,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly
+                            ],
+                            onSubmitted: (value) {
+                              itemUpdate(element, int.parse(value));
+                            },
+                            controller: TextEditingController(
+                                text: element.count.toString()),
+                          ),
+                        ),
+                        InkWell(
+                          onTap: () {
+                            itemUpdate(element, element.count + 1);
+                          },
+                          child: Container(
+                            // onPressed: () {
+                            //     itemUpdate(element, element.count + 1);
+                            //   },
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.horizontal(
+                                    right: Radius.circular(5)),
+                                color: kBlueDarkColor),
+                            height: size.height * 0.05,
+                            width: size.height * 0.05,
+                            child: Center(
+                              child: FittedBox(
+                                  child: Icon(Icons.add, color: Colors.white)),
+                            ),
+                          ),
+                        ),
+                      ]),
                 )
               ],
             ),
@@ -122,61 +168,141 @@ class CartScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    List<LineItem> itemList = Provider.of<Cart>(context).cartList;
+    Cart cart = Provider.of<Cart>(context);
+    List<LineItem> itemList = cart.cartList;
     var account = Provider.of<Auth>(context).getUserInfo;
     var size = MediaQuery.of(context).size;
 
     if (account.role == 1) {
       PejabatPengadaan pp = account as PejabatPengadaan;
-      return Column(
-        children: [
-          Expanded(
-            child: Container(
-                child: itemList.length > 0
-                    ? GroupedListView<LineItem, String>(
-                        elements: itemList,
-                        groupBy: (lineItem) => lineItem.item.seller,
-                        groupHeaderBuilder: (lineItem) {
-                          return Text(
-                            lineItem.item.seller,
-                            style: kCalibriBold,
-                          );
-                        },
-                        itemBuilder: (context, lineItem) {
-                          return cartTile(context, lineItem);
-                        },
-                      )
-                    : Container(
-                        height: size.height * 0.8,
-                        child: Center(
-                            child:
-                                Text('No item on Cart', style: kCalibriBold)),
-                      )),
-          ),
-          RaisedButton.icon(
-              //Function to progress checkout
-              //TODO Perbagus
-              onPressed: () async {
-                await _orderServices.batchCreateSalesOrder(
-                    itemList: itemList,
-                    ppName: pp.name,
-                    ppUid: pp.uid,
-                    unit: pp.unit,
-                    onComplete: (isSuccess) {
-                      isSuccess
-                          ? Provider.of<Cart>(context, listen: false)
-                              .clearCart()
-                          : null;
-                      //TODO Kalau gagalcreateSalesOrder
-                    });
-              },
-              icon: Icon(Icons.shopping_cart),
-              label: Text('Checkout'))
-        ],
+      return Container(
+        color: kBackgroundMainColor,
+        child: Column(
+          children: [
+            Expanded(
+              child: Container(
+                  child: itemList.length > 0
+                      ? GroupedListView<LineItem, String>(
+                          elements: itemList,
+                          groupBy: (lineItem) => lineItem.item.seller,
+                          groupHeaderBuilder: (lineItem) {
+                            return Padding(
+                              padding: EdgeInsets.all(2),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.store
+                                  ),
+                                  Text(
+                                    lineItem.item.seller,
+                                    style: kCalibriBold,
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                          itemBuilder: (context, lineItem) {
+                            return cartTile(context, lineItem);
+                          },
+                        )
+                      : Container(
+                          height: size.height * 0.8,
+                          child: Center(
+                              child:
+                                  Text('No item on Cart', style: kCalibriBold)),
+                        )),
+            ),
+            Container(
+              padding: EdgeInsets.all(size.height / 100),
+              decoration: BoxDecoration(
+                  borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(size.height / 60)),
+                  color: Colors.white),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: size.width / 20),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "TOTAL",
+                            style: kMavenBold,
+                          ),
+                          Container(
+                            alignment: Alignment.centerLeft,
+                            width: size.width / 3,
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                "Rp ${cart.countTotalPrice().toString()}",
+                                style: kMavenBold.copyWith(
+                                    fontSize: size.height / 33,
+                                    color: Colors.orange),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      children: [
+                        Text(
+                          "Unit Pengajuan".toUpperCase(),
+                          style: kMavenBold,
+                        ),
+                        //PPK
+                        Text(
+                          pp.getUnit,
+                          style: kMavenBold.copyWith(color: kBlueDarkColor),
+                        ),
+                        Container(
+                          padding: EdgeInsets.all(size.height / 60),
+                          height: size.height / 12,
+                          child: CustomRaisedButton(
+                            buttonChild: Text(
+                              "SUBMIT",
+                              style: kMavenBold,
+                              textAlign: TextAlign.center,
+                            ),
+                            color: kOrangeButtonColor,
+                            callback: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (context)=>CartConfirmation(),
+                                fullscreenDialog: true,
+                              ));
+                              // await _orderServices.batchCreateSalesOrder(
+                              //     itemList: itemList,
+                              //     ppName: pp.name,
+                              //     ppUid: pp.uid,
+                              //     unit: pp.unit,
+                              //     onComplete: (isSuccess) {
+                              //       isSuccess
+                              //           ? Provider.of<Cart>(context,
+                              //                   listen: false)
+                              //               .clearCart()
+                              //           : null;
+                              //       //TODO Kalau gagalcreateSalesOrder
+                              //     });
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       );
     } else {
       return Container(
-        padding: EdgeInsets.all(size.width/20),
+        padding: EdgeInsets.all(size.width / 20),
         child: Center(
             child: Text(
                 'Hanya Akun yang terdaftar Sebagai Pejabat Pengadaan yang diizinkan melakukan Pembelian',
