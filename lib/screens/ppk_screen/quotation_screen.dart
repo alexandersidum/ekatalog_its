@@ -1,5 +1,6 @@
 import 'package:e_catalog/auth.dart';
 import 'package:e_catalog/components/custom_raised_button.dart';
+import 'package:e_catalog/components/modal_bottom_sheet_app.dart';
 import 'package:e_catalog/models/account.dart';
 import 'package:e_catalog/models/sales_order.dart';
 import 'package:e_catalog/screens/ppk_screen/quotation_detail.dart';
@@ -7,6 +8,7 @@ import 'package:e_catalog/utilities/order_services.dart';
 import 'package:flutter/material.dart';
 import 'package:e_catalog/constants.dart';
 import 'package:provider/provider.dart';
+import 'package:e_catalog/components/bottom_sheet_decline_info.dart';
 
 class QuotationScreen extends StatefulWidget {
   static const routeId = "Quotation";
@@ -23,8 +25,9 @@ class QuotationScreenState extends State<QuotationScreen> {
   bool onSearch = false;
 
   void manageQuotation(List<SalesOrder> initialList) {
-    if (initialList == null) return;
-    else{
+    if (initialList == null)
+      return;
+    else {
       finalOrderList = List.from(initialList);
     }
     switch (sorted) {
@@ -63,9 +66,11 @@ class QuotationScreenState extends State<QuotationScreen> {
               child: Row(
                 children: [
                   GestureDetector(
-                    onTap: (){
+                    onTap: () {
                       Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => QuotationDetail(quotation: quotation,),
+                        builder: (context) => QuotationDetail(
+                          quotation: quotation,
+                        ),
                       ));
                     },
                     child: Container(
@@ -129,7 +134,8 @@ class QuotationScreenState extends State<QuotationScreen> {
                     ),
                     Row(
                       children: [
-                        Expanded(child: Text("Penyedia :", style: kCalibriBold)),
+                        Expanded(
+                            child: Text("Penyedia :", style: kCalibriBold)),
                         Expanded(
                             child: Text(quotation.seller, style: kCalibri)),
                       ],
@@ -158,7 +164,25 @@ class QuotationScreenState extends State<QuotationScreen> {
                               style: kCalibriBold.copyWith(color: Colors.white),
                             ),
                             callback: () {
-                              //Fungsi tolak quotation
+                              showModalBottomSheetApp(
+                                  context: context,
+                                  builder: (context) {
+                                    return DeclineBottomSheet(
+                                      id: quotation.id,
+                                      callback: (keterangan) {
+                                        print(keterangan);
+                                        os.changeOrderStatus(
+                                            orderId: quotation.id,
+                                            newStatus: 2,
+                                            keterangan: keterangan,
+                                            callback: (bool result) {
+                                              result
+                                                  ? print("SUKSES")
+                                                  : print("GAGAL");
+                                            });
+                                      },
+                                    );
+                                  });
                             },
                             color: kRedButtonColor,
                           ),
@@ -171,15 +195,14 @@ class QuotationScreenState extends State<QuotationScreen> {
                               "TERIMA",
                               style: kCalibriBold.copyWith(color: Colors.white),
                             ),
-                            callback: () async{
+                            callback: () async {
                               //Fungsi terima quotation
                               os.changeOrderStatus(
-                                orderId: quotation.id,
-                                newStatus: 1,
-                                callback: (bool result){
-                                  result?print("SUKSES"):print("GAGAL");
-                                }
-                              );
+                                  orderId: quotation.id,
+                                  newStatus: 1,
+                                  callback: (bool result) {
+                                    result ? print("SUKSES") : print("GAGAL");
+                                  });
                             },
                             color: kBlueMainColor,
                           ),
@@ -224,11 +247,11 @@ class QuotationScreenState extends State<QuotationScreen> {
   @override
   Widget build(BuildContext context) {
     List<SalesOrder> listOrder = Provider.of<List<SalesOrder>>(context);
-    if(listOrder!=null){
+    if (listOrder != null) {
       listOrder = listOrder.where((element) => element.status == 0).toList();
     }
     var size = MediaQuery.of(context).size;
-    
+
     manageQuotation(listOrder);
 
     return Scaffold(

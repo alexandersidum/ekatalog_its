@@ -46,6 +46,7 @@ class CatalogHomeState extends State<CatalogHome> {
 
   List<Widget> _listAppbar = [
     AppBar(
+      automaticallyImplyLeading: false,
       elevation: 0,
       toolbarHeight: 0,
       backgroundColor: kBlueMainColor,
@@ -90,7 +91,7 @@ class CatalogHomeState extends State<CatalogHome> {
       backgroundColor: Colors.blueAccent,
       leading: FlatButton(
         onPressed: () {
-          Provider.of<Auth>(context, listen: false).signOut(context);
+          // Provider.of<Auth>(context, listen: false).signOut(context, );
         },
         child: Icon(Icons.exit_to_app),
       ),

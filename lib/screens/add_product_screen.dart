@@ -74,7 +74,7 @@ class AddProductScreenState extends State<AddProductScreen> {
       seller: seller.namaPerusahaan,
       sellerUid: seller.uid,
       status: status,
-      taxPercentage: int.parse(_taxPercentageController.text),
+      taxPercentage: _taxPercentageController.text.isNotEmpty?int.parse(_taxPercentageController.text):0,
       category: selectedCategory,
       description: _descriptionController.text,
       stock: int.parse(_stockController.text),
@@ -173,12 +173,13 @@ class AddProductScreenState extends State<AddProductScreen> {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: size.width * 0.03),
                 child: CustomTextField(
+                  textInputAction: TextInputAction.newline,
                   maxLength: 1000,
                   controller: _descriptionController,
                   hintText: 'Dekripsi produk..',
-                  keyboardType: TextInputType.text,
+                  keyboardType: TextInputType.multiline,
                   color: Colors.white,
-                  maxLine: 20,
+                  maxLine: 8,
                 ),
               ),
               Row(

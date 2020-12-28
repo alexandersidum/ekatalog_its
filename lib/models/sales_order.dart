@@ -12,22 +12,26 @@ class SalesOrder{
   String seller; 
   String sellerUid; 
   DateTime creationDate;
+  //shipping
+  String namaPenerima;
+  String namaAlamat;
+  String teleponPenerima;
+  String address;
   int status;
   String ppUid;
   String ppName;
   String ppkUid;
   String ppkName;
   int unit;
-  String shippingAddress;
   int tax;
   int unitPrice;
-  String responseFeedback;
+  String feedback;
 
-  SalesOrder({this.id, this.itemName, this.ppkName, this.creationDate, this.itemId, this.count, this.totalPrice, this.seller, this.sellerUid, this.status, this.ppName, this.ppUid, this.ppkUid, this.unit});
+  SalesOrder({this.id, this.docId, this.itemName, this.ppkName, this.creationDate, this.itemId, this.count, this.totalPrice, this.seller, this.sellerUid, this.status, this.ppName, this.ppUid, this.ppkUid, this.unit, this.address, this.namaAlamat, this.namaPenerima,this.teleponPenerima,this.unitPrice, this.feedback, this.tax});
 
-  factory SalesOrder.fromDb(Map<String , dynamic> parsedData){
-    
+  factory SalesOrder.fromDb(Map<String , dynamic> parsedData, String docId){
     return SalesOrder(
+      docId: docId,
       id: parsedData['id'],
       seller: parsedData['seller'],
       sellerUid: parsedData['sellerUid'],
@@ -41,7 +45,14 @@ class SalesOrder{
       ppUid: parsedData['ppUid'],
       unit: parsedData['unit'],
       ppkUid: parsedData['ppkUid'],
-      ppkName: parsedData['ppkName']
+      ppkName: parsedData['ppkName'],
+      address: parsedData['address'],
+      namaAlamat: parsedData['namaAlamat'],
+      namaPenerima: parsedData['namaPenerima'],
+      teleponPenerima: parsedData['teleponPenerima'],
+      feedback: parsedData['feedback']!=null?parsedData['feedback']:'',
+      tax: parsedData['tax'],
+      unitPrice: parsedData['unitPrice'],
     );
   }
 
@@ -60,7 +71,14 @@ class SalesOrder{
       'ppUid' : this.ppUid,
       'ppkName' : this.ppkName,
       'ppkUid' : this.ppkUid,
-      'unit' : this.unit
+      'unit' : this.unit,
+      'address' : this.address,
+      'namaAlamat' : this.namaAlamat,
+      'namaPenerima' : this.namaPenerima,
+      'teleponPenerima' : this.teleponPenerima,
+      'feedback' : this.feedback,
+      'tax' : this.tax,
+      'unitPrice' : this.unitPrice,
     };
   }
 

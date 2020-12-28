@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_catalog/models/item.dart';
+import 'package:e_catalog/utilities/order_services.dart';
 
 class Account {
   //Belum tau propertinya apa aja
@@ -51,30 +52,6 @@ class Account {
 
   String get getRole {
     return listRole[this.role];
-    // switch (this.role) {
-    //   case 0:
-    //     return listRole[0];
-    //     break;
-    //   case 1:
-    //     return listRole[1];
-    //     break;
-    //   case 2:
-    //     return listRole[2];
-    //     break;
-    //   case 3:
-    //     return listRole[3];
-    //     break;
-    //   case 4:
-    //     return listRole[4];
-    //     break;
-    //   case 4:
-    //     return listRole[5];
-    //     break;
-
-    //   default:
-    //     return "Pengunjung";
-    //     break;
-    // }
   }
 }
 

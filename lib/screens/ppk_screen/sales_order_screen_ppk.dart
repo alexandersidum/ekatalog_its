@@ -3,6 +3,7 @@ import 'package:e_catalog/components/custom_raised_button.dart';
 import 'package:e_catalog/models/account.dart';
 import 'package:e_catalog/models/sales_order.dart';
 import 'package:e_catalog/screens/ppk_screen/quotation_detail.dart';
+import 'package:e_catalog/screens/ppk_screen/sales_order_detail.dart';
 import 'package:e_catalog/utilities/order_services.dart';
 import 'package:flutter/material.dart';
 import 'package:e_catalog/constants.dart';
@@ -64,9 +65,9 @@ class SalesOrderPPKState extends State<SalesOrderPPK> {
                 children: [
                   GestureDetector(
                     onTap: (){
-                      // Navigator.of(context).push(MaterialPageRoute(
-                      //   builder: (context) => QuotationDetail(quotation: quotation,),
-                      // ));
+                      Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => SalesOrderDetail(salesOrder: order,),
+                      ));
                     },
                     child: Container(
                       child: Text(

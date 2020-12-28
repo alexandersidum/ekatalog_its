@@ -1,3 +1,4 @@
+import 'package:e_catalog/components/custom_raised_button.dart';
 import 'package:e_catalog/models/cart.dart';
 import 'package:e_catalog/models/menu_state.dart';
 import 'package:e_catalog/screens/catalog_home.dart';
@@ -8,6 +9,7 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:e_catalog/constants.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:e_catalog/components/item_counter.dart';
 
 class ItemDetail extends StatefulWidget {
   //Multiple photo belum support
@@ -50,72 +52,70 @@ class ItemDetailState extends State<ItemDetail> {
     return output;
   }
 
-  Widget bottomSheetKeranjang (BuildContext context, Item item){
+  Widget bottomSheetKeranjang(BuildContext context, Item item) {
     var size = MediaQuery.of(context).size;
-    return Container(
-      height: size.height/4,
-      color: Colors.transparent,
-      child: Container(
-        decoration : BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top:Radius.circular(size.height/30))
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text("Masukkan Keranjang",
-            style: kMavenBold,
-            ),
-            Container(
-              height: size.height/10,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children : [
-                  IconButton(icon: Icon(Icons.add_circle), onPressed: (){
-                    itemCount >= 0 ? itemCount += 1 : itemCount = itemCount;
+    return StatefulBuilder(builder: (context, setState) {
+      return Container(
+        height: size.height / 4,
+        color: Colors.transparent,
+        child: Container(
+          decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.vertical(
+                  top: Radius.circular(size.height / 30))),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                "Masukkan Keranjang",
+                style: kMavenBold,
+              ),
+              Container(
+                height: size.height / 10,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    ItemCounterButton(
+                      fieldText: itemCount.toString(),
+                      itemAdd: () {
+                        itemCount >= 0 ? itemCount += 1 : itemCount = itemCount;
+                        setState(() {});
+                      },
+                      itemReduce: () {
+                        itemCount >= 1 ? itemCount -= 1 : itemCount = itemCount;
                         count.text = itemCount.toString();
-                  }),
-                   Container(
-                width: size.width * 0.1,
-                child: TextField(
-                  style: TextStyle(
-                      color: kGrayTextColor,
-                      fontWeight: FontWeight.w800,
-                      fontSize: size.height * 0.035),
-                  textAlign: TextAlign.center,
-                  decoration: InputDecoration(
-                    border: InputBorder.none,
-                  ),
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  onChanged: (value) {
-                    setState(() {
-                      try{itemCount = int.parse(value);}
-                      catch(e){}
-                    });
-                  },
-                  controller: count,
+                        setState(() {});
+                      },
+                      onTextSubmit: (value) {
+                        itemCount = int.parse(value);
+                        setState(() {});
+                      },
+                    )
+                  ],
                 ),
               ),
-                  IconButton(icon: Icon(Icons.remove_circle), onPressed: (){
-                    itemCount >= 1 ? itemCount -= 1 : itemCount = itemCount;
-                        count.text = itemCount.toString();
-                  }),
-                ],
-                
-              ),
-            ),
-            RaisedButton(onPressed: (){
-              Provider.of<Cart>(context, listen: false)
-                    .addToCart(item, itemCount);
-            },
-            child: Text("Submit"),)
-          ],
+              Container(
+                height: size.height/20,
+                width: size.width/3,
+                child: CustomRaisedButton(
+                  color: kBlueMainColor,
+                  callback: () {
+                    Provider.of<Cart>(context, listen: false)
+                        .addToCart(item, itemCount);
+                  },
+                  buttonChild: Text(
+                    "Submit",
+                    style: kCalibriBold.copyWith(
+                      color: Colors.white
+                    )
+                  ),
+                ),
+              )
+            ],
+          ),
         ),
-
-      ),
-    );
-
+      );
+    });
   }
 
   @override
@@ -130,23 +130,22 @@ class ItemDetailState extends State<ItemDetail> {
           //Searchbar belum dikasi
           toolbarHeight: size.height * 0.07,
           centerTitle: true,
-          title: Text(item.name,
+          title: Text(
+            item.name,
             style: kCalibriBold,
           ),
           backgroundColor: kBlueMainColor,
           elevation: 2,
           actions: [
             InkWell(
-              onTap: (){
-                Provider.of<MenuState>(context, listen: false).setMenuSelected(1);
-                Navigator.pushNamed(context, CatalogHome.routeId);
+              onTap: () {
+                Provider.of<MenuState>(context, listen: false)
+                    .setMenuSelected(1);
+                Navigator.pushNamedAndRemoveUntil(context, CatalogHome.routeId, (Route<dynamic> route)=>false);
               },
               child: Icon(Icons.shopping_cart),
-
             ),
-            SizedBox(
-              width: size.width/30
-            )
+            SizedBox(width: size.width / 30)
           ],
         ),
         body: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
@@ -156,7 +155,7 @@ class ItemDetailState extends State<ItemDetail> {
                 Stack(
                   children: [
                     CarouselSlider(
-                      //Diganti images dari item nanti
+                        //Diganti images dari item nanti
                         items: imageUrls.map((url) {
                           return Builder(builder: (context) {
                             return Container(
@@ -211,7 +210,8 @@ class ItemDetailState extends State<ItemDetail> {
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.symmetric(vertical : 5, horizontal:7),
+                            padding: const EdgeInsets.symmetric(
+                                vertical: 5, horizontal: 7),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -219,18 +219,16 @@ class ItemDetailState extends State<ItemDetail> {
                                 Text(
                                   "Deskripsi Produk",
                                   style: kCalibriBold.copyWith(
-                                    fontSize: size.height * 0.03),
+                                      fontSize: size.height * 0.03),
                                 ),
                                 SizedBox(
                                   height: size.height * 0.01,
                                 ),
                                 Container(
-                                  child: Text(
-                                    item.description,
-                                    style:kCalibri.copyWith(
-                                      fontSize: size.height * 0.025,
-                                    )
-                                  ),
+                                  child: Text(item.description,
+                                      style: kCalibri.copyWith(
+                                        fontSize: size.height * 0.025,
+                                      )),
                                 ),
                               ],
                             ),
@@ -239,13 +237,12 @@ class ItemDetailState extends State<ItemDetail> {
                       ),
                     ],
                   ),
-                ),                
+                ),
               ],
             ),
           ),
           buildBottomOption(size, item)
-        ])
-        );
+        ]));
   }
 
   Container buildBottomOption(Size size, Item item) {
@@ -253,50 +250,53 @@ class ItemDetailState extends State<ItemDetail> {
       //warna sementara dan desain masih jelek
       color: Colors.white,
       height: size.height * 0.08,
-      child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, 
-      children: [
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
         Expanded(
           child: Padding(
-            padding: EdgeInsets.all(size.width/120),
+            padding: EdgeInsets.all(size.width / 120),
             child: FlatButton(
-              color: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(size.width/40),
-                side: BorderSide(width:size.width/200, color: kBlueMainColor)
-              ),
-              child: Text("Beli Sekarang",
-              style: kCalibriBold.copyWith(
-                  color: kBlueDarkColor,
-                  fontSize: size.width/23
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(size.width / 40),
+                    side: BorderSide(
+                        width: size.width / 200, color: kBlueMainColor)),
+                child: Text(
+                  "Beli Sekarang",
+                  style: kCalibriBold.copyWith(
+                      color: kBlueDarkColor, fontSize: size.width / 23),
                 ),
-              ),
-              onPressed: (){
-                //TODO Fungsi untuk beli sekarang
-                
-              }),
+                onPressed: () {
+                  Provider.of<Cart>(context, listen: false)
+                        .addToCart(item, itemCount==0?1:itemCount);
+                  Provider.of<MenuState>(context, listen: false)
+                    .setMenuSelected(1);
+                  Navigator.pushNamedAndRemoveUntil(context, CatalogHome.routeId, (Route<dynamic> route) => false);
+                  //TODO Fungsi untuk beli sekarang
+                }),
           ),
         ),
         Expanded(
           child: Padding(
-            padding: EdgeInsets.all(size.width/120),
+            padding: EdgeInsets.all(size.width / 120),
             child: FlatButton(
-              minWidth: size.width/2.5,
-              color: kBlueMainColor,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(size.width/40),
-                side: BorderSide(width:size.width/200,color: kBlueMainColor)
-              ),
-              child: Text("Masukkan Keranjang",
-                style: kCalibriBold.copyWith(
-                  color: Colors.white,
-                  fontSize: size.width/23
+                minWidth: size.width / 2.5,
+                color: kBlueMainColor,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(size.width / 40),
+                    side: BorderSide(
+                        width: size.width / 200, color: kBlueMainColor)),
+                child: Text(
+                  "Masukkan Keranjang",
+                  style: kCalibriBold.copyWith(
+                      color: Colors.white, fontSize: size.width / 23),
                 ),
-              ),
-              onPressed: (){
-                showModalBottomSheet(context: context, builder: (context){
-                  return bottomSheetKeranjang(context, item);
-                });
-              }),
+                onPressed: () {
+                  showModalBottomSheet(
+                      context: context,
+                      builder: (context) {
+                        return bottomSheetKeranjang(context, item);
+                      });
+                }),
           ),
         ),
       ]),
@@ -324,16 +324,12 @@ class TopInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     return Container(
-      padding: EdgeInsets.symmetric(horizontal : 15, vertical : 10),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start, 
-        children: [
+      padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(
           'Rp ${item.price.toString()}',
           style: kCalibriBold.copyWith(
-            fontSize: size.height/25,
-            color: kBlueMainColor
-          ),
+              fontSize: size.height / 25, color: kBlueMainColor),
         ),
         SizedBox(
           height: size.height * 0.001,
@@ -342,12 +338,8 @@ class TopInfo extends StatelessWidget {
           width: size.width,
           padding: EdgeInsets.only(bottom: 5),
           margin: EdgeInsets.only(bottom: 5),
-          child: Text(
-            item.name,
-            style: kCalibri.copyWith(
-              fontSize : size.height/30
-            )
-          ),
+          child: Text(item.name,
+              style: kCalibri.copyWith(fontSize: size.height / 30)),
         ),
         Container(
             padding: EdgeInsets.only(bottom: 5),
@@ -366,7 +358,7 @@ class TopInfo extends StatelessWidget {
               ],
             )),
         Padding(
-          padding: const EdgeInsets.symmetric(vertical : 5),
+          padding: const EdgeInsets.symmetric(vertical: 5),
           child: Row(
             children: [
               Text(
@@ -385,9 +377,8 @@ class TopInfo extends StatelessWidget {
                 child: Container(
                   padding: EdgeInsets.all(size.height * 0.007),
                   decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(3),
-                    color: kGrayConcreteColor
-                  ),
+                      borderRadius: BorderRadius.circular(3),
+                      color: kGrayConcreteColor),
                   child: Text(
                     '${item.seller}',
                     style: TextStyle(

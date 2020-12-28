@@ -12,13 +12,15 @@ class CustomTextField extends StatelessWidget {
   final Function callback;
   final int maxLine;
   final int maxLength;
+  final TextInputAction textInputAction;
 
-  CustomTextField({this.keyboardType = TextInputType.text, this.iconData, this.color=Colors.white, this.hintText='...', this.controller, this.isObscure = false, this.callback, this.maxLine, this.maxLength});
+  CustomTextField({this.textInputAction, this.keyboardType = TextInputType.text, this.iconData, this.color=Colors.white, this.hintText='...', this.controller, this.isObscure = false, this.callback, this.maxLine, this.maxLength});
 
   @override
   Widget build(BuildContext context) {
     return Container(
       child: TextFormField(
+        textInputAction: textInputAction!=null?textInputAction:TextInputAction.done,
         style: kCalibri,
         maxLines: maxLine!=null?maxLine:1,
         onChanged: callback,

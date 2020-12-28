@@ -4,6 +4,7 @@ import 'package:e_catalog/models/account.dart';
 import 'package:e_catalog/models/cart.dart';
 import 'package:e_catalog/models/sales_order.dart';
 import 'package:e_catalog/screens/cart_confirmation_screen.dart';
+import 'package:e_catalog/components/item_counter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
@@ -67,15 +68,6 @@ class CartScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.end,
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        // Container(
-                        //   height: size.height * 0.07,
-                        //   child: IconButton(
-                        //     onPressed: () {
-                        //       itemDelete(element);
-                        //     },
-                        //     icon: Icon(Icons.delete),
-                        //   ),
-                        // ),
                         InkWell(
                           onTap: () {
                             itemDelete(element);
@@ -94,68 +86,81 @@ class CartScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-                        InkWell(
-                          onTap: () {
-                            itemUpdate(element, element.count - 1);
-                          },
-                          child: Container(
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.horizontal(
-                                    left: Radius.circular(5)),
-                                color: kBlueDarkColor),
-                            height: size.height * 0.05,
-                            width: size.height * 0.05,
-                            child: Center(
-                              child: FittedBox(
-                                  child:
-                                      Icon(Icons.remove, color: Colors.white)),
-                            ),
-                          ),
-                        ),
-                        Container(
-                          alignment: Alignment.center,
-                          color: kGrayConcreteColor,
-                          width: size.width * 0.1,
-                          height: size.height * 0.05,
-                          child: TextField(
-                            textAlign: TextAlign.center,
-                            expands: true,
-                            maxLines: null,
-                            style: TextStyle(
-                              fontWeight: FontWeight.w700,
-                            ),
-                            decoration: null,
-                            keyboardType: TextInputType.number,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly
-                            ],
-                            onSubmitted: (value) {
-                              itemUpdate(element, int.parse(value));
-                            },
-                            controller: TextEditingController(
-                                text: element.count.toString()),
-                          ),
-                        ),
-                        InkWell(
-                          onTap: () {
+                        ItemCounterButton(
+                          fieldText: element.count.toString(),
+                          itemAdd: (){
                             itemUpdate(element, element.count + 1);
                           },
-                          child: Container(
-                            // onPressed: () {
-                            //     itemUpdate(element, element.count + 1);
-                            //   },
-                            decoration: BoxDecoration(
-                                borderRadius: BorderRadius.horizontal(
-                                    right: Radius.circular(5)),
-                                color: kBlueDarkColor),
-                            height: size.height * 0.05,
-                            width: size.height * 0.05,
-                            child: Center(
-                              child: FittedBox(
-                                  child: Icon(Icons.add, color: Colors.white)),
-                            ),
-                          ),
-                        ),
+                          itemReduce: (){
+                            itemUpdate(element, element.count - 1);
+                          },
+                          onTextSubmit: (value){
+                            print(value);
+                            itemUpdate(element, int.parse(value));
+                          },
+                        )
+                        // InkWell(
+                        //   onTap: () {
+                        //     itemUpdate(element, element.count - 1);
+                        //   },
+                        //   child: Container(
+                        //     decoration: BoxDecoration(
+                        //         borderRadius: BorderRadius.horizontal(
+                        //             left: Radius.circular(5)),
+                        //         color: kBlueDarkColor),
+                        //     height: size.height * 0.05,
+                        //     width: size.height * 0.05,
+                        //     child: Center(
+                        //       child: FittedBox(
+                        //           child:
+                        //               Icon(Icons.remove, color: Colors.white)),
+                        //     ),
+                        //   ),
+                        // ),
+                        // Container(
+                        //   alignment: Alignment.center,
+                        //   color: kGrayConcreteColor,
+                        //   width: size.width * 0.1,
+                        //   height: size.height * 0.05,
+                        //   child: TextField(
+                        //     textAlign: TextAlign.center,
+                        //     expands: true,
+                        //     maxLines: null,
+                        //     style: TextStyle(
+                        //       fontWeight: FontWeight.w700,
+                        //     ),
+                        //     decoration: null,
+                        //     keyboardType: TextInputType.number,
+                        //     inputFormatters: [
+                        //       FilteringTextInputFormatter.digitsOnly
+                        //     ],
+                        //     onSubmitted: (value) {
+                        //       itemUpdate(element, int.parse(value));
+                        //     },
+                        //     controller: TextEditingController(
+                        //         text: element.count.toString()),
+                        //   ),
+                        // ),
+                        // InkWell(
+                        //   onTap: () {
+                        //     itemUpdate(element, element.count + 1);
+                        //   },
+                        //   child: Container(
+                        //     // onPressed: () {
+                        //     //     itemUpdate(element, element.count + 1);
+                        //     //   },
+                        //     decoration: BoxDecoration(
+                        //         borderRadius: BorderRadius.horizontal(
+                        //             right: Radius.circular(5)),
+                        //         color: kBlueDarkColor),
+                        //     height: size.height * 0.05,
+                        //     width: size.height * 0.05,
+                        //     child: Center(
+                        //       child: FittedBox(
+                        //           child: Icon(Icons.add, color: Colors.white)),
+                        //     ),
+                        //   ),
+                        // ),
                       ]),
                 )
               ],
@@ -212,6 +217,7 @@ class CartScreen extends StatelessWidget {
                                   Text('No item on Cart', style: kCalibriBold)),
                         )),
             ),
+            itemList.length > 0? 
             Container(
               padding: EdgeInsets.all(size.height / 100),
               decoration: BoxDecoration(
@@ -296,7 +302,7 @@ class CartScreen extends StatelessWidget {
                   ),
                 ],
               ),
-            ),
+            ):SizedBox(),
           ],
         ),
       );

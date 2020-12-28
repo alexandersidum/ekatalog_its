@@ -1,5 +1,7 @@
 import 'package:e_catalog/constants.dart';
 import 'package:e_catalog/models/account.dart';
+import 'package:e_catalog/models/cart.dart';
+import 'package:e_catalog/models/menu_state.dart';
 import 'package:e_catalog/screens/role_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -38,52 +40,50 @@ class Profile extends StatelessWidget {
     }
     return Container(
       alignment: Alignment.centerLeft,
-      width: size.width/2,
+      width: size.width / 2,
       child: FittedBox(
-        fit:BoxFit.scaleDown ,
+        fit: BoxFit.scaleDown,
         child: Text(info,
-            style:
-                kCalibri.copyWith(fontSize: size.height / 40, color: Colors.white)),
+            style: kCalibri.copyWith(
+                fontSize: size.height / 40, color: Colors.white)),
       ),
     );
   }
 
   Widget roleMenu(int role, Function goRoleMenu) {
     //TODO Navigate ke menunya masing2
-    String menuText='';
+    String menuText = '';
 
     switch (role) {
       case 0:
         return SizedBox();
         break;
       case 1:
-        menuText='Menu PP';
+        menuText = 'Menu PP';
         break;
       case 2:
-        menuText='Menu Penyedia';
+        menuText = 'Menu Penyedia';
         break;
       case 3:
-        menuText='Menu PPK';
+        menuText = 'Menu PPK';
         break;
       case 4:
-        menuText='Menu UKPBJ';
+        menuText = 'Menu UKPBJ';
         break;
       case 5:
-        menuText='Menu Audit';
+        menuText = 'Menu Audit';
         break;
       case 6:
-        menuText='Menu BPP';
+        menuText = 'Menu BPP';
         break;
       default:
         return SizedBox();
     }
     return ListTile(
-          leading: Icon(Icons.menu),
-          title: Text(menuText,
-                    style: kCalibri),
-          trailing: Icon(Icons.keyboard_arrow_right),
-          onTap: goRoleMenu
-        );
+        leading: Icon(Icons.menu),
+        title: Text(menuText, style: kCalibri),
+        trailing: Icon(Icons.keyboard_arrow_right),
+        onTap: goRoleMenu);
   }
 
   @override
@@ -148,29 +148,32 @@ class Profile extends StatelessWidget {
                         top: Radius.circular(size.height / 20))),
                 child: ListView(
                     children: ListTile.divideTiles(context: context, tiles: [
-                  roleMenu(accountInfo.role, (){
+                  roleMenu(accountInfo.role, () {
                     Navigator.of(context).pushNamed(RoleMenu.routeId);
                   }),
                   ListTile(
                     leading: Icon(Icons.account_circle),
-                    title: Text('Pengaturan Akun',
-                    style: kCalibri,),
+                    title: Text(
+                      'Pengaturan Akun',
+                      style: kCalibri,
+                    ),
                     trailing: Icon(Icons.keyboard_arrow_right),
                   ),
                   ListTile(
                     leading: Icon(Icons.help),
-                    title: Text('Bantuan',
-                    style: kCalibri),
+                    title: Text('Bantuan', style: kCalibri),
                     trailing: Icon(Icons.keyboard_arrow_right),
                   ),
                   ListTile(
                       leading: Icon(Icons.exit_to_app),
-                      title: Text('Logout',
-                    style: kCalibri),
+                      title: Text('Logout', style: kCalibri),
                       trailing: Icon(Icons.keyboard_arrow_right),
                       onTap: () {
                         Provider.of<Auth>(context, listen: false)
-                            .signOut(context);
+                            .signOut(context, () {
+                          Provider.of<MenuState>(context, listen: false).setMenuSelected(0);
+                          Provider.of<Cart>(context, listen: false).clearCart();
+                        });
                       }),
                 ]).toList()),
               ),

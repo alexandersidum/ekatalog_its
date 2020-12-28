@@ -53,6 +53,17 @@ class ItemCatalogState extends State<ItemCatalog> {
           return b.price.compareTo(a.price);
         });
         break;
+      //TODO Terbaru terlamanya sepertinya kebalik
+      case sortedBy.Terbaru:
+        selectedList.sort((a, b) {
+          return a.creationDate.compareTo(b.creationDate);
+        });
+        break;
+      case sortedBy.Terlama:
+        selectedList.sort((a, b) {
+          return b.creationDate.compareTo(a.creationDate);
+        });
+        break;
       case sortedBy.Default:
         selectedList = List.from(initialList);
         break;
@@ -196,10 +207,9 @@ class UpperContainer extends SliverPersistentHeaderDelegate {
     sortedBy.values.forEach((element) {
       output.add(DropdownMenuItem(
         value: element,
-        child: Text(element.toString().split(".").last,
-        style: kMaven.copyWith(
-          fontSize: size.height/50
-        ),
+        child: Text(
+          element.toString().split(".").last,
+          style: kMaven.copyWith(fontSize: size.height / 50),
         ),
       ));
     });
@@ -246,7 +256,8 @@ class UpperContainer extends SliverPersistentHeaderDelegate {
                   Container(
                     margin: EdgeInsets.only(right: size.width / 100),
                     height: size.height / 20,
-                    padding: EdgeInsets.only(right: size.width / 100, left: size.width / 50),
+                    padding: EdgeInsets.only(
+                        right: size.width / 100, left: size.width / 50),
                     decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(5),
                         color: Colors.white,

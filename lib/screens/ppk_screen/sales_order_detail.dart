@@ -6,18 +6,18 @@ import 'package:flutter/material.dart';
 import 'package:e_catalog/constants.dart';
 import 'package:e_catalog/components/custom_raised_button.dart';
 
-class QuotationDetail extends StatelessWidget {
+class SalesOrderDetail extends StatelessWidget {
   OrderServices os = OrderServices();
-  final SalesOrder quotation;
+  final SalesOrder salesOrder;
 
-  QuotationDetail({Key key, this.quotation}) : super(key: key);
+  SalesOrderDetail({Key key, this.salesOrder}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Detail Quotation", style: kCalibriBold),
+        title: Text("Detail Sales Order", style: kCalibriBold),
         centerTitle: false,
         backgroundColor: kBlueMainColor,
         elevation: 0,
@@ -33,7 +33,7 @@ class QuotationDetail extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  quotation.id,
+                  salesOrder.id,
                   style: kCalibriBold.copyWith(
                     color: kBlueDarkColor,
                     fontSize: size.width/22),
@@ -52,8 +52,8 @@ class QuotationDetail extends StatelessWidget {
                           )),
                           Expanded(
                               child: Text(
-                                  quotation.creationDate != null
-                                      ? "${quotation.creationDate.day}-${quotation.creationDate.month}-${quotation.creationDate.year}"
+                                  salesOrder.creationDate != null
+                                      ? "${salesOrder.creationDate.day}-${salesOrder.creationDate.month}-${salesOrder.creationDate.year}"
                                       : "Undefined",
                                   style: kCalibri)),
                         ],
@@ -62,18 +62,28 @@ class QuotationDetail extends StatelessWidget {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.baseline,
                         children: [
-                          Expanded(child: Text("Produk :", style: kCalibriBold)),
+                          Expanded(child: Text("Status :", style: kCalibriBold)),
                           Expanded(
-                              child: Text(quotation.itemName, style: kCalibri)),
+                              child: Text(salesOrder.getStatus(), style: kCalibriBold)),
                         ],
                       ),
                       SizedBox(height: size.height / 100),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.baseline,
                         children: [
+                          Expanded(child: Text("Produk :", style: kCalibriBold)),
+                          Expanded(
+                              child: Text(salesOrder.itemName, style: kCalibri)),
+                        ],
+                      ),
+
+                      SizedBox(height: size.height / 100),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        children: [
                           Expanded(child: Text("Jumlah :", style: kCalibriBold)),
                           Expanded(
-                              child: Text("${quotation.count}", style: kCalibri)),
+                              child: Text("${salesOrder.count}", style: kCalibri)),
                         ],
                       ),
                       SizedBox(height: size.height / 100),
@@ -81,7 +91,7 @@ class QuotationDetail extends StatelessWidget {
                         children: [
                           Expanded(child: Text("Nama Penyedia :", style: kCalibriBold)),
                           Expanded(
-                              child: Text(quotation.seller, style: kCalibri)),
+                              child: Text(salesOrder.seller, style: kCalibri)),
                         ],
                       ),
                       SizedBox(height: size.height / 100),
@@ -89,7 +99,16 @@ class QuotationDetail extends StatelessWidget {
                         children: [
                           Expanded(child: Text("PP :", style: kCalibriBold)),
                           Expanded(
-                              child: Text(quotation.ppName, style: kCalibri)),
+                              child: Text(salesOrder.ppName, style: kCalibri)),
+                        ],
+                      ),
+                      SizedBox(height: size.height / 100),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        children: [
+                          Expanded(child: Text("Unit :", style: kCalibriBold)),
+                          Expanded(
+                              child: Text(salesOrder.unit.toString(), style: kCalibri)),
                         ],
                       ),
                       SizedBox(height: size.height / 100),
@@ -98,7 +117,7 @@ class QuotationDetail extends StatelessWidget {
                           Expanded(
                               child: Text("Harga Satuan :", style: kCalibriBold)),
                           Expanded(
-                              child: Text((quotation.unitPrice).toString(),
+                              child: Text((salesOrder.unitPrice).toString(),
                                 style: kCalibri
                               ),
                             ),
@@ -110,7 +129,7 @@ class QuotationDetail extends StatelessWidget {
                           Expanded(
                               child: Text("Pajak :", style: kCalibriBold)),
                           Expanded(
-                              child: Text((quotation.tax.toString()+"%"),
+                              child: Text((salesOrder.tax.toString()+"%"),
                                 style: kCalibri
                               ),
                             ),
@@ -122,7 +141,7 @@ class QuotationDetail extends StatelessWidget {
                           Expanded(
                               child: Text("Total Harga :", style: kCalibriBold)),
                           Expanded(
-                              child: Text(quotation.totalPrice.toString(),
+                              child: Text(salesOrder.totalPrice.toString(),
                                   style: kCalibri)),
                         ],
                       ),
@@ -146,11 +165,11 @@ class QuotationDetail extends StatelessWidget {
                                   context: context,
                                   builder: (context) {
                                     return DeclineBottomSheet(
-                                      id: quotation.id,
+                                      id: salesOrder.id,
                                       callback: (keterangan) {
                                         print(keterangan);
                                         os.changeOrderStatus(
-                                            orderId: quotation.id,
+                                            orderId: salesOrder.id,
                                             newStatus: 2,
                                             keterangan: keterangan,
                                             callback: (bool result) {
@@ -164,29 +183,6 @@ class QuotationDetail extends StatelessWidget {
                                   });
                             },
                                 color: kRedButtonColor,
-                              ),
-                            ),
-                          ),
-                          Expanded(
-                                                      child: Container(
-                              height: size.height / 25,
-                              width: size.width / 4,
-                              child: CustomRaisedButton(
-                                buttonChild: Text(
-                                  "TERIMA",
-                                  style: kCalibriBold.copyWith(color: Colors.white),
-                                ),
-                                callback: () {
-                                  os.changeOrderStatus(
-                                  orderId: quotation.id,
-                                  newStatus: 1,
-                                  callback: (bool result) {
-                                    result ? print("SUKSES") : print("GAGAL");
-                                  });
-                                  Navigator.of(context).pop();
-                                  //Fungsi terima quotation
-                                },
-                                color: kBlueMainColor,
                               ),
                             ),
                           ),

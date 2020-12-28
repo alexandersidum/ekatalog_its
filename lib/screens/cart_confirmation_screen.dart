@@ -19,11 +19,14 @@ class CartConfirmation extends StatefulWidget {
 
 class _CartConfirmationState extends State<CartConfirmation> {
   OrderServices _orderServices = OrderServices();
+  ShippingAddress finalShippingAddress;
+
+  void createSalesOrder() {}
 
   @override
   Widget build(BuildContext context) {
     Cart cart = Provider.of<Cart>(context);
-    Account account = Provider.of<Auth>(context).getUserInfo;
+    PejabatPengadaan account = Provider.of<Auth>(context).getUserInfo;
     List<LineItem> listItem = cart.cartList;
     Size size = MediaQuery.of(context).size;
 
@@ -73,12 +76,16 @@ class _CartConfirmationState extends State<CartConfirmation> {
                               crossAxisAlignment: CrossAxisAlignment.baseline,
                               children: [
                                 Expanded(
-                                    child:
-                                        Text(e.item.name+" ${e.count} x", 
+                                    child: Text(e.item.name + " ${e.count} x",
                                         style: kCalibriBold)),
                                 Expanded(
-                                    child: Text(NumberFormat.currency(name: "Rp ", decimalDigits: 0)
-                          .format((e.item.price*e.count)*(1+e.item.taxPercentage/100)),
+                                    child: Text(
+                                        NumberFormat.currency(
+                                                name: "Rp ", decimalDigits: 0)
+                                            .format((e.item.price * e.count) *
+                                                (1 +
+                                                    e.item.taxPercentage /
+                                                        100)),
                                         style: kCalibriBold)),
                               ],
                             );
@@ -87,9 +94,7 @@ class _CartConfirmationState extends State<CartConfirmation> {
                       )
                     ],
                   ),
-                  SizedBox(
-                    height: size.height/25
-                  ),
+                  SizedBox(height: size.height / 25),
                   Container(
                     alignment: Alignment.centerLeft,
                     child: Text(
@@ -98,14 +103,13 @@ class _CartConfirmationState extends State<CartConfirmation> {
                     ),
                   ),
                   Container(
-                    padding: EdgeInsets.only(left:size.width/20),
+                    padding: EdgeInsets.only(left: size.width / 20),
                     alignment: Alignment.centerLeft,
                     child: Text(
                       NumberFormat.currency(name: "Rp ", decimalDigits: 0)
                           .format(cart.countTotalPrice()),
                       style: kCalibriBold.copyWith(
-                        color: Colors.orange,
-                        fontSize: size.width/20),
+                          color: Colors.orange, fontSize: size.width / 20),
                     ),
                   ),
                 ],
@@ -145,25 +149,14 @@ class _CartConfirmationState extends State<CartConfirmation> {
                         child: Text("Error Mengambil alamat"),
                       );
                     }
-                    if (snapshot.data.length <= 0) {
-                      return Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.all(size.width / 30),
-                          decoration:
-                              BoxDecoration(color: kBackgroundMainColor),
-                          child: Center(
-                              child: TextButton(
-                            child: Text("Belum ada alamat Tambahkan Alamat"),
-                            onPressed: () {
-                              showModalBottomSheetApp(
-                                  context: context,
-                                  builder: (context) => ShippingBottomSheet(
-                                        isEdit: false,
-                                        uid: account.uid,
-                                      ));
-                            },
-                          )));
-                    } else {
+                    if (snapshot == null || snapshot.data == null) {
+                      return tambahkanAlamatBox(size, context, account);
+                    } 
+                    else if(snapshot.data.length <= 0){
+                      return tambahkanAlamatBox(size, context, account);
+                    }
+                    else {
+                      finalShippingAddress = snapshot.data[0];
                       return Container(
                         child: Column(
                           children: snapshot.data.map((shippingAddress) {
@@ -228,6 +221,25 @@ class _CartConfirmationState extends State<CartConfirmation> {
               padding: EdgeInsets.symmetric(horizontal: size.height / 10),
               height: size.height / 15,
               child: CustomRaisedButton(
+                callback: () {
+                  //TODO Validator Kalau ada data yang kosong atau salah
+                  _orderServices.batchCreateSalesOrder(
+                      itemList: listItem,
+                      shippingAddress: finalShippingAddress,
+                      ppName: account.name,
+                      ppUid: account.uid,
+                      unit: account.unit,
+                      onComplete: (isSuccess) {
+                        if(isSuccess){
+                          cart.clearCart();
+                          Navigator.of(context).pop();
+                          print("Create SO $isSuccess");
+                        }
+                        else{
+                          print("Create SO $isSuccess");
+                        }
+                      });
+                },
                 color: kOrangeButtonColor,
                 buttonChild: Text(
                   "Konfirmasi Pengajuan",
@@ -239,6 +251,26 @@ class _CartConfirmationState extends State<CartConfirmation> {
         ),
       ),
     );
+  }
+
+  Container tambahkanAlamatBox(Size size, BuildContext context, PejabatPengadaan account) {
+    return Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(size.width / 30),
+                        decoration:
+                            BoxDecoration(color: kBackgroundMainColor),
+                        child: Center(
+                            child: TextButton(
+                          child: Text("Belum ada alamat Tambahkan Alamat"),
+                          onPressed: () {
+                            showModalBottomSheetApp(
+                                context: context,
+                                builder: (context) => ShippingBottomSheet(
+                                      isEdit: false,
+                                      uid: account.uid,
+                                    ));
+                          },
+                        )));
   }
 }
 

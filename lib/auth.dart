@@ -68,7 +68,7 @@ class Auth {
               'namaPerusahaan': namaPerusahaan,
               'alamat': lokasiPerusahaan,
               'imageUrl': value != null ? value : "",
-              'is_accepted' : false,
+              'is_accepted': false,
             }).then((value) => onComplete(AuthResultStatus.successful));
           });
         } else {
@@ -90,21 +90,20 @@ class Auth {
   Future<void> signIn(
       String email, String password, Function onComplete) async {
     if (email.isNotEmpty && password.isNotEmpty) {
-      try{
+      try {
         await _auth
-          .signInWithEmailAndPassword(email: email, password: password)
-          .then((value) async {
-        if (value.user != null) {
-          await checkUserInfo(value.user.uid);
-          onComplete(AuthResultStatus.successful);
-        } else {
-          onComplete(AuthResultStatus.undefined);
-        }
-      });
-      }catch(error){
+            .signInWithEmailAndPassword(email: email, password: password)
+            .then((value) async {
+          if (value.user != null) {
+            await checkUserInfo(value.user.uid);
+            onComplete(AuthResultStatus.successful);
+          } else {
+            onComplete(AuthResultStatus.undefined);
+          }
+        });
+      } catch (error) {
         onComplete(AuthExceptionHandler.handleException(error));
       }
-      
     } else {
       onComplete(AuthResultStatus.undefined);
     }
@@ -116,7 +115,7 @@ class Auth {
         // is accepted untuk memfilter langsung?
         bool isAccepted = value.data()['is_accepted'];
         int role = value.data()['role'];
-          switch (role) {
+        switch (role) {
           case 0:
             _userInfo = Account.generateGuest();
             break;
@@ -140,16 +139,21 @@ class Auth {
             break;
           default:
             _userInfo = Account.fromDb(value.data());
-        }        
+        }
       }
     });
   }
 
-  Future<void> signOut(BuildContext context) async {
-    await _auth.signOut().whenComplete(() => Navigator.pushNamedAndRemoveUntil(
-        context, LoginScreen.routeId, (Route<dynamic> route) => false));
+  Future<void> signOut(BuildContext context, Function callback) async {
+    await _auth.signOut().whenComplete(() {
+      print(_user);
+      if (_user == null) {
+        callback();
+        Navigator.pushNamedAndRemoveUntil(
+            context, LoginScreen.routeId, (Route<dynamic> route) => false);
+      }
+    });
   }
-  
 }
 
 class AuthExceptionHandler {
