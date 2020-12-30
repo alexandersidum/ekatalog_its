@@ -22,19 +22,26 @@ class DeclineBottomSheetState extends State<DeclineBottomSheet>{
     return StatefulBuilder(builder: (context, setState) {
       
       return Container(
-        height: size.height / 4,
+        height: size.height / 2,
         color: Colors.transparent,
         child: Container(
           decoration: BoxDecoration(
-              color: Colors.white,
+              color: kBackgroundMainColor,
               borderRadius: BorderRadius.vertical(
                   top: Radius.circular(size.height / 30))),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Text(
-                "Keterangan Penolakan ${widget.id}",
-                style: kMavenBold,
+              Container(
+                padding: EdgeInsets.all(size.width/100),
+                child: Text(
+                  "Alasan Penolakan ${widget.id}",
+                  textAlign: TextAlign.center,
+                  style: kMavenBold,
+                ),
+              ),
+              SizedBox(
+                height: size.height/20,
               ),
               Padding(
                 padding: EdgeInsets.symmetric(
@@ -57,17 +64,21 @@ class DeclineBottomSheetState extends State<DeclineBottomSheet>{
                 ),
               ),
               Container(
-                  height: size.height / 10,
+                padding: EdgeInsets.symmetric(horizontal:size.width/20),
+                  height: size.height / 6,
                   child: CustomTextField(
                     callback: (value) {
                       print(value);
                       keterangan = value;
                       print(keterangan);
                     },
-                    maxLine: 5,
+                    maxLine: 6,
                     hintText: "Alasan penolakan..",
                     maxLength: 300,
                   )),
+              SizedBox(
+                height: size.height/20,
+              ),
               Container(
                 height: size.height / 20,
                 width: size.width / 3,

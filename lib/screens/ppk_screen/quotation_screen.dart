@@ -82,7 +82,8 @@ class QuotationScreenState extends State<QuotationScreen> {
                   ),
                   Container(child: Icon(Icons.chevron_right))
                 ],
-              )),
+              )
+              ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [

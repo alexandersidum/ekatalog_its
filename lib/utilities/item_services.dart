@@ -22,8 +22,8 @@ class ItemService {
             .toList());
   }
 
-  Stream<List<Item>> getItemsWithStatus(int status) {
-    return _firestore.collection(itemsPath).where('status', isEqualTo: status).snapshots().map(
+  Stream<List<Item>> getItemsWithStatus(List<int> status) {
+    return _firestore.collection(itemsPath).where('status', whereIn: status).snapshots().map(
         (QuerySnapshot snapshot) => snapshot.docs
             .map((DocumentSnapshot document) =>
                 Item.fromDb(document.data()))
@@ -71,6 +71,7 @@ class ItemService {
               })
               .timeout(Duration(seconds: 10))
               .catchError((error) {
+                //TODO Ada yang tidak beres disini
                 throw ("Upload Failed");
               });
         }
@@ -129,6 +130,48 @@ class ItemService {
       }
       callback(output);
     });
-    
   }
+
+  Future<bool> setItemStatus(String id, int newStatus,{String keterangan})async{
+    bool isSuccess = false;
+    if(keterangan!=null){
+      await _firestore.collection(itemsPath).doc(id).update({
+      'status' : newStatus,
+      'keteranganPengajuan' : keterangan, 
+    }).then((value) => isSuccess = true).catchError((Object error){
+      isSuccess = false;
+    });
+    }
+    else{
+      await _firestore.collection(itemsPath).doc(id).update({
+      'status' : newStatus
+    }).then((value) => isSuccess = true).catchError((Object error){
+      isSuccess = false;
+    });
+    }
+    return isSuccess;
+  }
+
+  Future<bool> acceptItemProposal(Item item )async{
+    bool isSuccess = false;
+      await _firestore.collection(itemsPath).doc(item.id).update({
+      'status' : 1,
+      'price' : item.sellerPrice, 
+    }).then((value) => isSuccess = true).catchError((Object error){
+      isSuccess = false;
+    });
+    return isSuccess;
+  }
+
+  Future<bool> negotiateItem(String itemId, int ukpbjPrice )async{
+    bool isSuccess = false;
+      await _firestore.collection(itemsPath).doc(itemId).update({
+      'status' : 2,
+      'ukpbjPrice' : ukpbjPrice, 
+    }).then((value) => isSuccess = true).catchError((Object error){
+      isSuccess = false;
+    });
+    return isSuccess;
+  }
+
 }

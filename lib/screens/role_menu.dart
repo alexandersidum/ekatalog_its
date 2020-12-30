@@ -1,8 +1,11 @@
 import 'package:e_catalog/models/account.dart';
+import 'package:e_catalog/models/item.dart';
 import 'package:e_catalog/models/sales_order.dart';
 import 'package:e_catalog/screens/add_product_screen.dart';
 import 'package:e_catalog/screens/ppk_screen/quotation_screen.dart';
 import 'package:e_catalog/screens/ppk_screen/sales_order_screen_ppk.dart';
+import 'package:e_catalog/screens/ukpbj_screen/manage_product.dart';
+import 'package:e_catalog/utilities/item_services.dart';
 import 'package:e_catalog/utilities/order_services.dart';
 import 'package:flutter/material.dart';
 import 'package:e_catalog/constants.dart';
@@ -47,7 +50,9 @@ class RoleMenu extends StatelessWidget {
         return MenuPPK(size: size);
         break;
       case 4:
-        return Column();
+        return MenuUKPBJ(
+          size: size,
+        );
         break;
       case 5:
         return Column();
@@ -206,10 +211,12 @@ class MenuPPK extends StatelessWidget {
                 ListTile(
                   onTap: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context)=>StreamProvider<List<SalesOrder>>(
-                        create: (context) => OrderServices().getSalesOrder(ppk.unit),
-                        updateShouldNotify: (_,__)=>true,
-                        child: QuotationScreen(),)));
+                        builder: (context) => StreamProvider<List<SalesOrder>>(
+                              create: (context) =>
+                                  OrderServices().getSalesOrder(ppk.unit),
+                              updateShouldNotify: (_, __) => true,
+                              child: QuotationScreen(),
+                            )));
                   },
                   title: Text(
                     'Quotation',
@@ -220,10 +227,12 @@ class MenuPPK extends StatelessWidget {
                 ListTile(
                   onTap: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context)=>StreamProvider<List<SalesOrder>>(
-                        create: (context) => OrderServices().getSalesOrder(ppk.unit),
-                        updateShouldNotify: (_,__)=>true,
-                        child: SalesOrderPPK(),)));
+                        builder: (context) => StreamProvider<List<SalesOrder>>(
+                              create: (context) =>
+                                  OrderServices().getSalesOrder(ppk.unit),
+                              updateShouldNotify: (_, __) => true,
+                              child: SalesOrderPPK(),
+                            )));
                   },
                   title: Text('Sales Order', style: kCalibri),
                   trailing: Icon(Icons.keyboard_arrow_right),
@@ -256,6 +265,109 @@ class MenuPPK extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class MenuUKPBJ extends StatelessWidget {
+  const MenuUKPBJ({
+    Key key,
+    @required this.size,
+  }) : super(key: key);
+
+  final Size size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.only(
+                top: size.height / 40,
+                left: size.width / 30,
+                bottom: size.height / 100),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Produk',
+              style: kCalibriBold,
+            ),
+          ),
+          Container(
+            color: Colors.white,
+            child: Column(
+                children: ListTile.divideTiles(context: context, tiles: [
+              ListTile(
+                onTap: () {},
+                title: Text('Produk Pending', style: kCalibri),
+                trailing: Icon(Icons.keyboard_arrow_right),
+              ),
+              ListTile(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => ManageProduct(
+                            initialTab: 0,
+                          )));
+                },
+                title: Text('Manage Produk', style: kCalibri),
+                trailing: Icon(Icons.keyboard_arrow_right),
+              ),
+              ListTile(
+                title: Text('Negosiasi Produk', style: kCalibri),
+                trailing: Icon(Icons.keyboard_arrow_right),
+              ),
+            ]).toList()),
+          ),
+          Container(
+            padding: EdgeInsets.only(
+                top: size.height / 40,
+                left: size.width / 30,
+                bottom: size.height / 100),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Analisis',
+              style: kCalibriBold,
+            ),
+          ),
+          Container(
+            color: Colors.white,
+            child: Column(
+                children: ListTile.divideTiles(context: context, tiles: [
+              ListTile(
+                title: Text(
+                  'Laporan Pengadaan Ekatalog',
+                  style: kCalibri,
+                ),
+                trailing: Icon(Icons.keyboard_arrow_right),
+              ),
+            ]).toList()),
+          ),
+          Container(
+            margin: EdgeInsets.only(
+                top: size.height / 40,
+                left: size.width / 30,
+                bottom: size.height / 100),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Bantuan',
+              style: kCalibriBold,
+            ),
+          ),
+          Container(
+            color: Colors.white,
+            child: Column(
+                children: ListTile.divideTiles(context: context, tiles: [
+              ListTile(
+                title: Text(
+                  'Kontak Bantuan',
+                  style: kCalibri,
+                ),
+                trailing: Icon(Icons.keyboard_arrow_right),
+              )
+            ]).toList()),
+          ),
+        ],
       ),
     );
   }

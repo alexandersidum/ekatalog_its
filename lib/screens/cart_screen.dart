@@ -16,7 +16,6 @@ class CartScreen extends StatelessWidget {
   CartScreen({Key key}) : super(key: key);
 
   //function itemupdate di pass lewat constructor bisa , kalau di function tidak?
-  //TODO Perbagus UInya Cart Screen
 
   
 
@@ -99,68 +98,6 @@ class CartScreen extends StatelessWidget {
                             itemUpdate(element, int.parse(value));
                           },
                         )
-                        // InkWell(
-                        //   onTap: () {
-                        //     itemUpdate(element, element.count - 1);
-                        //   },
-                        //   child: Container(
-                        //     decoration: BoxDecoration(
-                        //         borderRadius: BorderRadius.horizontal(
-                        //             left: Radius.circular(5)),
-                        //         color: kBlueDarkColor),
-                        //     height: size.height * 0.05,
-                        //     width: size.height * 0.05,
-                        //     child: Center(
-                        //       child: FittedBox(
-                        //           child:
-                        //               Icon(Icons.remove, color: Colors.white)),
-                        //     ),
-                        //   ),
-                        // ),
-                        // Container(
-                        //   alignment: Alignment.center,
-                        //   color: kGrayConcreteColor,
-                        //   width: size.width * 0.1,
-                        //   height: size.height * 0.05,
-                        //   child: TextField(
-                        //     textAlign: TextAlign.center,
-                        //     expands: true,
-                        //     maxLines: null,
-                        //     style: TextStyle(
-                        //       fontWeight: FontWeight.w700,
-                        //     ),
-                        //     decoration: null,
-                        //     keyboardType: TextInputType.number,
-                        //     inputFormatters: [
-                        //       FilteringTextInputFormatter.digitsOnly
-                        //     ],
-                        //     onSubmitted: (value) {
-                        //       itemUpdate(element, int.parse(value));
-                        //     },
-                        //     controller: TextEditingController(
-                        //         text: element.count.toString()),
-                        //   ),
-                        // ),
-                        // InkWell(
-                        //   onTap: () {
-                        //     itemUpdate(element, element.count + 1);
-                        //   },
-                        //   child: Container(
-                        //     // onPressed: () {
-                        //     //     itemUpdate(element, element.count + 1);
-                        //     //   },
-                        //     decoration: BoxDecoration(
-                        //         borderRadius: BorderRadius.horizontal(
-                        //             right: Radius.circular(5)),
-                        //         color: kBlueDarkColor),
-                        //     height: size.height * 0.05,
-                        //     width: size.height * 0.05,
-                        //     child: Center(
-                        //       child: FittedBox(
-                        //           child: Icon(Icons.add, color: Colors.white)),
-                        //     ),
-                        //   ),
-                        // ),
                       ]),
                 )
               ],

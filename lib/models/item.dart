@@ -19,9 +19,11 @@ class Item {
   int price;
   int status;
   int sold;
+  String keteranganPengajuan;
+
   //0 belum disetujui 1 disetujui 2 proses negosiasi 3 ditolak
 
-  Item({this.id, this.name, this.image, this.creationDate, this.description,this.category, this.ukpbjPrice, this.sellerPrice, this.seller, this.stock, this.price, this.sold, this.taxPercentage, this.sellerUid, this.status});
+  Item({this.id, this.name, this.image, this.creationDate, this.keteranganPengajuan, this.description,this.category, this.ukpbjPrice, this.sellerPrice, this.seller, this.stock, this.price, this.sold, this.taxPercentage, this.sellerUid, this.status});
 
   factory Item.fromDb(Map<String, dynamic> parsedData){
     return(
@@ -41,6 +43,7 @@ class Item {
         sold: parsedData['sold'],
         taxPercentage : parsedData['taxPercentage'],
         status : parsedData['status'],
+        keteranganPengajuan : parsedData['keteranganPengajuan'],
       ));
   }
 
@@ -59,36 +62,34 @@ class Item {
       'stock' : this.stock,
       'taxPercentage' : this.taxPercentage,
       'status' : this.status,
+      'keteranganPengajuan' : this.keteranganPengajuan,
     };
   }
 
-  // ItemStatus getStatus(){
-  //   switch (this.status) {
-  //     case 0:
-  //       return ItemStatus.BelumDiterima;
-  //       break;
-  //     case 1:
-  //       return ItemStatus.Diterima;
-  //       break;
-  //     case 2:
-  //       return ItemStatus.Ditolak;
-  //       break;
-  //     default:
-  //       return ItemStatus.Error;
-  //   }
-  // }
+  String getStatus(){
+    switch (this.status) {
+      case 0:
+        return "Belum Disetujui";
+        break;
+      case 1:
+        return "Disetujui";
+        break;
+      case 2:
+        return "Proses Negosiasi";
+        break;
+      case 3:
+        return "Negosiasi Diterima Penyedia";
+        break;
+      case 4:
+        return "Negosiasi Ditolak Penyedia";
+        break;
+      case 5:
+        return "Ditolak UKPBJ";
+        break;
+      default:
+        return "Undefined";
+    }
+  }
 
-  // String enumToString(Object a)=> a.toString().split(".").last;
-
-  // ItemStatus stringToEnum(String a){
-  //   ItemStatus.values.forEach((element) {
-  //     if (a == enumToString(element )){
-  //       return element;
-  //     }
-  //    });
-  // }
 }
 
-enum ItemStatus{
-  Diterima, Ditolak, BelumDiterima, Error
-}

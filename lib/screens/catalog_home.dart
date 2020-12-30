@@ -160,7 +160,7 @@ class CatalogHomeState extends State<CatalogHome> {
         StreamProvider<List<Item>>(
           create: (context) => ItemService(
             uid: _auth.getUser.uid,
-          ).getItemsWithStatus(1),
+          ).getItemsWithStatus([1]),
           updateShouldNotify: (_, __) => true,
         ),
       ],

@@ -3,6 +3,7 @@ import 'package:e_catalog/models/cart.dart';
 import 'package:e_catalog/models/menu_state.dart';
 import 'package:e_catalog/screens/catalog_home.dart';
 import 'package:e_catalog/screens/seller_catalog.dart';
+import 'package:e_catalog/utilities/item_services.dart';
 import 'package:flutter/material.dart';
 import 'package:e_catalog/models/item.dart';
 import 'package:carousel_slider/carousel_slider.dart';
@@ -15,6 +16,11 @@ class ItemDetail extends StatefulWidget {
   //Multiple photo belum support
   //Review dan rating
 
+  bool isInfoOnly;
+  Item infoItem;
+
+  ItemDetail({this.isInfoOnly = false, this.infoItem});
+
   static const routeId = 'itemDetail';
 
   @override
@@ -23,11 +29,23 @@ class ItemDetail extends StatefulWidget {
 
 class ItemDetailState extends State<ItemDetail> {
   @override
+  void initState() {
+    isInfoOnly = widget.isInfoOnly;
+    if (isInfoOnly) {
+      item = widget.infoItem;
+    }
+    super.initState();
+  }
+
+  @override
   void dispose() {
     count.dispose();
     super.dispose();
   }
 
+  ItemService itemService = ItemService();
+  Item item;
+  bool isInfoOnly;
   int imageSelected = 0;
   int itemCount = 0;
   int tempTerjual = 12;
@@ -95,20 +113,16 @@ class ItemDetailState extends State<ItemDetail> {
                 ),
               ),
               Container(
-                height: size.height/20,
-                width: size.width/3,
+                height: size.height / 20,
+                width: size.width / 3,
                 child: CustomRaisedButton(
                   color: kBlueMainColor,
                   callback: () {
                     Provider.of<Cart>(context, listen: false)
                         .addToCart(item, itemCount);
                   },
-                  buttonChild: Text(
-                    "Submit",
-                    style: kCalibriBold.copyWith(
-                      color: Colors.white
-                    )
-                  ),
+                  buttonChild: Text("Submit",
+                      style: kCalibriBold.copyWith(color: Colors.white)),
                 ),
               )
             ],
@@ -121,7 +135,8 @@ class ItemDetailState extends State<ItemDetail> {
   @override
   Widget build(BuildContext context) {
     //Image list sementara
-    Item item = ModalRoute.of(context).settings.arguments;
+
+    if (item == null) item = ModalRoute.of(context).settings.arguments;
     List<String> imageUrls = item.image.cast<String>();
 
     Size size = MediaQuery.of(context).size;
@@ -137,14 +152,17 @@ class ItemDetailState extends State<ItemDetail> {
           backgroundColor: kBlueMainColor,
           elevation: 2,
           actions: [
-            InkWell(
-              onTap: () {
-                Provider.of<MenuState>(context, listen: false)
-                    .setMenuSelected(1);
-                Navigator.pushNamedAndRemoveUntil(context, CatalogHome.routeId, (Route<dynamic> route)=>false);
-              },
-              child: Icon(Icons.shopping_cart),
-            ),
+            isInfoOnly
+                ? SizedBox()
+                : InkWell(
+                    onTap: () {
+                      Provider.of<MenuState>(context, listen: false)
+                          .setMenuSelected(1);
+                      Navigator.pushNamedAndRemoveUntil(context,
+                          CatalogHome.routeId, (Route<dynamic> route) => false);
+                    },
+                    child: Icon(Icons.shopping_cart),
+                  ),
             SizedBox(width: size.width / 30)
           ],
         ),
@@ -241,7 +259,7 @@ class ItemDetailState extends State<ItemDetail> {
               ],
             ),
           ),
-          buildBottomOption(size, item)
+          buildBottomOptionPengajuan(size, item)
         ]));
   }
 
@@ -252,6 +270,7 @@ class ItemDetailState extends State<ItemDetail> {
       height: size.height * 0.08,
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
         Expanded(
+          flex: 2,
           child: Padding(
             padding: EdgeInsets.all(size.width / 120),
             child: FlatButton(
@@ -267,15 +286,17 @@ class ItemDetailState extends State<ItemDetail> {
                 ),
                 onPressed: () {
                   Provider.of<Cart>(context, listen: false)
-                        .addToCart(item, itemCount==0?1:itemCount);
+                      .addToCart(item, itemCount == 0 ? 1 : itemCount);
                   Provider.of<MenuState>(context, listen: false)
-                    .setMenuSelected(1);
-                  Navigator.pushNamedAndRemoveUntil(context, CatalogHome.routeId, (Route<dynamic> route) => false);
+                      .setMenuSelected(1);
+                  Navigator.pushNamedAndRemoveUntil(context,
+                      CatalogHome.routeId, (Route<dynamic> route) => false);
                   //TODO Fungsi untuk beli sekarang
                 }),
           ),
         ),
         Expanded(
+          flex: 3,
           child: Padding(
             padding: EdgeInsets.all(size.width / 120),
             child: FlatButton(
@@ -297,6 +318,79 @@ class ItemDetailState extends State<ItemDetail> {
                         return bottomSheetKeranjang(context, item);
                       });
                 }),
+          ),
+        ),
+      ]),
+    );
+  }
+
+  Container buildBottomOptionPengajuan(Size size, Item item) {
+    return Container(
+      //warna sementara dan desain masih jelek
+      color: Colors.white,
+      height: size.height * 0.08,
+      child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
+        Expanded(
+          child: Column(
+            children: [
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.all(2),
+                  child: CustomRaisedButton(
+                    buttonChild: FittedBox(
+                      child: Text(
+                        "TOLAK",
+                        style: kCalibriBold.copyWith(color: Colors.white),
+                      ),
+                    ),
+                    callback: () async {
+                      bool isSuccess =
+                          await itemService.setItemStatus(item.id, 5);
+                      print(isSuccess);
+                    },
+                    color: kRedButtonColor,
+                  ),
+                ),
+              ),
+              Expanded(
+                child: Container(
+                  padding: EdgeInsets.all(2),
+                  child: CustomRaisedButton(
+                    buttonChild: FittedBox(
+                      child: Text(
+                        "NEGOSIASI",
+                        style: kCalibriBold.copyWith(color: Colors.white),
+                      ),
+                    ),
+                    callback: () async {
+                      
+                    },
+                    color: Colors.lightBlue
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.all(size.width / 120),
+            child: Container(
+              width: size.width / 5,
+              child: CustomRaisedButton(
+                buttonChild: FittedBox(
+                  child: Text(
+                    "TERIMA",
+                    style: kCalibriBold.copyWith(color: Colors.white),
+                  ),
+                ),
+                callback: () async {
+                  bool isSuccess = await itemService.setItemStatus(item.id, 1);
+                  print(isSuccess);
+                },
+                color: kBlueMainColor,
+              ),
+            ),
           ),
         ),
       ]),

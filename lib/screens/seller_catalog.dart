@@ -30,7 +30,7 @@ class _SellerCatalogState extends State<SellerCatalog> {
       StreamProvider<List<Item>>(
           create: (context) => ItemService(
                 uid: Provider.of<Auth>(context, listen: false).getUser.uid,
-              ).getItemsWithStatus(1))
+              ).getItemsWithStatus([1]))
     ], child: Etalase());
   }
 }
