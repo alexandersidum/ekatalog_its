@@ -46,7 +46,8 @@ class AddProductScreenState extends State<AddProductScreen> {
     "Smartphone",
     "PC",
     "Laptop",
-    "Proyektor"
+    "Proyektor",
+    "Elektronik"
   ];
 
   //TODO Validator
@@ -66,34 +67,32 @@ class AddProductScreenState extends State<AddProductScreen> {
     setState(() {});
   }
 
-  Future<void> proposeItem(Seller seller)async{
-    try{
+  Future<void> proposeItem(Seller seller) async {
+    try {
       Item item = Item(
-      name: _nameController.text,
-      sellerPrice: int.parse(_sellerPriceController.text),
-      seller: seller.namaPerusahaan,
-      sellerUid: seller.uid,
-      status: status,
-      taxPercentage: _taxPercentageController.text.isNotEmpty?int.parse(_taxPercentageController.text):0,
-      category: selectedCategory,
-      description: _descriptionController.text,
-      stock: int.parse(_stockController.text),
-      sold: sold,
-    );
-    await db.proposeItem(
-      images: pickedImage,
-      callback: (bool isSuccess){
-        isLoading = false;
-        setState(() {
-        });
-      },
-      item: item
-    );
-    }
-    catch(error){
+        name: _nameController.text,
+        sellerPrice: int.parse(_sellerPriceController.text),
+        seller: seller.namaPerusahaan,
+        sellerUid: seller.uid,
+        status: status,
+        taxPercentage: _taxPercentageController.text.isNotEmpty
+            ? int.parse(_taxPercentageController.text)
+            : 0,
+        category: selectedCategory,
+        description: _descriptionController.text,
+        stock: int.parse(_stockController.text),
+        sold: sold,
+      );
+      await db.proposeItem(
+          images: pickedImage,
+          callback: (bool isSuccess) {
+            isLoading = false;
+            setState(() {});
+          },
+          item: item);
+    } catch (error) {
       print(error);
     }
-    
   }
 
   @override
@@ -188,10 +187,11 @@ class AddProductScreenState extends State<AddProductScreen> {
                     flex: 2,
                     child: Column(
                       children: [
-                        labelText(leadText: "Harga Satuan", trailText: "Rupiah"),
+                        labelText(
+                            leadText: "Harga Satuan", trailText: "Rupiah"),
                         Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: size.width * 0.03),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: size.width * 0.03),
                           child: CustomTextField(
                             maxLength: 100,
                             controller: _sellerPriceController,
@@ -209,8 +209,8 @@ class AddProductScreenState extends State<AddProductScreen> {
                       children: [
                         labelText(leadText: "Pajak(%)"),
                         Container(
-                          padding:
-                              EdgeInsets.symmetric(horizontal: size.width * 0.03),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: size.width * 0.03),
                           child: CustomTextField(
                             maxLength: 100,
                             controller: _taxPercentageController,
@@ -239,7 +239,10 @@ class AddProductScreenState extends State<AddProductScreen> {
               ),
               Container(
                 padding: EdgeInsets.only(
-                    left: size.width * 0.03, right:size.width * 0.05, bottom: size.height * 0.015, top:size.height * 0.05),
+                    left: size.width * 0.03,
+                    right: size.width * 0.05,
+                    bottom: size.height * 0.015,
+                    top: size.height * 0.05),
                 child: Column(
                   children: [
                     Text(
@@ -247,14 +250,14 @@ class AddProductScreenState extends State<AddProductScreen> {
                       style: kMaven.copyWith(color: kGrayTextColor),
                     ),
                     SizedBox(
-                      height: size.height/40,
+                      height: size.height / 40,
                     ),
                     Text(
                       '* Jika harga kurang sesuai maka akan dilakukan proses negosiasi penyesuaian harga',
                       style: kMaven.copyWith(color: kGrayTextColor),
                     ),
                     SizedBox(
-                      height: size.height/40,
+                      height: size.height / 40,
                     ),
                     Text(
                       '* Hubungi admin jika terdapat masalah atau waktu penerimaan yang terlalu lama',
@@ -264,14 +267,16 @@ class AddProductScreenState extends State<AddProductScreen> {
                 ),
               ),
               SizedBox(
-                      height: size.height/30,
-                    ),
+                height: size.height / 30,
+              ),
               CustomRaisedButton(
-                buttonHeight: size.height/20,
-                buttonChild: Text("Submit Produk".toUpperCase(),
-                style: kMavenBold,
-                textAlign: TextAlign.center,),
-                callback: (){
+                buttonHeight: size.height / 20,
+                buttonChild: Text(
+                  "Submit Produk".toUpperCase(),
+                  style: kMavenBold,
+                  textAlign: TextAlign.center,
+                ),
+                callback: () {
                   //TODO fungsi pengajuan item
                   setState(() {
                     isLoading = true;
@@ -281,8 +286,8 @@ class AddProductScreenState extends State<AddProductScreen> {
                 color: kLightBlueButtonColor,
               ),
               SizedBox(
-                      height: size.height/20,
-                    ),
+                height: size.height / 20,
+              ),
             ],
           ),
         ),
@@ -321,27 +326,53 @@ class AddProductScreenState extends State<AddProductScreen> {
     return Builder(
       builder: (BuildContext context) {
         bool isNotPicked = pickedImage[index] == null;
-        return InkWell(
-            onTap: () {
-              pickImage(index);
-            },
-            child: Container(
-              padding: EdgeInsets.all(2),
-              decoration: BoxDecoration(
-                color: kGrayConcreteColor,
+        return Stack(children: [
+          Container(
+            height: size.width / 3.5,
+            width: size.width / 3.5,
+          ),
+          Positioned(
+            left: 5,
+            right: 5,
+            bottom: 5,
+            top: 5,
+            child: InkWell(
+                onTap: () {
+                  pickImage(index);
+                },
+                child: Container(
+                  padding: EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: kGrayConcreteColor,
+                  ),
+                  height: size.width / 4,
+                  width: size.width / 4,
+                  child: isNotPicked
+                      ? Icon(
+                          Icons.add_a_photo,
+                          color: Colors.white,
+                        )
+                      : Image.file(
+                          pickedImage[index],
+                          fit: BoxFit.cover,
+                        ),
+                )),
+          ),
+          !isNotPicked?Positioned(
+            right: 0,
+            top: 0,
+            child: GestureDetector(
+              onTap: () {
+                pickedImage[index]=null;
+                setState(() {});
+              },
+              child: Icon(
+                Icons.highlight_off,
+                color: Colors.red,
               ),
-              height: size.width / 4,
-              width: size.width / 4,
-              child: isNotPicked
-                  ? Icon(
-                      Icons.add_a_photo,
-                      color: Colors.white,
-                    )
-                  : Image.file(
-                      pickedImage[index],
-                      fit: BoxFit.cover,
-                    ),
-            ));
+            ),
+          ):SizedBox(),
+        ]);
       },
     );
   }

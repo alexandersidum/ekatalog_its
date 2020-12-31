@@ -2,9 +2,11 @@ import 'package:e_catalog/models/account.dart';
 import 'package:e_catalog/models/item.dart';
 import 'package:e_catalog/models/sales_order.dart';
 import 'package:e_catalog/screens/add_product_screen.dart';
+import 'package:e_catalog/screens/penyedia_screen/negotiation_screen_penyedia.dart';
 import 'package:e_catalog/screens/ppk_screen/quotation_screen.dart';
 import 'package:e_catalog/screens/ppk_screen/sales_order_screen_ppk.dart';
 import 'package:e_catalog/screens/ukpbj_screen/manage_product.dart';
+import 'package:e_catalog/screens/ukpbj_screen/negotiation_screen.dart';
 import 'package:e_catalog/utilities/item_services.dart';
 import 'package:e_catalog/utilities/order_services.dart';
 import 'package:flutter/material.dart';
@@ -109,6 +111,9 @@ class MenuPenyedia extends StatelessWidget {
                 trailing: Icon(Icons.keyboard_arrow_right),
               ),
               ListTile(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context)=>NegotationScreenPenyedia()));
+                },
                 title: Text('Negosiasi Produk', style: kCalibri),
                 trailing: Icon(Icons.keyboard_arrow_right),
               ),
@@ -299,7 +304,12 @@ class MenuUKPBJ extends StatelessWidget {
             child: Column(
                 children: ListTile.divideTiles(context: context, tiles: [
               ListTile(
-                onTap: () {},
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => ManageProduct(
+                            initialTab: 1,
+                          )));
+                },
                 title: Text('Produk Pending', style: kCalibri),
                 trailing: Icon(Icons.keyboard_arrow_right),
               ),
@@ -314,6 +324,10 @@ class MenuUKPBJ extends StatelessWidget {
                 trailing: Icon(Icons.keyboard_arrow_right),
               ),
               ListTile(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => NegotationScreenPPK()));
+                },
                 title: Text('Negosiasi Produk', style: kCalibri),
                 trailing: Icon(Icons.keyboard_arrow_right),
               ),

@@ -9,17 +9,18 @@ import 'package:e_catalog/models/item.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:e_catalog/constants.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:e_catalog/components/item_counter.dart';
 
 class ItemDetail extends StatefulWidget {
   //Multiple photo belum support
   //Review dan rating
-
+  bool isWithOption;
   bool isInfoOnly;
   Item infoItem;
 
-  ItemDetail({this.isInfoOnly = false, this.infoItem});
+  ItemDetail({this.isInfoOnly = false, this.infoItem, this.isWithOption=true});
 
   static const routeId = 'itemDetail';
 
@@ -31,6 +32,7 @@ class ItemDetailState extends State<ItemDetail> {
   @override
   void initState() {
     isInfoOnly = widget.isInfoOnly;
+    isWithOption = widget.isWithOption;
     if (isInfoOnly) {
       item = widget.infoItem;
     }
@@ -43,9 +45,22 @@ class ItemDetailState extends State<ItemDetail> {
     super.dispose();
   }
 
+  Widget bottomOptionManager(Size size){
+    if(isInfoOnly&&isWithOption){
+      return buildBottomOptionPengajuan(size, item);
+    }
+    else if(isInfoOnly&&isWithOption==false){
+      return SizedBox();
+    }
+    else{
+      return buildBottomOption(size, item);
+    }
+  }
+
   ItemService itemService = ItemService();
   Item item;
   bool isInfoOnly;
+  bool isWithOption;
   int imageSelected = 0;
   int itemCount = 0;
   int tempTerjual = 12;
@@ -182,7 +197,7 @@ class ItemDetailState extends State<ItemDetail> {
                               child: Image(
                                   width: size.width,
                                   image: NetworkImage(url),
-                                  fit: BoxFit.cover),
+                                  fit: BoxFit.contain),
                             );
                           });
                         }).toList(),
@@ -192,9 +207,9 @@ class ItemDetailState extends State<ItemDetail> {
                               imageSelected = index;
                             });
                           },
-                          aspectRatio: size.width / size.height * 0.5,
+                          aspectRatio: size.width / size.height ,
                           viewportFraction: 1,
-                          height: size.height * 0.5,
+                          height: size.height * 0.55,
                           enableInfiniteScroll: false,
                         )),
                     Positioned(
@@ -218,6 +233,7 @@ class ItemDetailState extends State<ItemDetail> {
                           Container(
                             child: TopInfo(
                               item: item,
+                              isInfoOnly: isInfoOnly,
                             ),
                           ),
                           Container(
@@ -228,8 +244,9 @@ class ItemDetailState extends State<ItemDetail> {
                             ),
                           ),
                           Padding(
-                            padding: const EdgeInsets.symmetric(
-                                vertical: 5, horizontal: 7),
+                            padding: EdgeInsets.symmetric(
+                                vertical: size.height / 100,
+                                horizontal: size.width / 50),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.start,
                               crossAxisAlignment: CrossAxisAlignment.start,
@@ -237,12 +254,15 @@ class ItemDetailState extends State<ItemDetail> {
                                 Text(
                                   "Deskripsi Produk",
                                   style: kCalibriBold.copyWith(
-                                      fontSize: size.height * 0.03),
+                                      fontSize: size.height * 0.027),
                                 ),
                                 SizedBox(
                                   height: size.height * 0.01,
                                 ),
                                 Container(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: size.height / 100,
+                                      horizontal: size.width / 50),
                                   child: Text(item.description,
                                       style: kCalibri.copyWith(
                                         fontSize: size.height * 0.025,
@@ -259,11 +279,15 @@ class ItemDetailState extends State<ItemDetail> {
               ],
             ),
           ),
-          buildBottomOptionPengajuan(size, item)
+          bottomOptionManager(size)
+          
         ]));
   }
 
-  Container buildBottomOption(Size size, Item item) {
+  Container buildBottomOption(
+    Size size,
+    Item item,
+  ) {
     return Container(
       //warna sementara dan desain masih jelek
       color: Colors.white,
@@ -356,17 +380,14 @@ class ItemDetailState extends State<ItemDetail> {
                 child: Container(
                   padding: EdgeInsets.all(2),
                   child: CustomRaisedButton(
-                    buttonChild: FittedBox(
-                      child: Text(
-                        "NEGOSIASI",
-                        style: kCalibriBold.copyWith(color: Colors.white),
+                      buttonChild: FittedBox(
+                        child: Text(
+                          "NEGOSIASI",
+                          style: kCalibriBold.copyWith(color: Colors.white),
+                        ),
                       ),
-                    ),
-                    callback: () async {
-                      
-                    },
-                    color: Colors.lightBlue
-                  ),
+                      callback: () async {},
+                      color: Colors.lightBlue),
                 ),
               ),
             ],
@@ -385,8 +406,8 @@ class ItemDetailState extends State<ItemDetail> {
                   ),
                 ),
                 callback: () async {
-                  bool isSuccess = await itemService.setItemStatus(item.id, 1);
-                  print(isSuccess);
+                  bool isSuccess = await itemService.acceptItemProposal(item);
+                  isSuccess?Navigator.of(context).pop():print("GAGAL");
                 },
                 color: kBlueMainColor,
               ),
@@ -400,8 +421,8 @@ class ItemDetailState extends State<ItemDetail> {
 
 class TopInfo extends StatelessWidget {
   final Item item;
-
-  TopInfo({this.item});
+  final bool isInfoOnly;
+  TopInfo({this.item, this.isInfoOnly});
 
   Widget starRating(double rating) {
     var starFilled = Icon(Icons.star, color: Colors.orange, size: 20);
@@ -421,9 +442,11 @@ class TopInfo extends StatelessWidget {
       padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(
-          'Rp ${item.price.toString()}',
+          // "${item.price}",
+          NumberFormat.currency(name: "Rp ", decimalDigits: 0)
+              .format(isInfoOnly ? item.sellerPrice : item.price),
           style: kCalibriBold.copyWith(
-              fontSize: size.height / 25, color: kBlueMainColor),
+              fontSize: size.height / 30, color: kBlueMainColor),
         ),
         SizedBox(
           height: size.height * 0.001,
@@ -447,7 +470,7 @@ class TopInfo extends StatelessWidget {
                 SizedBox(
                   width: size.width * 0.06,
                 ),
-                Text('Terjual : 12'),
+                Text('Terjual : ${item.sold}'),
                 // starRating(4),
               ],
             )),
@@ -457,28 +480,30 @@ class TopInfo extends StatelessWidget {
             children: [
               Text(
                 'Dijual oleh ',
-                style: TextStyle(
-                  fontWeight: FontWeight.w300,
-                  fontSize: size.height * 0.02,
-                ),
+                style: kCalibri,
               ),
-              //Hyperlink untuk membuka page seller belum
-              GestureDetector(
+              Icon(
+                Icons.store,
+                color: kBlueDarkColor,
+              ),
+              InkWell(
                 onTap: () {
                   Navigator.pushNamed(context, SellerCatalog.routeId,
                       arguments: item.seller);
                 },
                 child: Container(
-                  padding: EdgeInsets.all(size.height * 0.007),
+                  padding: EdgeInsets.symmetric(
+                      vertical: size.height * 0.005,
+                      horizontal: size.width / 30),
+                  height: size.height / 25,
+                  constraints: BoxConstraints(maxWidth: size.width / 1.7),
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(3),
-                      color: kGrayConcreteColor),
+                      color: kBlueMainColor),
                   child: Text(
-                    '${item.seller}',
-                    style: TextStyle(
-                      fontWeight: FontWeight.w500,
-                      fontSize: size.height * 0.022,
-                    ),
+                    '${item.seller}'.toUpperCase(),
+                    style: kCalibriBold.copyWith(
+                        color: Colors.white, fontSize: size.height * 0.021),
                   ),
                 ),
               ),

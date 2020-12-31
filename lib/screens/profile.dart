@@ -40,7 +40,7 @@ class Profile extends StatelessWidget {
     }
     return Container(
       alignment: Alignment.centerLeft,
-      width: size.width / 2,
+      width: size.width / 1.7,
       child: FittedBox(
         fit: BoxFit.scaleDown,
         child: Text(info,
@@ -80,7 +80,8 @@ class Profile extends StatelessWidget {
         return SizedBox();
     }
     return ListTile(
-        leading: Icon(Icons.menu),
+        leading: Icon(Icons.menu
+        ),
         title: Text(menuText, style: kCalibri),
         trailing: Icon(Icons.keyboard_arrow_right),
         onTap: goRoleMenu);
@@ -102,7 +103,7 @@ class Profile extends StatelessWidget {
               child: Row(
                 children: [
                   SizedBox(
-                    width: size.width / 15,
+                    width: size.width / 20,
                   ),
                   Container(
                     height: size.height / 8,
@@ -122,10 +123,17 @@ class Profile extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        accountInfo.name,
-                        style: kCalibriBold.copyWith(
-                            color: Colors.white, fontSize: size.height / 30),
+                      Container(
+                        constraints: BoxConstraints(
+                          maxWidth: size.width/1.7
+                        ),
+                        child: Text(
+                          accountInfo.name,
+                          overflow: TextOverflow.ellipsis,
+                          // accountInfo.name,
+                          style: kCalibriBold.copyWith(
+                              color: Colors.white, fontSize: size.height / 35),
+                        ),
                       ),
                       Text(
                         accountInfo.getRole,

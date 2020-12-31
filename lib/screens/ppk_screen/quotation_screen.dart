@@ -7,6 +7,7 @@ import 'package:e_catalog/screens/ppk_screen/quotation_detail.dart';
 import 'package:e_catalog/utilities/order_services.dart';
 import 'package:flutter/material.dart';
 import 'package:e_catalog/constants.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:e_catalog/components/bottom_sheet_decline_info.dart';
 
@@ -82,8 +83,7 @@ class QuotationScreenState extends State<QuotationScreen> {
                   ),
                   Container(child: Icon(Icons.chevron_right))
                 ],
-              )
-              ),
+              )),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -146,7 +146,10 @@ class QuotationScreenState extends State<QuotationScreen> {
                         Expanded(
                             child: Text("Total Harga :", style: kCalibriBold)),
                         Expanded(
-                            child: Text(quotation.totalPrice.toString(),
+                            child: Text(
+                                NumberFormat.currency(
+                                        name: "Rp ", decimalDigits: 0)
+                                    .format(quotation.totalPrice),
                                 style: kCalibri)),
                       ],
                     ),

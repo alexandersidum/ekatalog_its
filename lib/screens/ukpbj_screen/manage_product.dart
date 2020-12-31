@@ -7,6 +7,7 @@ import 'package:e_catalog/screens/item_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:e_catalog/utilities/item_services.dart';
 import 'package:intl/intl.dart';
+import 'package:e_catalog/components/negotiation_bottom_sheet.dart';
 
 import '../../constants.dart';
 
@@ -47,10 +48,10 @@ class _ManageProductState extends State<ManageProduct> {
     return output;
   }
 
-  Widget negosiasiBottomSheet(Size size, String id, String docId, String sellerPrice){
-    
-    return StatefulBuilder(builder: (context, setState){
-      int ukpbjPrice;
+  Widget negosiasiBottomSheet(Size size, String id, String docId,
+      String sellerPrice, Function callback) {
+    int ukpbjPrice;
+    return StatefulBuilder(builder: (context, setState) {
       return Container(
         height: size.height / 2,
         color: Colors.transparent,
@@ -63,7 +64,7 @@ class _ManageProductState extends State<ManageProduct> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: EdgeInsets.all(size.width/100),
+                padding: EdgeInsets.all(size.width / 100),
                 child: Text(
                   "Negosiasi $id",
                   textAlign: TextAlign.center,
@@ -71,17 +72,15 @@ class _ManageProductState extends State<ManageProduct> {
                 ),
               ),
               Container(
-                padding: EdgeInsets.all(size.width/100),
+                padding: EdgeInsets.all(size.width / 100),
                 child: Text(
                   "Harga awal $sellerPrice",
                   textAlign: TextAlign.center,
-                  style: kMavenBold.copyWith(
-                    color: Colors.orange
-                  ),
+                  style: kMavenBold.copyWith(color: Colors.orange),
                 ),
               ),
               SizedBox(
-                height: size.height/20,
+                height: size.height / 20,
               ),
               Padding(
                 padding: EdgeInsets.symmetric(
@@ -99,7 +98,7 @@ class _ManageProductState extends State<ManageProduct> {
                 ),
               ),
               Container(
-                padding: EdgeInsets.symmetric(horizontal:size.width/20),
+                  padding: EdgeInsets.symmetric(horizontal: size.width / 20),
                   height: size.height / 6,
                   child: CustomTextField(
                     keyboardType: TextInputType.number,
@@ -111,24 +110,16 @@ class _ManageProductState extends State<ManageProduct> {
                     maxLength: 100,
                   )),
               SizedBox(
-                height: size.height/100,
+                height: size.height / 100,
               ),
               Container(
                 height: size.height / 20,
                 width: size.width / 3,
                 child: CustomRaisedButton(
                   color: kRedButtonColor,
-                  callback: ()async{
-                    print(ukpbjPrice);
-                    if(ukpbjPrice != null){
-                      print(await itemService.negotiateItem(docId, ukpbjPrice));
-                      Navigator.of(context).pop();
-                    }
-                    else{
-                      //Jika tidak valid ukpbjprice
-                    }
-                    
-                    },
+                  callback: () {
+                    callback(ukpbjPrice);
+                  },
                   buttonChild: Text("Submit",
                       style: kCalibriBold.copyWith(color: Colors.white)),
                 ),
@@ -138,11 +129,9 @@ class _ManageProductState extends State<ManageProduct> {
         ),
       );
     });
-
-    
   }
 
-  Widget itemTile(context, Item element) {
+  Widget itemTile(context, Item element, {bool withOption = true}) {
     Size size = MediaQuery.of(context).size;
     return Container(
       // height: size.height * 0.15,
@@ -163,8 +152,8 @@ class _ManageProductState extends State<ManageProduct> {
             Expanded(
               child: Stack(children: [
                 Positioned(
-                    top: 1,
-                    right: 1,
+                    top: 0,
+                    right: 0,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
@@ -173,6 +162,7 @@ class _ManageProductState extends State<ManageProduct> {
                             Navigator.of(context).push(MaterialPageRoute(
                               builder: (context) => ItemDetail(
                                 infoItem: element,
+                                isWithOption: withOption,
                                 isInfoOnly: true,
                               ),
                               fullscreenDialog: true,
@@ -195,7 +185,7 @@ class _ManageProductState extends State<ManageProduct> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: EdgeInsets.only(right: size.width / 8),
+                        padding: EdgeInsets.only(right: size.width / 6),
                         child: Text(
                           element.name,
                           style: kCalibriBold.copyWith(
@@ -206,8 +196,12 @@ class _ManageProductState extends State<ManageProduct> {
                         // NumberFormat.currency(name: "Rp ", decimalDigits: 0)
                         //     .format(element.price),
                         element.status == 1
-                            ? 'Rp ${element.price}'
-                            : 'Rp ${element.sellerPrice}',
+                            ? NumberFormat.currency(
+                                    name: "Rp ", decimalDigits: 0)
+                                .format(element.price)
+                            : NumberFormat.currency(
+                                    name: "Rp ", decimalDigits: 0)
+                                .format(element.sellerPrice),
                         style: kCalibri.copyWith(
                             fontSize: 16, color: Colors.orange),
                       ),
@@ -247,8 +241,15 @@ class _ManageProductState extends State<ManageProduct> {
                   children: [
                     TextButton(
                         onPressed: () {
-                          showModalBottomSheetApp(context: context, builder: 
-                          (context)=>negosiasiBottomSheet(size, element.name,element.id, element.sellerPrice.toString()));
+                          showModalBottomSheetApp(
+                              context: context,
+                              builder: (context) => NegosiasiBottomSheet(
+                                    id: element.name,
+                                    docId: element.id,
+                                    sellerPrice: NumberFormat.currency(
+                                            name: "Rp ", decimalDigits: 0)
+                                        .format(element.sellerPrice),
+                                  ));
                         },
                         child: Text(
                           "NEGOSIASI",
@@ -272,7 +273,8 @@ class _ManageProductState extends State<ManageProduct> {
                                   id: element.name,
                                   callback: (keterangan) async {
                                     bool isSuccess = await itemService
-                                        .setItemStatus(element.id, 5, keterangan: keterangan);
+                                        .setItemStatus(element.id, 5,
+                                            keterangan: keterangan);
                                     print(isSuccess);
                                   },
                                 );
@@ -474,7 +476,7 @@ class _ManageProductState extends State<ManageProduct> {
                         return finalItemList.length > 0
                             ? ListView(
                                 children: finalItemList
-                                    .map((e) => itemTile(context, e))
+                                    .map((e) => itemTile(context, e, withOption: false))
                                     .toList())
                             : Container(
                                 decoration:
@@ -562,6 +564,106 @@ class _ManageProductState extends State<ManageProduct> {
     );
   }
 }
+
+// class NegosiasiBottomSheet extends StatefulWidget {
+//   String id, sellerPrice, docId;
+
+//   NegosiasiBottomSheet({this.id, this.sellerPrice, this.docId});
+
+//   @override
+//   _NegosiasiBottomSheetState createState() => _NegosiasiBottomSheetState();
+// }
+
+// class _NegosiasiBottomSheetState extends State<NegosiasiBottomSheet> {
+//   ItemService itemService = ItemService();
+//   int ukpbjPrice;
+//   @override
+//   Widget build(BuildContext context) {
+//     Size size = MediaQuery.of(context).size;
+//     return Container(
+//       height: size.height / 2,
+//       color: Colors.transparent,
+//       child: Container(
+//         decoration: BoxDecoration(
+//             color: kBackgroundMainColor,
+//             borderRadius:
+//                 BorderRadius.vertical(top: Radius.circular(size.height / 30))),
+//         child: Column(
+//           mainAxisAlignment: MainAxisAlignment.center,
+//           children: [
+//             Container(
+//               padding: EdgeInsets.all(size.width / 100),
+//               child: Text(
+//                 "Negosiasi ${widget.id}",
+//                 textAlign: TextAlign.center,
+//                 style: kMavenBold,
+//               ),
+//             ),
+//             Container(
+//               padding: EdgeInsets.all(size.width / 100),
+//               child: Text(
+//                 "Harga awal ${widget.sellerPrice}",
+//                 textAlign: TextAlign.center,
+//                 style: kMavenBold.copyWith(color: Colors.orange),
+//               ),
+//             ),
+//             SizedBox(
+//               height: size.height / 20,
+//             ),
+//             Padding(
+//               padding: EdgeInsets.symmetric(
+//                   horizontal: size.width * 0.03, vertical: size.height * 0.015),
+//               child: Row(
+//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                 children: [
+//                   Text("Penawaran",
+//                       style: kCalibriBold.copyWith(
+//                         color: kGrayTextColor,
+//                         fontSize: size.height * 0.025,
+//                       )),
+//                 ],
+//               ),
+//             ),
+//             Container(
+//                 padding: EdgeInsets.symmetric(horizontal: size.width / 20),
+//                 height: size.height / 6,
+//                 child: CustomTextField(
+//                   keyboardType: TextInputType.number,
+//                   callback: (value) {
+//                     ukpbjPrice = int.parse(value);
+//                     print(ukpbjPrice);
+//                   },
+//                   hintText: "Harga Penawaran",
+//                   maxLength: 100,
+//                 )),
+//             SizedBox(
+//               height: size.height / 100,
+//             ),
+//             Container(
+//               height: size.height / 20,
+//               width: size.width / 3,
+//               child: CustomRaisedButton(
+//                 color: kRedButtonColor,
+//                 callback: () async {
+//                   print(ukpbjPrice);
+//                   if (ukpbjPrice != null) {
+//                     print(await itemService.negotiateItem(
+//                         widget.docId, ukpbjPrice));
+//                     Navigator.of(context).pop();
+//                   } else {
+//                     //Jika tidak valid ukpbjprice
+//                   }
+//                 },
+//                 buttonChild: Text("Submit",
+//                     style: kCalibriBold.copyWith(color: Colors.white)),
+//               ),
+//             )
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 enum sortedBy {
   Terbaru,
