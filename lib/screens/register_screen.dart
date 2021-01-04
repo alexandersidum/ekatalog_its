@@ -333,7 +333,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                       : SizedBox(),
                   selectedRoles == 'Penyedia'
                       ? CustomTextField(
-                          maxLine: 2,
+                          maxLine: 4,
                           controller: _lokasiPerusahaanController,
                           hintText: 'Alamat Perusahaan',
                           keyboardType: TextInputType.text,

@@ -3,6 +3,8 @@ import 'package:e_catalog/models/item.dart';
 import 'package:e_catalog/models/sales_order.dart';
 import 'package:e_catalog/screens/add_product_screen.dart';
 import 'package:e_catalog/screens/penyedia_screen/negotiation_screen_penyedia.dart';
+import 'package:e_catalog/screens/penyedia_screen/rekening_screen.dart';
+import 'package:e_catalog/screens/penyedia_screen/sales_order_penyedia.dart';
 import 'package:e_catalog/screens/ppk_screen/quotation_screen.dart';
 import 'package:e_catalog/screens/ppk_screen/sales_order_screen_ppk.dart';
 import 'package:e_catalog/screens/ukpbj_screen/manage_product.dart';
@@ -20,6 +22,7 @@ class RoleMenu extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Account account = Provider.of<Auth>(context).getUserInfo;
     int role = Provider.of<Auth>(context).getUserInfo.role;
     String roleDesc = Provider.of<Auth>(context).getUserInfo.getRole;
     return Scaffold(
@@ -31,12 +34,12 @@ class RoleMenu extends StatelessWidget {
         elevation: 0,
       ),
       body: Container(
-        child: roleMenuList(role, context),
+        child: roleMenuList(role, context, account),
       ),
     );
   }
 
-  Widget roleMenuList(int role, BuildContext context) {
+  Widget roleMenuList(int role, BuildContext context, Account account) {
     Size size = MediaQuery.of(context).size;
     switch (role) {
       case 0:
@@ -46,7 +49,7 @@ class RoleMenu extends StatelessWidget {
         return Column();
         break;
       case 2:
-        return MenuPenyedia(size: size);
+        return MenuPenyedia(size: size, account: account);
         break;
       case 3:
         return MenuPPK(size: size);
@@ -69,113 +72,148 @@ class RoleMenu extends StatelessWidget {
 }
 
 class MenuPenyedia extends StatelessWidget {
-  const MenuPenyedia({
-    Key key,
-    @required this.size,
-  }) : super(key: key);
+  const MenuPenyedia({Key key, @required this.size, this.account})
+      : super(key: key);
 
   final Size size;
+  final Account account;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          Container(
-            padding: EdgeInsets.only(
-                top: size.height / 40,
-                left: size.width / 30,
-                bottom: size.height / 100),
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Produk',
-              style: kCalibriBold,
+    return SingleChildScrollView(
+      child: Container(
+        child: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.only(
+                  top: size.height / 40,
+                  left: size.width / 30,
+                  bottom: size.height / 100),
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Produk',
+                style: kCalibriBold,
+              ),
             ),
-          ),
-          Container(
-            color: Colors.white,
-            child: Column(
-                children: ListTile.divideTiles(context: context, tiles: [
-              ListTile(
-                title: Text(
-                  'Produk Saya',
-                  style: kCalibri,
+            Container(
+              color: Colors.white,
+              child: Column(
+                  children: ListTile.divideTiles(context: context, tiles: [
+                ListTile(
+                  title: Text(
+                    'Produk Saya',
+                    style: kCalibri,
+                  ),
+                  trailing: Icon(Icons.keyboard_arrow_right),
                 ),
-                trailing: Icon(Icons.keyboard_arrow_right),
-              ),
-              ListTile(
-                onTap: () {
-                  Navigator.of(context).pushNamed(AddProductScreen.routeId);
-                },
-                title: Text('Tambah Produk', style: kCalibri),
-                trailing: Icon(Icons.keyboard_arrow_right),
-              ),
-              ListTile(
-                onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context)=>NegotationScreenPenyedia()));
-                },
-                title: Text('Negosiasi Produk', style: kCalibri),
-                trailing: Icon(Icons.keyboard_arrow_right),
-              ),
-            ]).toList()),
-          ),
-          Container(
-            padding: EdgeInsets.only(
-                top: size.height / 40,
-                left: size.width / 30,
-                bottom: size.height / 100),
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Penjualan',
-              style: kCalibriBold,
+                ListTile(
+                  onTap: () {
+                    Navigator.of(context).pushNamed(AddProductScreen.routeId);
+                  },
+                  title: Text('Tambah Produk', style: kCalibri),
+                  trailing: Icon(Icons.keyboard_arrow_right),
+                ),
+                ListTile(
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => NegotationScreenPenyedia()));
+                  },
+                  title: Text('Negosiasi Produk', style: kCalibri),
+                  trailing: Icon(Icons.keyboard_arrow_right),
+                ),
+              ]).toList()),
             ),
-          ),
-          Container(
-            color: Colors.white,
-            child: Column(
-                children: ListTile.divideTiles(context: context, tiles: [
-              ListTile(
-                title: Text(
-                  'Riwayat Penjualan',
-                  style: kCalibri,
-                ),
-                trailing: Icon(Icons.keyboard_arrow_right),
+            Container(
+              padding: EdgeInsets.only(
+                  top: size.height / 40,
+                  left: size.width / 30,
+                  bottom: size.height / 100),
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Penjualan',
+                style: kCalibriBold,
               ),
-              ListTile(
-                title: Text('Sales Order', style: kCalibri),
-                trailing: Icon(Icons.keyboard_arrow_right),
-              ),
-              ListTile(
-                title: Text('Pembayaran', style: kCalibri),
-                trailing: Icon(Icons.keyboard_arrow_right),
-              ),
-            ]).toList()),
-          ),
-          Container(
-            margin: EdgeInsets.only(
-                top: size.height / 40,
-                left: size.width / 30,
-                bottom: size.height / 100),
-            alignment: Alignment.centerLeft,
-            child: Text(
-              'Bantuan',
-              style: kCalibriBold,
             ),
-          ),
-          Container(
-            color: Colors.white,
-            child: Column(
-                children: ListTile.divideTiles(context: context, tiles: [
-              ListTile(
-                title: Text(
-                  'Kontak Bantuan',
-                  style: kCalibri,
+            Container(
+              color: Colors.white,
+              child: Column(
+                  children: ListTile.divideTiles(context: context, tiles: [
+                ListTile(
+                  title: Text(
+                    'Riwayat Penjualan',
+                    style: kCalibri,
+                  ),
+                  trailing: Icon(Icons.keyboard_arrow_right),
                 ),
-                trailing: Icon(Icons.keyboard_arrow_right),
-              )
-            ]).toList()),
-          ),
-        ],
+                ListTile(
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => SalesOrderPenyedia()));
+                  },
+                  title: Text('Sales Order', style: kCalibri),
+                  trailing: Icon(Icons.keyboard_arrow_right),
+                ),
+              ]).toList()),
+            ),
+            Container(
+              padding: EdgeInsets.only(
+                  top: size.height / 40,
+                  left: size.width / 30,
+                  bottom: size.height / 100),
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Pembayaran',
+                style: kCalibriBold,
+              ),
+            ),
+            Container(
+              color: Colors.white,
+              child: Column(
+                  children: ListTile.divideTiles(context: context, tiles: [
+                ListTile(
+                  title: Text(
+                    'Pembayaran',
+                    style: kCalibri,
+                  ),
+                  trailing: Icon(Icons.keyboard_arrow_right),
+                ),
+                ListTile(
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => RekeningPenyediaScreen(
+                            seller: Provider.of<Auth>(context).getUserInfo)));
+                  },
+                  title: Text('Atur Rekening Pembayaran', style: kCalibri),
+                  trailing: Icon(Icons.keyboard_arrow_right),
+                ),
+              ]).toList()),
+            ),
+            Container(
+              margin: EdgeInsets.only(
+                  top: size.height / 40,
+                  left: size.width / 30,
+                  bottom: size.height / 100),
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Bantuan',
+                style: kCalibriBold,
+              ),
+            ),
+            Container(
+              color: Colors.white,
+              child: Column(
+                  children: ListTile.divideTiles(context: context, tiles: [
+                ListTile(
+                  title: Text(
+                    'Kontak Bantuan',
+                    style: kCalibri,
+                  ),
+                  trailing: Icon(Icons.keyboard_arrow_right),
+                )
+              ]).toList()),
+            ),
+          ],
+        ),
       ),
     );
   }

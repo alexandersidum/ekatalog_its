@@ -42,8 +42,10 @@ class _LoginScreenState extends State<LoginScreen> {
         .signIn(emailController.text, passwordController.text, (AuthResultStatus status) {
         if(status==AuthResultStatus.successful){
           Navigator.pushReplacementNamed(context, CatalogHome.routeId);
+        }
+        else{
+          validationText = AuthExceptionHandler.generateExceptionMessage(status);
         } 
-        validationText = AuthExceptionHandler.generateExceptionMessage(status);
         isLoading = false;
         setState(() {
         });

@@ -31,6 +31,8 @@ class ItemService {
             .toList());
   }
 
+  
+
   Stream<List<Item>> getSellerItemsWithStatus(
       List<int> status, String sellerUid) {
     return _firestore
@@ -135,12 +137,13 @@ class ItemService {
 
   Future<bool> acceptItemProposal(Item item) async {
     bool isSuccess = false;
+    
     await _firestore
         .collection(itemsPath)
         .doc(item.id)
         .update({
           'status': 1,
-          'price': item.sellerPrice,
+          'price': item.status == 3?item.ukpbjPrice:item.sellerPrice,
         })
         .then((value) => isSuccess = true)
         .catchError((Object error) {

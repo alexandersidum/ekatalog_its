@@ -1,4 +1,5 @@
 import 'package:e_catalog/constants.dart';
+import 'package:e_catalog/models/account.dart';
 import 'package:e_catalog/models/menu_state.dart';
 import 'package:e_catalog/screens/add_product_screen.dart';
 import 'package:e_catalog/screens/item_detail.dart';
@@ -36,6 +37,10 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (context)=>MenuState(menuSelected: 0)),
         ChangeNotifierProvider(create: (context)=>Cart()),
         Provider(create: (context)=>Auth()),
+        StreamProvider<Account>(
+          updateShouldNotify: (_,__)=>true,
+          create: (context)=>Provider.of<Auth>(
+          context,listen: false).streamUserInfo(Provider.of<Auth>(context,listen: false).getUserInfo.uid))
       ],
       child: MaterialApp(
         theme: ThemeData.light().copyWith(

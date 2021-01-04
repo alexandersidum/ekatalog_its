@@ -163,6 +163,7 @@ class CatalogHomeState extends State<CatalogHome> {
           ).getItemsWithStatus([1]),
           updateShouldNotify: (_, __) => true,
         ),
+        
       ],
       child: Scaffold(
           //Appbar sementara

@@ -15,35 +15,64 @@ class OrderServices {
         .collection(salesOrderPath)
         .where("unit", whereIn: [unit])
         .snapshots()
-        .map((QuerySnapshot snapshot) =>
-            snapshot.docs
-            .map((DocumentSnapshot e) => SalesOrder.fromDb(e.data(), e.id)).toList());
+        .map((QuerySnapshot snapshot) => snapshot.docs
+            .map((DocumentSnapshot e) => SalesOrder.fromDb(e.data(), e.id))
+            .toList());
   }
 
-  Future<bool> setShippingAddress(String ppUid, ShippingAddress newAddress) async{
+  Stream<List<SalesOrder>> getSellerSalesOrder(
+      String sellerUid, List<int> status) {
+    //Sales order sesuai seller dan status
+    return _firestore
+        .collection(salesOrderPath)
+        .where("sellerUid", isEqualTo: sellerUid)
+        .where("status", whereIn: status)
+        .snapshots()
+        .map((QuerySnapshot snapshot) => snapshot.docs
+            .map((DocumentSnapshot e) => SalesOrder.fromDb(e.data(), e.id))
+            .toList());
+  }
+
+  Future<bool> setShippingAddress(
+      String ppUid, ShippingAddress newAddress) async {
     bool isSuccess = true;
-    await  _firestore.collection(usersPath).doc(ppUid).collection("shipping").doc(newAddress.id)
-    .set(newAddress.toMap(), SetOptions(merge: true)).catchError((Object error){
+    await _firestore
+        .collection(usersPath)
+        .doc(ppUid)
+        .collection("shipping")
+        .doc(newAddress.id)
+        .set(newAddress.toMap(), SetOptions(merge: true))
+        .catchError((Object error) {
       isSuccess = false;
       print("ERROR setShippingAddress");
     });
     return isSuccess;
   }
 
-  Future<bool> createShippingAddress(String ppUid, ShippingAddress newAddress) async{
+  Future<bool> createShippingAddress(
+      String ppUid, ShippingAddress newAddress) async {
     bool isSuccess = true;
-    await  _firestore.collection(usersPath).doc(ppUid).collection("shipping").add(newAddress.toMap()).then(
-      (value) => value!=null?isSuccess = true:isSuccess =false).catchError((Object error){
-        isSuccess = false;
-      });
+    await _firestore
+        .collection(usersPath)
+        .doc(ppUid)
+        .collection("shipping")
+        .add(newAddress.toMap())
+        .then((value) => value != null ? isSuccess = true : isSuccess = false)
+        .catchError((Object error) {
+      isSuccess = false;
+    });
     return isSuccess;
   }
 
-
-  Stream<List<ShippingAddress>> getShippingAddress(String ppUid){
-    return _firestore.collection(usersPath).doc(ppUid).collection("shipping").snapshots().map(
-      (event)=>event.docs.map((e) => ShippingAddress.fromDb(e.data(), e.id)).toList()
-      );
+  Stream<List<ShippingAddress>> getShippingAddress(String ppUid) {
+    return _firestore
+        .collection(usersPath)
+        .doc(ppUid)
+        .collection("shipping")
+        .snapshots()
+        .map((event) => event.docs
+            .map((e) => ShippingAddress.fromDb(e.data(), e.id))
+            .toList());
   }
 
   Future<String> getLatestSalesOrderID() async {
@@ -72,19 +101,42 @@ class OrderServices {
     });
   }
 
-  Future<void> changeOrderStatus({String orderId, int newStatus, String keterangan, Function callback})async{
+  // Future<void> changeOrderStatus({String orderId, int newStatus, String keterangan, Function callback})async{
+  //   var docRef = _firestore.collection(salesOrderPath);
+  //   await docRef.where('id',  isEqualTo: orderId).get().then(
+  //     (snapshot) => snapshot.docs.forEach((element) {
+  //       docRef.doc(element.id).update(
+  //         keterangan!=null?
+  //         {"status":newStatus,
+  //         "keterangan":keterangan}:
+  //         {"status":newStatus}
+  //         ).then((value) {callback(true);}).catchError((Object error){
+  //         callback(false);
+  //       });
+  //     }));
+  // }
+
+  Future<bool> changeOrderStatus(
+      {String docId,
+      int newStatus,
+      String keterangan,
+      Function callback}) async {
+    bool output = false;
     var docRef = _firestore.collection(salesOrderPath);
-    await docRef.where('id',  isEqualTo: orderId).get().then(
-      (snapshot) => snapshot.docs.forEach((element) {
-        docRef.doc(element.id).update(
-          keterangan!=null?
-          {"status":newStatus,
-          "keterangan":keterangan}:
-          {"status":newStatus}
-          ).then((value) {callback(true);}).catchError((Object error){
-          callback(false);
-        });
-      }));
+    await docRef
+        .doc(docId)
+        .update(keterangan != null
+            ? {"status": newStatus, "keterangan": keterangan}
+            : {"status": newStatus})
+        .then((value) {
+      output = true;
+      callback(true);
+    }).catchError((Object error) {
+      print(error);
+      output = false;
+      callback(false);
+    });
+    return output;
   }
 
   Future<void> createSalesOrder(SalesOrder order, Function isSuccess) async {
@@ -114,19 +166,19 @@ class OrderServices {
           .then((value) async {
         if (!value.exists) {
           throw ("PPK INFO NOT EXIST");
-        }else{
+        } else {
           await _firestore
-            .collection(usersPath)
-            .doc(value.data()[unit.toString()])
-            .get()
-            .then((value) {
-          if (!value.exists) {
-            throw ("PPK USER INFO NOT EXIST");
-          }
-          //TODO thrower jika gagal
-          ppkUid = value.id;
-          ppkName = value.data()['name'];
-        });
+              .collection(usersPath)
+              .doc(value.data()[unit.toString()])
+              .get()
+              .then((value) {
+            if (!value.exists) {
+              throw ("PPK USER INFO NOT EXIST");
+            }
+            //TODO thrower jika gagal
+            ppkUid = value.id;
+            ppkName = value.data()['name'];
+          });
         }
       });
       itemList.forEach((element) async {
@@ -150,7 +202,10 @@ class OrderServices {
             namaPenerima: shippingAddress.namaPenerima,
             teleponPenerima: shippingAddress.teleponPenerima,
             tax: element.item.taxPercentage,
-            totalPrice: ((element.item.price*element.count)*(1+element.item.taxPercentage/100)).round());
+            itemImage: element.item.image,
+            totalPrice: ((element.item.price * element.count) *
+                    (1 + element.item.taxPercentage / 100))
+                .round());
         _firestore.runTransaction((transaction) async {
           transaction.set(docRef.doc(), order.toMap());
         }).catchError((err) {

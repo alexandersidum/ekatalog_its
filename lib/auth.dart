@@ -109,6 +109,42 @@ class Auth {
     }
   }
 
+  Stream<Account> streamUserInfo(uid) {
+    return _firestore
+        .collection('users')
+        .doc(uid)
+        .snapshots()
+        .map((DocumentSnapshot document) {
+      var role = document.data()['role'];
+      switch (role) {
+        case 0:
+          _userInfo = Account.generateGuest();
+          break;
+        case 1:
+          _userInfo = PejabatPengadaan.fromDb(document.data());
+          break;
+        case 2:
+          _userInfo = Seller.fromDb(document.data());
+          break;
+        case 3:
+          _userInfo = PejabatPembuatKomitmen.fromDb(document.data());
+          break;
+        case 4:
+          _userInfo = UnitKerjaPengadaan.fromDb(document.data());
+          break;
+        case 5:
+          _userInfo = Audit.fromDb(document.data());
+          break;
+        case 6:
+          _userInfo = BendaharaPengeluaran.fromDb(document.data());
+          break;
+        default:
+          _userInfo = Account.fromDb(document.data());
+      }
+      return _userInfo;
+    });
+  }
+
   Future<void> checkUserInfo(uid) async {
     await _firestore.collection('users').doc(uid).get().then((value) {
       if (value.exists) {

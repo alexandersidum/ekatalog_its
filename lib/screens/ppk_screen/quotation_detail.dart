@@ -150,7 +150,7 @@ class QuotationDetail extends StatelessWidget {
                                       callback: (keterangan) {
                                         print(keterangan);
                                         os.changeOrderStatus(
-                                            orderId: quotation.id,
+                                            docId: quotation.docId,
                                             newStatus: 2,
                                             keterangan: keterangan,
                                             callback: (bool result) {
@@ -178,12 +178,12 @@ class QuotationDetail extends StatelessWidget {
                                 ),
                                 callback: () {
                                   os.changeOrderStatus(
-                                  orderId: quotation.id,
+                                  docId: quotation.docId,
                                   newStatus: 1,
                                   callback: (bool result) {
-                                    result ? print("SUKSES") : print("GAGAL");
+                                    result ? Navigator.of(context).pop(): null;
                                   });
-                                  Navigator.of(context).pop();
+                                  
                                   //Fungsi terima quotation
                                 },
                                 color: kBlueMainColor,

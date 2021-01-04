@@ -7,6 +7,7 @@ class SalesOrder{
   String docId;
   String itemName;
   String itemId;
+  List itemImage;
   int count;
   int totalPrice;
   String seller; 
@@ -27,7 +28,7 @@ class SalesOrder{
   int unitPrice;
   String feedback;
 
-  SalesOrder({this.id, this.docId, this.itemName, this.ppkName, this.creationDate, this.itemId, this.count, this.totalPrice, this.seller, this.sellerUid, this.status, this.ppName, this.ppUid, this.ppkUid, this.unit, this.address, this.namaAlamat, this.namaPenerima,this.teleponPenerima,this.unitPrice, this.feedback, this.tax});
+  SalesOrder({this.id, this.docId, this.itemName, this.itemImage, this.ppkName, this.creationDate, this.itemId, this.count, this.totalPrice, this.seller, this.sellerUid, this.status, this.ppName, this.ppUid, this.ppkUid, this.unit, this.address, this.namaAlamat, this.namaPenerima,this.teleponPenerima,this.unitPrice, this.feedback, this.tax});
 
   factory SalesOrder.fromDb(Map<String , dynamic> parsedData, String docId){
     return SalesOrder(
@@ -39,6 +40,7 @@ class SalesOrder{
       creationDate: DateTime.parse(parsedData['creationDate'].toDate().toString()),
       itemId: parsedData['itemId'],
       itemName: parsedData['itemName'],
+      itemImage: parsedData['itemImage'],
       status: parsedData['status'],
       totalPrice: parsedData['totalPrice'],
       ppName: parsedData['ppName'],
@@ -79,22 +81,99 @@ class SalesOrder{
       'feedback' : this.feedback,
       'tax' : this.tax,
       'unitPrice' : this.unitPrice,
+      'itemImage' : this.itemImage,
     };
   }
 
   String getStatus(){
     switch(this.status){
       case 0:
-        return "Belum Diterima";
+        return "Belum Disetujui";
       case 1:
-        return "Diterima";
+        return "Disetujui";
       case 2:
         return "Ditolak";
       case 3:
-        return "Dibatalkan";
+        return "Segera Dikirim";
+      case 4:
+        return "Dibatalkan Penyedia";
+      case 5:
+        return "Dibatalkan PPK";
+      case 6:
+        return "Menunggu Pembayaran";
+      case 7:
+        return "Selesai";
       default:
         return "Undefined";
     }
   }
 
+  List<String> listUnit = [
+    'Unit Urutan 0',
+    'Unit Urutan 1',
+    'Unit Urutan 2',
+    'Unit Urutan 3',
+    'Unit Urutan 4',
+    'Unit Urutan 5',
+    'Unit Urutan 6',
+    'Unit Urutan 7',
+    'Unit Urutan 8',
+    'Unit Urutan 9',
+  ];
+
+  String get getUnit {
+    switch (this.unit) {
+      case 0:
+        return listUnit[0];
+        break;
+      case 1:
+        return listUnit[1];
+        break;
+      case 2:
+        return listUnit[2];
+        break;
+      case 3:
+        return listUnit[3];
+        break;
+      case 4:
+        return listUnit[4];
+        break;
+      default:
+        return "Unit Tidak terdefinisi";
+        break;
+    }
+  }
+
+  String getStatusPenyedia(){
+    switch(this.status){
+      case 0:
+        return "Belum Diterima";
+      case 1:
+        return "Menunggu Respon";
+      case 2:
+        return "Ditolak";
+      case 3:
+        return "Segera Dikirim";
+      case 4:
+        return "Dibatalkan Penyedia";
+      case 5:
+        return "Dibatalkan PPK";
+      case 6:
+        return "Menunggu Pembayaran";
+      case 7:
+        return "Selesai";
+      default:
+        return "Undefined";
+    }
+  }
 }
+
+// Status SalesOrder
+// 0 : Belum Disetujui PPK
+// 1 : Disetujui PPK 
+// 2 : Ditolak PPK
+// 3 : Segera Dikirim
+// 4 : Dibatalkan Penyedia
+// 5 : Dibatalkan PPK
+// 6 : Menunggu Pembayaran
+// 7 : Selesai

@@ -7,6 +7,7 @@ import 'package:e_catalog/screens/ppk_screen/sales_order_detail.dart';
 import 'package:e_catalog/utilities/order_services.dart';
 import 'package:flutter/material.dart';
 import 'package:e_catalog/constants.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class SalesOrderPPK extends StatefulWidget {
@@ -24,8 +25,9 @@ class SalesOrderPPKState extends State<SalesOrderPPK> {
   bool onSearch = false;
 
   void manageOrder(List<SalesOrder> initialList) {
-    if (initialList == null) return;
-    else{
+    if (initialList == null)
+      return;
+    else {
       finalOrderList = List.from(initialList);
     }
     switch (sorted) {
@@ -64,9 +66,11 @@ class SalesOrderPPKState extends State<SalesOrderPPK> {
               child: Row(
                 children: [
                   GestureDetector(
-                    onTap: (){
+                    onTap: () {
                       Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => SalesOrderDetail(salesOrder: order,),
+                        builder: (context) => SalesOrderDetail(
+                          salesOrder: order,
+                        ),
                       ));
                     },
                     child: Container(
@@ -110,15 +114,15 @@ class SalesOrderPPKState extends State<SalesOrderPPK> {
                       children: [
                         Expanded(child: Text("Status :", style: kCalibriBold)),
                         Expanded(
-                            child: Text(order.getStatus(), style: kCalibriBold)),
+                            child:
+                                Text(order.getStatus(), style: kCalibriBold)),
                       ],
                     ),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.baseline,
                       children: [
                         Expanded(child: Text("Produk :", style: kCalibriBold)),
-                        Expanded(
-                            child: Text(order.itemName, style: kCalibri)),
+                        Expanded(child: Text(order.itemName, style: kCalibri)),
                       ],
                     ),
                     Row(
@@ -132,15 +136,14 @@ class SalesOrderPPKState extends State<SalesOrderPPK> {
                     Row(
                       children: [
                         Expanded(child: Text("PP :", style: kCalibriBold)),
-                        Expanded(
-                            child: Text(order.ppName, style: kCalibri)),
+                        Expanded(child: Text(order.ppName, style: kCalibri)),
                       ],
                     ),
                     Row(
                       children: [
-                        Expanded(child: Text("Penyedia :", style: kCalibriBold)),
                         Expanded(
-                            child: Text(order.seller, style: kCalibri)),
+                            child: Text("Penyedia :", style: kCalibriBold)),
+                        Expanded(child: Text(order.seller, style: kCalibri)),
                       ],
                     ),
                     Row(
@@ -148,7 +151,10 @@ class SalesOrderPPKState extends State<SalesOrderPPK> {
                         Expanded(
                             child: Text("Total Harga :", style: kCalibriBold)),
                         Expanded(
-                            child: Text(order.totalPrice.toString(),
+                            child: Text(
+                                NumberFormat.currency(
+                                        name: "Rp ", decimalDigits: 0)
+                                    .format(order.totalPrice),
                                 style: kCalibri)),
                       ],
                     ),
@@ -190,11 +196,11 @@ class SalesOrderPPKState extends State<SalesOrderPPK> {
   @override
   Widget build(BuildContext context) {
     List<SalesOrder> listOrder = Provider.of<List<SalesOrder>>(context);
-    if(listOrder!=null){
+    if (listOrder != null) {
       listOrder = listOrder.where((element) => element.status == 1).toList();
     }
     var size = MediaQuery.of(context).size;
-    
+
     manageOrder(listOrder);
 
     return Scaffold(
@@ -207,74 +213,84 @@ class SalesOrderPPKState extends State<SalesOrderPPK> {
       body: Container(
         child: Column(
           children: [
-            Row(
-              children: [
-                Container(
-                  margin: EdgeInsets.only(right: size.width / 100),
-                  height: size.height / 20,
-                  padding: EdgeInsets.only(
-                      right: size.width / 100, left: size.width / 50),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                      color: Colors.white,
-                      border: Border.all(
-                          color: kGrayConcreteColor,
-                          width: 1,
-                          style: BorderStyle.solid)),
-                  child: Theme(
-                    data: Theme.of(context).copyWith(canvasColor: Colors.white),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton(
-                          value: sorted,
-                          items: dropDownSort(size),
-                          onChanged: (value) {
-                            setState(() {
-                              sorted = value;
-                            });
-                          }),
+            Container(
+              padding: EdgeInsets.symmetric(
+                  horizontal: size.width / 100, vertical: size.height / 200),
+              child: Row(
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(right: size.width / 100),
+                    height: size.height / 20,
+                    padding: EdgeInsets.only(
+                        right: size.width / 100, left: size.width / 50),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: Colors.white,
+                        border: Border.all(
+                            color: kGrayConcreteColor,
+                            width: 1,
+                            style: BorderStyle.solid)),
+                    child: Theme(
+                      data:
+                          Theme.of(context).copyWith(canvasColor: Colors.white),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton(
+                            value: sorted,
+                            items: dropDownSort(size),
+                            onChanged: (value) {
+                              setState(() {
+                                sorted = value;
+                              });
+                            }),
+                      ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: Container(
-                    height: MediaQuery.of(context).size.height / 18,
-                    width: MediaQuery.of(context).size.width * 0.7,
-                    child: TextField(
-                      decoration: InputDecoration(
-                          contentPadding: EdgeInsets.only(top: 5, left: 5),
-                          suffixIcon: Icon(Icons.search),
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(5)),
-                            borderSide: BorderSide(
-                              width: 0,
-                              style: BorderStyle.none,
+                  Expanded(
+                    child: Container(
+                      height: MediaQuery.of(context).size.height / 18,
+                      width: MediaQuery.of(context).size.width * 0.7,
+                      child: TextField(
+                        decoration: InputDecoration(
+                            contentPadding: EdgeInsets.only(top: 5, left: 5),
+                            suffixIcon: Icon(Icons.search),
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius:
+                                  BorderRadius.all(Radius.circular(5)),
+                              borderSide: BorderSide(
+                                width: 0,
+                                style: BorderStyle.none,
+                              ),
                             ),
-                          ),
-                          hintText: 'Search'),
-                      onChanged: (value) {
-                        if (value.isNotEmpty || value != null) {
-                          onSearch = true;
-                          searchQuery = value;
-                        } else {
-                          onSearch = false;
-                          searchQuery = value;
-                        }
-                        setState(() {});
-                      },
+                            hintText: 'Search'),
+                        onChanged: (value) {
+                          if (value.isNotEmpty || value != null) {
+                            onSearch = true;
+                            searchQuery = value;
+                          } else {
+                            onSearch = false;
+                            searchQuery = value;
+                          }
+                          setState(() {});
+                        },
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             Expanded(
-                child: ListView.builder(
-                    itemCount:
-                        finalOrderList != null ? finalOrderList.length : 0,
-                    itemBuilder: (context, index) {
-                      return orderTile(finalOrderList[index], size);
-                    }))
+                child: finalOrderList.length > 0
+                    ? ListView.builder(
+                        itemCount:
+                            finalOrderList != null ? finalOrderList.length : 0,
+                        itemBuilder: (context, index) {
+                          return orderTile(finalOrderList[index], size);
+                        })
+                    : Center(
+                        child:
+                            Text("Tidak ada Sales Order", style: kCalibriBold)))
           ],
         ),
       ),

@@ -58,6 +58,10 @@ class Account {
 class Seller extends Account {
   String location;
   String namaPerusahaan;
+  String namaBank;
+  String atasNamaRekening;
+  String nomorRekening;
+  static List<String> bankNames = ['BRI', 'BCA', 'Mandiri', 'BNI', 'Bank Jatim', 'BTN','CIMB Niaga', 'Danamon', 'BTPN', 'Panin'];
 
   Seller(
       {String name,
@@ -68,7 +72,10 @@ class Seller extends Account {
       String uid,
       int role,
       this.location,
-      this.namaPerusahaan})
+      this.namaPerusahaan,
+      this.namaBank,
+      this.atasNamaRekening,
+      this.nomorRekening})
       : super(
             name: name,
             email: email,
@@ -90,8 +97,12 @@ class Seller extends Account {
       uid: parsedData['uid'],
       location: parsedData['alamat'],
       namaPerusahaan: parsedData['namaPerusahaan'],
+      namaBank: parsedData['namaBank'],
+      atasNamaRekening: parsedData['atasNamaRekening'],
+      nomorRekening: parsedData['nomorRekening'],
     );
   }
+
 
   Stream<List<Item>> listProduct() {
     return super

@@ -1,4 +1,5 @@
 import 'package:e_catalog/components/custom_raised_button.dart';
+import 'package:e_catalog/components/modal_bottom_sheet_app.dart';
 import 'package:e_catalog/models/cart.dart';
 import 'package:e_catalog/models/menu_state.dart';
 import 'package:e_catalog/screens/catalog_home.dart';
@@ -20,7 +21,8 @@ class ItemDetail extends StatefulWidget {
   bool isInfoOnly;
   Item infoItem;
 
-  ItemDetail({this.isInfoOnly = false, this.infoItem, this.isWithOption=true});
+  ItemDetail(
+      {this.isInfoOnly = false, this.infoItem, this.isWithOption = true});
 
   static const routeId = 'itemDetail';
 
@@ -45,14 +47,12 @@ class ItemDetailState extends State<ItemDetail> {
     super.dispose();
   }
 
-  Widget bottomOptionManager(Size size){
-    if(isInfoOnly&&isWithOption){
+  Widget bottomOptionManager(Size size) {
+    if (isInfoOnly && isWithOption) {
       return buildBottomOptionPengajuan(size, item);
-    }
-    else if(isInfoOnly&&isWithOption==false){
+    } else if (isInfoOnly && isWithOption == false) {
       return SizedBox();
-    }
-    else{
+    } else {
       return buildBottomOption(size, item);
     }
   }
@@ -97,35 +97,38 @@ class ItemDetailState extends State<ItemDetail> {
               borderRadius: BorderRadius.vertical(
                   top: Radius.circular(size.height / 30))),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              SizedBox(
+                height: size.height/50,
+              ),
               Text(
                 "Masukkan Keranjang",
                 style: kMavenBold,
               ),
-              Container(
-                height: size.height / 10,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ItemCounterButton(
-                      fieldText: itemCount.toString(),
-                      itemAdd: () {
-                        itemCount >= 0 ? itemCount += 1 : itemCount = itemCount;
-                        setState(() {});
-                      },
-                      itemReduce: () {
-                        itemCount >= 1 ? itemCount -= 1 : itemCount = itemCount;
-                        count.text = itemCount.toString();
-                        setState(() {});
-                      },
-                      onTextSubmit: (value) {
-                        itemCount = int.parse(value);
-                        setState(() {});
-                      },
-                    )
-                  ],
-                ),
+              SizedBox(
+                height: size.height/50,
+              ),
+              ItemCounterButton(
+                    componentHeight: size.height / 20,
+                    componentWidth: size.height / 20,
+                    fieldText: itemCount.toString(),
+                    itemAdd: () {
+                      itemCount >= 0 ? itemCount += 1 : itemCount = itemCount;
+                      setState(() {});
+                    },
+                    itemReduce: () {
+                      itemCount >= 1 ? itemCount -= 1 : itemCount = itemCount;
+                      count.text = itemCount.toString();
+                      setState(() {});
+                    },
+                    onTextSubmit: (value) {
+                      itemCount = int.parse(value);
+                      setState(() {});
+                    },
+                  ),
+                  SizedBox(
+                height: size.height/40,
               ),
               Container(
                 height: size.height / 20,
@@ -207,7 +210,7 @@ class ItemDetailState extends State<ItemDetail> {
                               imageSelected = index;
                             });
                           },
-                          aspectRatio: size.width / size.height ,
+                          aspectRatio: size.width / size.height,
                           viewportFraction: 1,
                           height: size.height * 0.55,
                           enableInfiniteScroll: false,
@@ -280,7 +283,6 @@ class ItemDetailState extends State<ItemDetail> {
             ),
           ),
           bottomOptionManager(size)
-          
         ]));
   }
 
@@ -336,7 +338,7 @@ class ItemDetailState extends State<ItemDetail> {
                       color: Colors.white, fontSize: size.width / 23),
                 ),
                 onPressed: () {
-                  showModalBottomSheet(
+                  showModalBottomSheetApp(
                       context: context,
                       builder: (context) {
                         return bottomSheetKeranjang(context, item);
@@ -407,7 +409,7 @@ class ItemDetailState extends State<ItemDetail> {
                 ),
                 callback: () async {
                   bool isSuccess = await itemService.acceptItemProposal(item);
-                  isSuccess?Navigator.of(context).pop():print("GAGAL");
+                  isSuccess ? Navigator.of(context).pop() : print("GAGAL");
                 },
                 color: kBlueMainColor,
               ),

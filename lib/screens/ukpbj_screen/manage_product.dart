@@ -34,6 +34,28 @@ class _ManageProductState extends State<ManageProduct> {
     super.initState();
   }
 
+  void sortItem(List<Item> initialList) {
+    switch (sorted) {
+      //TODO Terbaru terlamanya sepertinya kebalik
+      case sortedBy.Terbaru:
+        initialList.sort((a, b) {
+          return b.creationDate.compareTo(a.creationDate);
+        });
+        break;
+      case sortedBy.Terlama:
+        initialList.sort((a, b) {
+          return a.creationDate.compareTo(b.creationDate);
+        });
+        break;
+      case sortedBy.Default:
+        initialList = initialList;
+        break;
+      default:
+        initialList = initialList;
+    }
+    // return initialList;
+  }
+
   List<DropdownMenuItem> dropDownSort(Size size) {
     List<DropdownMenuItem> output = [];
     sortedBy.values.forEach((element) {
@@ -320,7 +342,9 @@ class _ManageProductState extends State<ManageProduct> {
                               builder: (context) {
                                 return DeclineBottomSheet(
                                   id: element.name,
-                                  callback: (keterangan) {},
+                                  callback: (keterangan) async{
+                                    await itemService.setItemStatus(element.id, 5, keterangan:keterangan );
+                                  },
                                 );
                               });
                         },
@@ -363,66 +387,69 @@ class _ManageProductState extends State<ManageProduct> {
         ),
         body: Column(
           children: [
-            Row(
-              children: [
-                Container(
-                  margin: EdgeInsets.only(right: size.width / 100),
-                  height: size.height / 20,
-                  padding: EdgeInsets.only(
-                      right: size.width / 100, left: size.width / 50),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                      color: Colors.white,
-                      border: Border.all(
-                          color: kGrayConcreteColor,
-                          width: 1,
-                          style: BorderStyle.solid)),
-                  child: Theme(
-                    data: Theme.of(context).copyWith(canvasColor: Colors.white),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton(
-                          value: sorted,
-                          items: dropDownSort(size),
-                          onChanged: (value) {
-                            setState(() {
-                              sorted = value;
-                            });
-                          }),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal : size.width/100, vertical:size.height/200),
+              child: Row(
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(right: size.width / 100),
+                    height: size.height / 20,
+                    padding: EdgeInsets.only(
+                        right: size.width / 100, left: size.width / 50),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: Colors.white,
+                        border: Border.all(
+                            color: kGrayConcreteColor,
+                            width: 1,
+                            style: BorderStyle.solid)),
+                    child: Theme(
+                      data: Theme.of(context).copyWith(canvasColor: Colors.white),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton(
+                            value: sorted,
+                            items: dropDownSort(size),
+                            onChanged: (value) {
+                              setState(() {
+                                sorted = value;
+                              });
+                            }),
+                      ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: Container(
-                    height: MediaQuery.of(context).size.height / 18,
-                    width: MediaQuery.of(context).size.width * 0.7,
-                    child: TextField(
-                      decoration: InputDecoration(
-                          contentPadding: EdgeInsets.only(top: 5, left: 5),
-                          suffixIcon: Icon(Icons.search),
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(5)),
-                            borderSide: BorderSide(
-                              width: 0,
-                              style: BorderStyle.none,
+                  Expanded(
+                    child: Container(
+                      height: MediaQuery.of(context).size.height / 18,
+                      width: MediaQuery.of(context).size.width * 0.7,
+                      child: TextField(
+                        decoration: InputDecoration(
+                            contentPadding: EdgeInsets.only(top: 5, left: 5),
+                            suffixIcon: Icon(Icons.search),
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(5)),
+                              borderSide: BorderSide(
+                                width: 0,
+                                style: BorderStyle.none,
+                              ),
                             ),
-                          ),
-                          hintText: 'Search'),
-                      onChanged: (value) {
-                        if (value.isNotEmpty || value != null) {
-                          onSearch = true;
-                          searchQuery = value;
-                        } else {
-                          onSearch = false;
-                          searchQuery = value;
-                        }
-                        setState(() {});
-                      },
+                            hintText: 'Search'),
+                        onChanged: (value) {
+                          if (value.isNotEmpty || value != null) {
+                            onSearch = true;
+                            searchQuery = value;
+                          } else {
+                            onSearch = false;
+                            searchQuery = value;
+                          }
+                          setState(() {});
+                        },
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             Expanded(
               child: TabBarView(children: [
@@ -472,7 +499,7 @@ class _ManageProductState extends State<ManageProduct> {
                                         .contains(searchQuery.toLowerCase());
                               }).toList()
                             : snapshot.data;
-
+                        sortItem(finalItemList);
                         return finalItemList.length > 0
                             ? ListView(
                                 children: finalItemList
@@ -538,7 +565,7 @@ class _ManageProductState extends State<ManageProduct> {
                                         .contains(searchQuery.toLowerCase());
                               }).toList()
                             : snapshot.data;
-
+                        sortItem(finalItemList);
                         return finalItemList.length > 0
                             ? ListView(
                                 children: finalItemList

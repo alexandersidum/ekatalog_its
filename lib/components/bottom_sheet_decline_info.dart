@@ -35,7 +35,7 @@ class DeclineBottomSheetState extends State<DeclineBottomSheet>{
               Container(
                 padding: EdgeInsets.all(size.width/100),
                 child: Text(
-                  "Alasan Penolakan ${widget.id}",
+                  "Alasan Pembatalan ${widget.id}",
                   textAlign: TextAlign.center,
                   style: kMavenBold,
                 ),
@@ -85,8 +85,8 @@ class DeclineBottomSheetState extends State<DeclineBottomSheet>{
                 child: CustomRaisedButton(
                   color: kRedButtonColor,
                   callback: (){
-                    widget.callback(keterangan);
                     Navigator.of(context).pop();
+                    widget.callback(keterangan);
                     },
                   buttonChild: Text("Submit",
                       style: kCalibriBold.copyWith(color: Colors.white)),

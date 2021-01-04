@@ -1,3 +1,4 @@
+import 'package:e_catalog/constants.dart';
 import 'package:e_catalog/models/item.dart';
 import 'package:e_catalog/screens/item_detail.dart';
 import 'package:flutter/material.dart';
@@ -16,7 +17,7 @@ class ItemTile extends StatelessWidget {
         Navigator.pushNamed(context, ItemDetail.routeId, arguments: item);
       },
       child: Container(
-        padding: EdgeInsets.all(1),
+        padding: EdgeInsets.all(2),
         child: Card(
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -41,7 +42,7 @@ class ItemTile extends StatelessWidget {
                     ),
                   )),
               Container(
-                padding: EdgeInsets.all(5),
+                padding: EdgeInsets.symmetric(horizontal:size.width/50, vertical:size.height/200),
                 width: double.infinity,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -49,10 +50,10 @@ class ItemTile extends StatelessWidget {
                     Text(
                       item.name,
                       textAlign: TextAlign.start,
-                      style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.black),
+                      style: kCalibriBold.copyWith(
+                        color: kBlueMainColor,
+                        fontSize: size.height/45
+                      ),
                     ),
                     Text(
                       item.seller,
@@ -67,13 +68,12 @@ class ItemTile extends StatelessWidget {
                     ),
                     Text(
                       NumberFormat.currency(name: "Rp ", decimalDigits: 0)
-                          .format(item.price),
+                          .format(item.price).replaceAll(",", "."),
                       // 'Rp. ${item.price.toString()}',
                       textAlign: TextAlign.start,
-                      style: TextStyle(
-                          fontSize: 17,
-                          fontWeight: FontWeight.w700,
-                          color: Colors.black),
+                      style: kCalibriBold.copyWith(
+                        fontSize: size.height/38
+                      ),
                     ),
                   ],
                 ),

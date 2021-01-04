@@ -269,21 +269,24 @@ class AddProductScreenState extends State<AddProductScreen> {
               SizedBox(
                 height: size.height / 30,
               ),
-              CustomRaisedButton(
-                buttonHeight: size.height / 20,
-                buttonChild: Text(
-                  "Submit Produk".toUpperCase(),
-                  style: kMavenBold,
-                  textAlign: TextAlign.center,
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: size.width/10),
+                child: CustomRaisedButton(
+                  buttonHeight: size.height / 20,
+                  buttonChild: Text(
+                    "Submit Produk".toUpperCase(),
+                    style: kMavenBold,
+                    textAlign: TextAlign.center,
+                  ),
+                  callback: () {
+                    //TODO fungsi pengajuan item
+                    setState(() {
+                      isLoading = true;
+                      proposeItem(seller);
+                    });
+                  },
+                  color: kOrangeButtonColor,
                 ),
-                callback: () {
-                  //TODO fungsi pengajuan item
-                  setState(() {
-                    isLoading = true;
-                    proposeItem(seller);
-                  });
-                },
-                color: kLightBlueButtonColor,
               ),
               SizedBox(
                 height: size.height / 20,
@@ -326,53 +329,61 @@ class AddProductScreenState extends State<AddProductScreen> {
     return Builder(
       builder: (BuildContext context) {
         bool isNotPicked = pickedImage[index] == null;
-        return Stack(children: [
-          Container(
-            height: size.width / 3.5,
-            width: size.width / 3.5,
-          ),
-          Positioned(
-            left: 5,
-            right: 5,
-            bottom: 5,
-            top: 5,
-            child: InkWell(
-                onTap: () {
-                  pickImage(index);
-                },
-                child: Container(
-                  padding: EdgeInsets.all(2),
-                  decoration: BoxDecoration(
-                    color: kGrayConcreteColor,
-                  ),
-                  height: size.width / 4,
-                  width: size.width / 4,
-                  child: isNotPicked
-                      ? Icon(
-                          Icons.add_a_photo,
-                          color: Colors.white,
-                        )
-                      : Image.file(
-                          pickedImage[index],
-                          fit: BoxFit.cover,
-                        ),
-                )),
-          ),
-          !isNotPicked?Positioned(
-            right: 0,
-            top: 0,
-            child: GestureDetector(
-              onTap: () {
-                pickedImage[index]=null;
-                setState(() {});
-              },
-              child: Icon(
-                Icons.highlight_off,
-                color: Colors.red,
+        return Column(
+          children: [
+            Stack(children: [
+              Container(
+                height: size.width / 3.5,
+                width: size.width / 3.5,
               ),
-            ),
-          ):SizedBox(),
-        ]);
+              Positioned(
+                left: 5,
+                right: 5,
+                bottom: 5,
+                top: 5,
+                child: InkWell(
+                    onTap: () {
+                      pickImage(index);
+                    },
+                    child: Container(
+                      padding: EdgeInsets.all(1),
+                      decoration: BoxDecoration(
+                        color: kGrayConcreteColor,
+                      ),
+                      height: size.width / 4,
+                      width: size.width / 4,
+                      child: isNotPicked
+                          ? Icon(
+                              Icons.add_a_photo,
+                              color: Colors.white,
+                            )
+                          : Image.file(
+                              pickedImage[index],
+                              fit: BoxFit.cover,
+                            ),
+                    )),
+              ),
+              !isNotPicked?Positioned(
+                right: 0,
+                top: 0,
+                child: GestureDetector(
+                  onTap: () {
+                    pickedImage[index]=null;
+                    setState(() {});
+                  },
+                  child: Icon(
+                    Icons.highlight_off,
+                    color: Colors.red,
+                  ),
+                ),
+              ):SizedBox(),
+            ]),
+            Text(index==0?"Foto Utama":" ",
+            style: kCalibriBold.copyWith(
+              color: kBlueMainColor
+            ),)
+          ],
+        );
       },
     );
   }

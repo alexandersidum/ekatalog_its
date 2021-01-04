@@ -7,6 +7,7 @@ import 'package:e_catalog/screens/cart_confirmation_screen.dart';
 import 'package:e_catalog/components/item_counter.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:e_catalog/constants.dart';
 import 'package:e_catalog/utilities/order_services.dart';
@@ -16,8 +17,6 @@ class CartScreen extends StatelessWidget {
   CartScreen({Key key}) : super(key: key);
 
   //function itemupdate di pass lewat constructor bisa , kalau di function tidak?
-
-  
 
   Widget cartTile(context, element) {
     Function itemUpdate = Provider.of<Cart>(context).updateCount;
@@ -30,11 +29,12 @@ class CartScreen extends StatelessWidget {
       margin: EdgeInsets.all(5),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Container(
+          padding: EdgeInsets.all(size.width/100),
           height: size.height * 0.145,
           width: size.width * 0.3,
           margin: EdgeInsets.only(right: 10),
           child: Image(
-            fit: BoxFit.cover,
+            fit: BoxFit.contain,
             image: NetworkImage(element.item.image[0].toString()),
           ),
         ),
@@ -50,7 +50,8 @@ class CartScreen extends StatelessWidget {
                       fontSize: 15, fontWeight: FontWeight.w500),
                 ),
                 Text(
-                  'Rp ${element.item.price * element.count}',
+                  NumberFormat.currency(name: "Rp ", decimalDigits: 0)
+                      .format(element.item.price * element.count),
                   style: kPriceTextStyle.copyWith(
                       fontSize: 16, color: Colors.orange),
                 ),
@@ -73,30 +74,37 @@ class CartScreen extends StatelessWidget {
                           },
                           child: Container(
                             decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(5),
+                              borderRadius: BorderRadius.circular(5),
                             ),
                             height: size.height * 0.05,
                             width: size.height * 0.05,
                             child: Center(
                               child: FittedBox(
-                                  child:
-                                      Icon(Icons.delete_forever, color: Colors.red,
-                                      size: size.height * 0.05,)),
+                                  child: Icon(
+                                Icons.delete,
+                                color: kRedButtonColor,
+                                size: size.height * 0.05,
+                              )),
                             ),
                           ),
                         ),
-                        ItemCounterButton(
-                          fieldText: element.count.toString(),
-                          itemAdd: (){
-                            itemUpdate(element, element.count + 1);
-                          },
-                          itemReduce: (){
-                            itemUpdate(element, element.count - 1);
-                          },
-                          onTextSubmit: (value){
-                            print(value);
-                            itemUpdate(element, int.parse(value));
-                          },
+                        Container(
+                          height: size.height/20,
+                          child: ItemCounterButton(
+                            componentHeight: size.height/25,
+                            componentWidth: size.height/25,
+                            fieldText: element.count.toString(),
+                            itemAdd: () {
+                              itemUpdate(element, element.count + 1);
+                            },
+                            itemReduce: () {
+                              itemUpdate(element, element.count - 1);
+                            },
+                            onTextSubmit: (value) {
+                              print(value);
+                              itemUpdate(element, int.parse(value));
+                            },
+                          ),
                         )
                       ]),
                 )
@@ -132,9 +140,7 @@ class CartScreen extends StatelessWidget {
                               padding: EdgeInsets.all(2),
                               child: Row(
                                 children: [
-                                  Icon(
-                                    Icons.store
-                                  ),
+                                  Icon(Icons.store),
                                   Text(
                                     lineItem.item.seller,
                                     style: kCalibriBold,
@@ -154,92 +160,98 @@ class CartScreen extends StatelessWidget {
                                   Text('No item on Cart', style: kCalibriBold)),
                         )),
             ),
-            itemList.length > 0? 
-            Container(
-              padding: EdgeInsets.all(size.height / 100),
-              decoration: BoxDecoration(
-                  borderRadius: BorderRadius.vertical(
-                      top: Radius.circular(size.height / 60)),
-                  color: Colors.white),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: size.width / 20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "TOTAL",
-                            style: kMavenBold,
-                          ),
-                          Container(
-                            alignment: Alignment.centerLeft,
-                            width: size.width / 3,
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                "Rp ${cart.countTotalPrice().toString()}",
-                                style: kMavenBold.copyWith(
-                                    fontSize: size.height / 33,
-                                    color: Colors.orange),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Column(
+            itemList.length > 0
+                ? Container(
+                    padding: EdgeInsets.all(size.height / 100),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.vertical(
+                            top: Radius.circular(size.height / 60)),
+                        color: Colors.white),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
-                          "Unit Pengajuan".toUpperCase(),
-                          style: kMavenBold,
-                        ),
-                        //PPK
-                        Text(
-                          pp.getUnit,
-                          style: kMavenBold.copyWith(color: kBlueDarkColor),
-                        ),
-                        Container(
-                          padding: EdgeInsets.all(size.height / 60),
-                          height: size.height / 12,
-                          child: CustomRaisedButton(
-                            buttonChild: Text(
-                              "SUBMIT",
-                              style: kMavenBold,
-                              textAlign: TextAlign.center,
+                        Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                                horizontal: size.width / 20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  "TOTAL",
+                                  style: kMavenBold,
+                                ),
+                                Container(
+                                  alignment: Alignment.centerLeft,
+                                  width: size.width / 3,
+                                  child: FittedBox(
+                                    fit: BoxFit.scaleDown,
+                                    child: Text(
+                                      NumberFormat.currency(
+                                              name: "Rp", decimalDigits: 0)
+                                          .format(cart.countTotalPrice()),
+                                      style: kMavenBold.copyWith(
+                                          fontSize: size.height / 33,
+                                          color: Colors.orange),
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
-                            color: kOrangeButtonColor,
-                            callback: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                builder: (context)=>CartConfirmation(),
-                                fullscreenDialog: true,
-                              ));
-                              // await _orderServices.batchCreateSalesOrder(
-                              //     itemList: itemList,
-                              //     ppName: pp.name,
-                              //     ppUid: pp.uid,
-                              //     unit: pp.unit,
-                              //     onComplete: (isSuccess) {
-                              //       isSuccess
-                              //           ? Provider.of<Cart>(context,
-                              //                   listen: false)
-                              //               .clearCart()
-                              //           : null;
-                              //       //TODO Kalau gagalcreateSalesOrder
-                              //     });
-                            },
+                          ),
+                        ),
+                        Expanded(
+                          child: Column(
+                            children: [
+                              Text(
+                                "Unit Pengajuan".toUpperCase(),
+                                style: kMavenBold,
+                              ),
+                              //PPK
+                              Text(
+                                pp.getUnit,
+                                style:
+                                    kMavenBold.copyWith(color: kBlueDarkColor),
+                              ),
+                              Container(
+                                padding: EdgeInsets.all(size.height / 60),
+                                height: size.height / 12,
+                                child: CustomRaisedButton(
+                                  buttonChild: Text(
+                                    "SUBMIT",
+                                    style: kMavenBold,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                  color: kOrangeButtonColor,
+                                  callback: () {
+                                    Navigator.of(context)
+                                        .push(MaterialPageRoute(
+                                      builder: (context) => CartConfirmation(),
+                                      fullscreenDialog: true,
+                                    ));
+                                    // await _orderServices.batchCreateSalesOrder(
+                                    //     itemList: itemList,
+                                    //     ppName: pp.name,
+                                    //     ppUid: pp.uid,
+                                    //     unit: pp.unit,
+                                    //     onComplete: (isSuccess) {
+                                    //       isSuccess
+                                    //           ? Provider.of<Cart>(context,
+                                    //                   listen: false)
+                                    //               .clearCart()
+                                    //           : null;
+                                    //       //TODO Kalau gagalcreateSalesOrder
+                                    //     });
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
-            ):SizedBox(),
+                  )
+                : SizedBox(),
           ],
         ),
       );

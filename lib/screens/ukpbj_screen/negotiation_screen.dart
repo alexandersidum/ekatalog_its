@@ -176,14 +176,14 @@ class _NegotationScreenPPKState extends State<NegotationScreenPPK> {
                 style: kCalibriBold.copyWith(color: Colors.white),
               ),
             ),
-            callback: () {
+            callback: item.status==2?
               //Fungsi membatalkan kalau statusnya masih proses
-              item.status==2? ()async {
+               ()async {
                         bool isSuccess = await itemService
                             .setItemStatus(item.id, 0);
                         print("MEMBATALKAN $isSuccess");
                       }:
-              showModalBottomSheetApp(
+              ()async{showModalBottomSheetApp(
                   context: context,
                   builder: (context) {
                     return DeclineBottomSheet(
@@ -194,8 +194,7 @@ class _NegotationScreenPPKState extends State<NegotationScreenPPK> {
                         print("MENOLAK $isSuccess");
                       },
                     );
-                  });
-            },
+                  });},
             color: kRedButtonColor,
           ),
         ),
@@ -211,7 +210,8 @@ class _NegotationScreenPPKState extends State<NegotationScreenPPK> {
               ),
             ),
             callback: () async {
-              bool isSuccess = await itemService.acceptItemProposal(item);
+              bool isSuccess = await itemService.acceptItemProposal(
+                item);
               print("Accept $isSuccess");
             },
             color: kBlueMainColor,
@@ -235,66 +235,69 @@ class _NegotationScreenPPKState extends State<NegotationScreenPPK> {
       ),
       body: Column(
         children: [
-          Row(
-            children: [
-              Container(
-                margin: EdgeInsets.only(right: size.width / 100),
-                height: size.height / 20,
-                padding: EdgeInsets.only(
-                    right: size.width / 100, left: size.width / 50),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(5),
-                    color: Colors.white,
-                    border: Border.all(
-                        color: kGrayConcreteColor,
-                        width: 1,
-                        style: BorderStyle.solid)),
-                child: Theme(
-                  data: Theme.of(context).copyWith(canvasColor: Colors.white),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton(
-                        value: sorted,
-                        items: dropDownSort(size),
-                        onChanged: (value) {
-                          setState(() {
-                            sorted = value;
-                          });
-                        }),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal : size.width/100, vertical:size.height/200),
+            child: Row(
+              children: [
+                Container(
+                  margin: EdgeInsets.only(right: size.width / 100),
+                  height: size.height / 20,
+                  padding: EdgeInsets.only(
+                      right: size.width / 100, left: size.width / 50),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      color: Colors.white,
+                      border: Border.all(
+                          color: kGrayConcreteColor,
+                          width: 1,
+                          style: BorderStyle.solid)),
+                  child: Theme(
+                    data: Theme.of(context).copyWith(canvasColor: Colors.white),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton(
+                          value: sorted,
+                          items: dropDownSort(size),
+                          onChanged: (value) {
+                            setState(() {
+                              sorted = value;
+                            });
+                          }),
+                    ),
                   ),
                 ),
-              ),
-              Expanded(
-                child: Container(
-                  height: MediaQuery.of(context).size.height / 18,
-                  width: MediaQuery.of(context).size.width * 0.7,
-                  child: TextField(
-                    decoration: InputDecoration(
-                        contentPadding: EdgeInsets.only(top: 5, left: 5),
-                        suffixIcon: Icon(Icons.search),
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-                          borderSide: BorderSide(
-                            width: 0,
-                            style: BorderStyle.none,
+                Expanded(
+                  child: Container(
+                    height: MediaQuery.of(context).size.height / 18,
+                    width: MediaQuery.of(context).size.width * 0.7,
+                    child: TextField(
+                      decoration: InputDecoration(
+                          contentPadding: EdgeInsets.only(top: 5, left: 5),
+                          suffixIcon: Icon(Icons.search),
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                            borderSide: BorderSide(
+                              width: 0,
+                              style: BorderStyle.none,
+                            ),
                           ),
-                        ),
-                        hintText: 'Search'),
-                    onChanged: (value) {
-                      if (value.isNotEmpty || value != null) {
-                        onSearch = true;
-                        searchQuery = value;
-                      } else {
-                        onSearch = false;
-                        searchQuery = value;
-                      }
-                      setState(() {});
-                    },
+                          hintText: 'Search'),
+                      onChanged: (value) {
+                        if (value.isNotEmpty || value != null) {
+                          onSearch = true;
+                          searchQuery = value;
+                        } else {
+                          onSearch = false;
+                          searchQuery = value;
+                        }
+                        setState(() {});
+                      },
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           Expanded(
             child: StreamBuilder(

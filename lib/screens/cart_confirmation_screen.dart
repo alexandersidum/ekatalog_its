@@ -73,11 +73,19 @@ class _CartConfirmationState extends State<CartConfirmation> {
                         child: Column(
                           children: listItem.map((LineItem e) {
                             return Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
                               crossAxisAlignment: CrossAxisAlignment.baseline,
                               children: [
                                 Expanded(
-                                    child: Text(e.item.name + " ${e.count} x",
+                                    child: Text(e.item.name ,
                                         style: kCalibriBold)),
+                                Container(
+                                  padding: EdgeInsets.symmetric(horizontal:size.width/20),
+                                  child: Text(" ${e.count}x",
+                                      style: kCalibriBold.copyWith(
+                                        color: Colors.orange
+                                      )),
+                                ),
                                 Expanded(
                                     child: Text(
                                         NumberFormat.currency(
@@ -86,7 +94,9 @@ class _CartConfirmationState extends State<CartConfirmation> {
                                                 (1 +
                                                     e.item.taxPercentage /
                                                         100)),
-                                        style: kCalibriBold)),
+                                        style: kCalibriBold.copyWith(
+                                          color : kBlueMainColor
+                                        ))),
                               ],
                             );
                           }).toList(),
@@ -216,6 +226,40 @@ class _CartConfirmationState extends State<CartConfirmation> {
                       );
                     }
                   }),
+            ),
+            Container(
+              padding: EdgeInsets.only(
+                top: size.height / 100,
+                left: size.width / 30,
+              ),
+              alignment: Alignment.centerLeft,
+              child: Column(
+                textBaseline: TextBaseline.alphabetic,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Unit Pengaju',
+                    style: kCalibriBold,
+                  ),
+                
+                ],
+              ),
+            ),
+            Container(
+              margin: EdgeInsets.all(size.width / 50),
+              padding: EdgeInsets.all(size.height / 100),
+              decoration: BoxDecoration(color: Colors.white),
+              child: Column(
+                children: [
+                  Container(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      account.getUnit,
+                      style: kCalibriBold.copyWith(color: kBlueDarkColor),
+                    ),
+                  ),
+                ],
+              ),
             ),
             Container(
               padding: EdgeInsets.symmetric(horizontal: size.height / 10),

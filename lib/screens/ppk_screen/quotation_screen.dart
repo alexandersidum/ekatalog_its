@@ -34,12 +34,12 @@ class QuotationScreenState extends State<QuotationScreen> {
     switch (sorted) {
       case sortedBy.Terbaru:
         finalOrderList.sort((a, b) {
-          return a.creationDate.compareTo(b.creationDate);
+          return b.creationDate.compareTo(a.creationDate);
         });
         break;
       case sortedBy.Terlama:
         finalOrderList.sort((a, b) {
-          return b.creationDate.compareTo(a.creationDate);
+          return a.creationDate.compareTo(b.creationDate);
         });
         break;
       case sortedBy.Default:
@@ -176,7 +176,7 @@ class QuotationScreenState extends State<QuotationScreen> {
                                       callback: (keterangan) {
                                         print(keterangan);
                                         os.changeOrderStatus(
-                                            orderId: quotation.id,
+                                            docId: quotation.docId,
                                             newStatus: 2,
                                             keterangan: keterangan,
                                             callback: (bool result) {
@@ -202,7 +202,7 @@ class QuotationScreenState extends State<QuotationScreen> {
                             callback: () async {
                               //Fungsi terima quotation
                               os.changeOrderStatus(
-                                  orderId: quotation.id,
+                                  docId: quotation.docId,
                                   newStatus: 1,
                                   callback: (bool result) {
                                     result ? print("SUKSES") : print("GAGAL");
@@ -268,74 +268,80 @@ class QuotationScreenState extends State<QuotationScreen> {
       body: Container(
         child: Column(
           children: [
-            Row(
-              children: [
-                Container(
-                  margin: EdgeInsets.only(right: size.width / 100),
-                  height: size.height / 20,
-                  padding: EdgeInsets.only(
-                      right: size.width / 100, left: size.width / 50),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(5),
-                      color: Colors.white,
-                      border: Border.all(
-                          color: kGrayConcreteColor,
-                          width: 1,
-                          style: BorderStyle.solid)),
-                  child: Theme(
-                    data: Theme.of(context).copyWith(canvasColor: Colors.white),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton(
-                          value: sorted,
-                          items: dropDownSort(size),
-                          onChanged: (value) {
-                            setState(() {
-                              sorted = value;
-                            });
-                          }),
+            Container(
+              padding: EdgeInsets.symmetric(horizontal : size.width/100, vertical:size.height/200),
+              child: Row(
+                children: [
+                  Container(
+                    margin: EdgeInsets.only(right: size.width / 100),
+                    height: size.height / 20,
+                    padding: EdgeInsets.only(
+                        right: size.width / 100, left: size.width / 50),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(5),
+                        color: Colors.white,
+                        border: Border.all(
+                            color: kGrayConcreteColor,
+                            width: 1,
+                            style: BorderStyle.solid)),
+                    child: Theme(
+                      data: Theme.of(context).copyWith(canvasColor: Colors.white),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton(
+                            value: sorted,
+                            items: dropDownSort(size),
+                            onChanged: (value) {
+                              setState(() {
+                                sorted = value;
+                              });
+                            }),
+                      ),
                     ),
                   ),
-                ),
-                Expanded(
-                  child: Container(
-                    height: MediaQuery.of(context).size.height / 18,
-                    width: MediaQuery.of(context).size.width * 0.7,
-                    child: TextField(
-                      decoration: InputDecoration(
-                          contentPadding: EdgeInsets.only(top: 5, left: 5),
-                          suffixIcon: Icon(Icons.search),
-                          filled: true,
-                          fillColor: Colors.white,
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(5)),
-                            borderSide: BorderSide(
-                              width: 0,
-                              style: BorderStyle.none,
+                  Expanded(
+                    child: Container(
+                      height: MediaQuery.of(context).size.height / 18,
+                      width: MediaQuery.of(context).size.width * 0.7,
+                      child: TextField(
+                        decoration: InputDecoration(
+                            contentPadding: EdgeInsets.only(top: 5, left: 5),
+                            suffixIcon: Icon(Icons.search),
+                            filled: true,
+                            fillColor: Colors.white,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.all(Radius.circular(5)),
+                              borderSide: BorderSide(
+                                width: 0,
+                                style: BorderStyle.none,
+                              ),
                             ),
-                          ),
-                          hintText: 'Search'),
-                      onChanged: (value) {
-                        if (value.isNotEmpty || value != null) {
-                          onSearch = true;
-                          searchQuery = value;
-                        } else {
-                          onSearch = false;
-                          searchQuery = value;
-                        }
-                        setState(() {});
-                      },
+                            hintText: 'Search'),
+                        onChanged: (value) {
+                          if (value.isNotEmpty || value != null) {
+                            onSearch = true;
+                            searchQuery = value;
+                          } else {
+                            onSearch = false;
+                            searchQuery = value;
+                          }
+                          setState(() {});
+                        },
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
             Expanded(
-                child: ListView.builder(
+                child: finalOrderList.length>0 ?ListView.builder(
                     itemCount:
                         finalOrderList != null ? finalOrderList.length : 0,
                     itemBuilder: (context, index) {
                       return quotationTile(finalOrderList[index], size);
-                    }))
+                    }):Center(
+                      child : Text("Tidak ada Quotation",
+                      style: kCalibriBold)
+                    ))
           ],
         ),
       ),
