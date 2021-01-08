@@ -24,6 +24,20 @@ class SalesOrderPPKState extends State<SalesOrderPPK> {
   String searchQuery;
   bool onSearch = false;
 
+  bool itemChecker(List<Order> listOrder, String searched) {
+    bool output = false;
+    listOrder.forEach((element) {
+      if (element.itemName
+          .toLowerCase()
+          .trim()
+          .contains(searched.toLowerCase().trim())) {
+        output = true;
+      }
+      ;
+    });
+    return output;
+  }
+
   void manageOrder(List<SalesOrder> initialList) {
     if (initialList == null)
       return;
@@ -51,6 +65,24 @@ class SalesOrderPPKState extends State<SalesOrderPPK> {
       finalOrderList = searchedList(searchQuery);
     }
     setState(() {});
+  }
+
+  List<Widget> produkInfo(List<Order> listOrder) {
+    var output = listOrder
+        .map((e) => Row(
+              textBaseline: TextBaseline.alphabetic,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              children: [
+                Text(
+                  e.count.toString() + "x ",
+                  style: kCalibriBold.copyWith(color: kBlueMainColor),
+                ),
+                Expanded(child: Text(e.itemName, style: kCalibri)),
+                SizedBox(height: 10),
+              ],
+            ))
+        .toList();
+    return output;
   }
 
   Widget orderTile(SalesOrder order, Size size) {
@@ -122,15 +154,11 @@ class SalesOrderPPKState extends State<SalesOrderPPK> {
                       crossAxisAlignment: CrossAxisAlignment.baseline,
                       children: [
                         Expanded(child: Text("Produk :", style: kCalibriBold)),
-                        Expanded(child: Text(order.itemName, style: kCalibri)),
-                      ],
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      children: [
-                        Expanded(child: Text("Jumlah :", style: kCalibriBold)),
                         Expanded(
-                            child: Text("${order.count}", style: kCalibri)),
+                            child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: produkInfo(order.listOrder),
+                        )),
                       ],
                     ),
                     Row(
@@ -185,9 +213,7 @@ class SalesOrderPPKState extends State<SalesOrderPPK> {
   List<SalesOrder> searchedList(String searchQuery) {
     return finalOrderList
         .where((element) =>
-            element.itemName
-                .toLowerCase()
-                .contains(searchQuery.toLowerCase()) ||
+            itemChecker(element.listOrder, searchQuery) ||
             element.ppName.toLowerCase().contains(searchQuery.toLowerCase()) ||
             element.id.toLowerCase().contains(searchQuery.toLowerCase()))
         .toList();

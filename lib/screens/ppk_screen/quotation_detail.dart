@@ -5,12 +5,53 @@ import 'package:e_catalog/utilities/order_services.dart';
 import 'package:flutter/material.dart';
 import 'package:e_catalog/constants.dart';
 import 'package:e_catalog/components/custom_raised_button.dart';
+import 'package:intl/intl.dart';
 
 class QuotationDetail extends StatelessWidget {
   OrderServices os = OrderServices();
   final SalesOrder quotation;
 
   QuotationDetail({Key key, this.quotation}) : super(key: key);
+
+  int totalTax(List<Order> listOrder) {
+    int output = 0;
+    listOrder.forEach((element) {
+      output = output +
+          ((element.tax / 100) * element.unitPrice * element.count).round();
+    });
+    return output;
+  }
+
+  List<Widget> produkInfo(List<Order> listOrder) {
+    var output = listOrder
+        .map((e) => Row(
+              textBaseline: TextBaseline.alphabetic,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              children: [
+                Text(
+                  e.count.toString() + "x ",
+                  style: kCalibriBold.copyWith(color: kBlueMainColor),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(e.itemName, style: kCalibri),
+                      Text(
+                          "@" +
+                              NumberFormat.currency(
+                                      name: "Rp ", decimalDigits: 0)
+                                  .format(e.unitPrice),
+                          style: kCalibri.copyWith(color: Colors.orange)),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 10),
+              ],
+            ))
+        .toList();
+    return output;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -64,16 +105,7 @@ class QuotationDetail extends StatelessWidget {
                         children: [
                           Expanded(child: Text("Produk :", style: kCalibriBold)),
                           Expanded(
-                              child: Text(quotation.itemName, style: kCalibri)),
-                        ],
-                      ),
-                      SizedBox(height: size.height / 100),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.baseline,
-                        children: [
-                          Expanded(child: Text("Jumlah :", style: kCalibriBold)),
-                          Expanded(
-                              child: Text("${quotation.count}", style: kCalibri)),
+                              child: Column(children: produkInfo(quotation.listOrder),)),
                         ],
                       ),
                       SizedBox(height: size.height / 100),
@@ -96,21 +128,11 @@ class QuotationDetail extends StatelessWidget {
                       Row(
                         children: [
                           Expanded(
-                              child: Text("Harga Satuan :", style: kCalibriBold)),
-                          Expanded(
-                              child: Text((quotation.unitPrice).toString(),
-                                style: kCalibri
-                              ),
-                            ),
-                        ],
-                      ),
-                      SizedBox(height: size.height / 100),
-                      Row(
-                        children: [
-                          Expanded(
                               child: Text("Pajak :", style: kCalibriBold)),
                           Expanded(
-                              child: Text((quotation.tax.toString()+"%"),
+                              child: Text(NumberFormat.currency(
+                                            name: "Rp ", decimalDigits: 0)
+                                        .format(totalTax(quotation.listOrder)),
                                 style: kCalibri
                               ),
                             ),
@@ -122,7 +144,9 @@ class QuotationDetail extends StatelessWidget {
                           Expanded(
                               child: Text("Total Harga :", style: kCalibriBold)),
                           Expanded(
-                              child: Text(quotation.totalPrice.toString(),
+                              child: Text(NumberFormat.currency(
+                                            name: "Rp ", decimalDigits: 0)
+                                        .format(quotation.totalPrice),
                                   style: kCalibri)),
                         ],
                       ),

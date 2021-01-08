@@ -271,6 +271,7 @@ class UpperContainer extends SliverPersistentHeaderDelegate {
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton(
+                          
                             value: sorted,
                             items: dropDownSort(),
                             onChanged: (value) {

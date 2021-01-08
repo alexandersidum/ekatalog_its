@@ -293,13 +293,14 @@ class ItemDetailState extends State<ItemDetail> {
     return Container(
       //warna sementara dan desain masih jelek
       color: Colors.white,
-      height: size.height * 0.08,
+      height: size.height * 0.11,
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
         Expanded(
           flex: 2,
           child: Padding(
-            padding: EdgeInsets.all(size.width / 120),
+            padding: EdgeInsets.symmetric(horizontal : size.width / 120, vertical : size.height/100),
             child: FlatButton(
+              height: size.height/15,
                 color: Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(size.width / 40),
@@ -324,8 +325,9 @@ class ItemDetailState extends State<ItemDetail> {
         Expanded(
           flex: 3,
           child: Padding(
-            padding: EdgeInsets.all(size.width / 120),
+            padding: EdgeInsets.symmetric(horizontal : size.width / 120, vertical : size.height/100),
             child: FlatButton(
+              height: size.height/15,
                 minWidth: size.width / 2.5,
                 color: kBlueMainColor,
                 shape: RoundedRectangleBorder(

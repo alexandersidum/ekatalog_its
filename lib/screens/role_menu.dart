@@ -2,9 +2,11 @@ import 'package:e_catalog/models/account.dart';
 import 'package:e_catalog/models/item.dart';
 import 'package:e_catalog/models/sales_order.dart';
 import 'package:e_catalog/screens/add_product_screen.dart';
+import 'package:e_catalog/screens/bpp_screen/pembayaran_screen.dart';
 import 'package:e_catalog/screens/penyedia_screen/negotiation_screen_penyedia.dart';
 import 'package:e_catalog/screens/penyedia_screen/rekening_screen.dart';
 import 'package:e_catalog/screens/penyedia_screen/sales_order_penyedia.dart';
+import 'package:e_catalog/screens/pp_screen/order_confirmation.dart';
 import 'package:e_catalog/screens/ppk_screen/quotation_screen.dart';
 import 'package:e_catalog/screens/ppk_screen/sales_order_screen_ppk.dart';
 import 'package:e_catalog/screens/ukpbj_screen/manage_product.dart';
@@ -46,7 +48,7 @@ class RoleMenu extends StatelessWidget {
         return SizedBox();
         break;
       case 1:
-        return Column();
+        return OrderConfirmationPP();
         break;
       case 2:
         return MenuPenyedia(size: size, account: account);
@@ -62,8 +64,10 @@ class RoleMenu extends StatelessWidget {
       case 5:
         return Column();
         break;
-      case 5:
-        return Column();
+      case 6:
+        return MenuBPP(
+          size: size,
+        );
         break;
       default:
         return SizedBox();
@@ -389,6 +393,109 @@ class MenuUKPBJ extends StatelessWidget {
               ListTile(
                 title: Text(
                   'Laporan Pengadaan Ekatalog',
+                  style: kCalibri,
+                ),
+                trailing: Icon(Icons.keyboard_arrow_right),
+              ),
+            ]).toList()),
+          ),
+          Container(
+            margin: EdgeInsets.only(
+                top: size.height / 40,
+                left: size.width / 30,
+                bottom: size.height / 100),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Bantuan',
+              style: kCalibriBold,
+            ),
+          ),
+          Container(
+            color: Colors.white,
+            child: Column(
+                children: ListTile.divideTiles(context: context, tiles: [
+              ListTile(
+                title: Text(
+                  'Kontak Bantuan',
+                  style: kCalibri,
+                ),
+                trailing: Icon(Icons.keyboard_arrow_right),
+              )
+            ]).toList()),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class MenuBPP extends StatelessWidget {
+  const MenuBPP({
+    Key key,
+    @required this.size,
+  }) : super(key: key);
+
+  final Size size;
+
+  @override
+  Widget build(BuildContext context) {
+    var bpp = Provider.of<Auth>(context).getUserInfo as BendaharaPengeluaran;
+    return Container(
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.only(
+                top: size.height / 40,
+                left: size.width / 30,
+                bottom: size.height / 100),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Pembayaran',
+              style: kCalibriBold,
+            ),
+          ),
+          Container(
+            color: Colors.white,
+            child: Column(
+                children: ListTile.divideTiles(context: context, tiles: [
+              ListTile(
+                onTap: () {
+                 //Navigate ke Pembayaran
+                 Navigator.of(context).push(MaterialPageRoute(builder: (context)=>PembayaranScreen()));
+                },
+                title: Text('Pembayaran', style: kCalibri),
+                trailing: Icon(Icons.keyboard_arrow_right),
+              ),
+              ListTile(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => ManageProduct(
+                            initialTab: 0,
+                          )));
+                },
+                title: Text('Riwayat Pembayaran', style: kCalibri),
+                trailing: Icon(Icons.keyboard_arrow_right),
+              ),
+            ]).toList()),
+          ),
+          Container(
+            padding: EdgeInsets.only(
+                top: size.height / 40,
+                left: size.width / 30,
+                bottom: size.height / 100),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Bantuan',
+              style: kCalibriBold,
+            ),
+          ),
+          Container(
+            color: Colors.white,
+            child: Column(
+                children: ListTile.divideTiles(context: context, tiles: [
+              ListTile(
+                title: Text(
+                  'Kontak Bantuan',
                   style: kCalibri,
                 ),
                 trailing: Icon(Icons.keyboard_arrow_right),

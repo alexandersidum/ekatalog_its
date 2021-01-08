@@ -54,6 +54,24 @@ class QuotationScreenState extends State<QuotationScreen> {
     setState(() {});
   }
 
+  List<Widget> produkInfo(List<Order> listOrder){
+    var output = listOrder
+        .map((e) => Row(
+              textBaseline: TextBaseline.alphabetic,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              children: [
+                Text(
+                    e.count.toString() + "x ",
+                    style: kCalibriBold.copyWith(color: kBlueMainColor),
+                  ),
+                Expanded(child: Text(e.itemName, style: kCalibri)),
+                SizedBox(height: 10),
+              ],
+            ))
+        .toList();
+    return output;
+  }
+
   Widget quotationTile(SalesOrder quotation, Size size) {
     return Container(
       margin: EdgeInsets.all(size.width / 50),
@@ -115,15 +133,9 @@ class QuotationScreenState extends State<QuotationScreen> {
                       children: [
                         Expanded(child: Text("Produk :", style: kCalibriBold)),
                         Expanded(
-                            child: Text(quotation.itemName, style: kCalibri)),
-                      ],
-                    ),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      children: [
-                        Expanded(child: Text("Jumlah :", style: kCalibriBold)),
-                        Expanded(
-                            child: Text("${quotation.count}", style: kCalibri)),
+                            child: Column(
+                              children: produkInfo(quotation.listOrder),
+                            )),
                       ],
                     ),
                     Row(
@@ -240,9 +252,9 @@ class QuotationScreenState extends State<QuotationScreen> {
   List<SalesOrder> searchedList(String searchQuery) {
     return finalOrderList
         .where((element) =>
-            element.itemName
-                .toLowerCase()
-                .contains(searchQuery.toLowerCase()) ||
+            // element.itemName
+            //     .toLowerCase()
+            //     .contains(searchQuery.toLowerCase()) ||
             element.ppName.toLowerCase().contains(searchQuery.toLowerCase()) ||
             element.id.toLowerCase().contains(searchQuery.toLowerCase()))
         .toList();

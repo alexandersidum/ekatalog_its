@@ -6,7 +6,7 @@ class Item {
 
   String id;
   String name;
-  List image;
+  List<String> image;
   String description;
   String category;
   String seller;
@@ -30,7 +30,7 @@ class Item {
       Item(
         id : parsedData['id'],
         name: parsedData['name'],
-        image: parsedData['image'],
+        image: (parsedData['image'] as List).cast<String>(),
         description: parsedData['description'],
         creationDate: DateTime.parse(parsedData['creationDate'].toDate().toString()),
         category: parsedData['category'],

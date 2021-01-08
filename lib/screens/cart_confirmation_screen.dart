@@ -265,9 +265,9 @@ class _CartConfirmationState extends State<CartConfirmation> {
               padding: EdgeInsets.symmetric(horizontal: size.height / 10),
               height: size.height / 15,
               child: CustomRaisedButton(
-                callback: () {
+                callback: () async{
                   //TODO Validator Kalau ada data yang kosong atau salah
-                  _orderServices.batchCreateSalesOrder(
+                  await _orderServices.batchCreateSalesOrderGroup(
                       itemList: listItem,
                       shippingAddress: finalShippingAddress,
                       ppName: account.name,

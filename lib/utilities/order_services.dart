@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_catalog/models/sales_order.dart';
 import 'package:e_catalog/models/cart.dart';
 import 'package:e_catalog/models/shipping_address.dart';
+import 'package:collection/collection.dart';
 
 class OrderServices {
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -14,6 +15,33 @@ class OrderServices {
     return _firestore
         .collection(salesOrderPath)
         .where("unit", whereIn: [unit])
+        .snapshots()
+        .map((QuerySnapshot snapshot) => snapshot.docs
+            .map((DocumentSnapshot e) => SalesOrder.fromDb(e.data(), e.id))
+            .toList());
+  }
+
+
+  Stream<List<SalesOrder>> getBPPSalesOrder(
+      int unit, List<int> status) {
+    //Sales order buat bpp
+    return _firestore
+        .collection(salesOrderPath)
+        .where("unit", isEqualTo: unit)
+        .where("status", whereIn: status)
+        .snapshots()
+        .map((QuerySnapshot snapshot) => snapshot.docs
+            .map((DocumentSnapshot e) => SalesOrder.fromDb(e.data(), e.id))
+            .toList());
+  }
+
+  Stream<List<SalesOrder>> getPPSalesOrder(
+      String ppUid, List<int> status) {
+    //Sales order buat pp
+    return _firestore
+        .collection(salesOrderPath)
+        .where("ppUid", isEqualTo: ppUid)
+        .where("status", whereIn: status)
         .snapshots()
         .map((QuerySnapshot snapshot) => snapshot.docs
             .map((DocumentSnapshot e) => SalesOrder.fromDb(e.data(), e.id))
@@ -139,6 +167,36 @@ class OrderServices {
     return output;
   }
 
+  Future<bool> changeSubOrderStatus(
+      {String docId,
+      int newTotalPrice,
+      List<Order> newOrderList,
+      Function callback}) async {
+    var docRef = _firestore.collection(salesOrderPath);
+    bool output = false;
+    bool isDeclined = true;
+
+    newOrderList.forEach((element) {
+      if(element.status == 1) isDeclined = false ;
+    });
+    
+    Map input ={"listOrder":newOrderList.map((e) => e.toMap()).toList()};
+    if(newTotalPrice!=null)input['totalPrice']=newTotalPrice;
+    if(isDeclined)input['status']=5;
+
+    await docRef
+        .doc(docId)
+        .update(
+          input
+        )
+        .then((value) {
+          print("SAKSES");
+      output = true;
+      callback(true);
+    });
+    return output;
+  }
+
   Future<void> createSalesOrder(SalesOrder order, Function isSuccess) async {
     var docRef = _firestore.collection(salesOrderPath);
     await docRef.add(order.toMap()).then((value) {
@@ -184,25 +242,19 @@ class OrderServices {
       itemList.forEach((element) async {
         var order = SalesOrder(
             id: await getLatestSalesOrderID(),
-            count: element.count,
             ppName: ppName,
             ppUid: ppUid,
             unit: unit,
             creationDate: DateTime.now(),
             ppkName: ppkName,
             ppkUid: ppkUid,
-            itemId: element.item.id,
-            itemName: element.item.name,
             seller: element.item.seller,
             sellerUid: element.item.sellerUid,
             status: 0,
-            unitPrice: element.item.price,
             address: shippingAddress.address,
             namaAlamat: shippingAddress.namaAlamat,
             namaPenerima: shippingAddress.namaPenerima,
             teleponPenerima: shippingAddress.teleponPenerima,
-            tax: element.item.taxPercentage,
-            itemImage: element.item.image,
             totalPrice: ((element.item.price * element.count) *
                     (1 + element.item.taxPercentage / 100))
                 .round());
@@ -218,5 +270,89 @@ class OrderServices {
       print(error);
       onComplete(false);
     }
+  }
+
+  Future<void> batchCreateSalesOrderGroup(
+      {List<LineItem> itemList,
+      String ppName,
+      String ppUid,
+      int unit,
+      ShippingAddress shippingAddress,
+      Function onComplete}) async {
+    var docRef = _firestore.collection(salesOrderPath);
+    var ppkInfoRef = _firestore.collection(miscPath).doc('ppk_info');
+
+    var groupedItemMap = groupBy(itemList, (LineItem lineItem) {
+      return lineItem.item.sellerUid;
+    });
+    String ppkName;
+    String ppkUid;
+
+    Future.forEach(groupedItemMap.entries,
+        (MapEntry<String, List<LineItem>> element) async {
+      DocumentSnapshot ppkSnap = await ppkInfoRef.get();
+      if (!ppkSnap.exists) {
+        print("PPK TIDAK ADA");
+        throw Exception("PPK INFO TIDAK EXIST!");
+      }
+      //ambil data ppk dulu
+      ppkUid = ppkSnap.data()[unit.toString()]['ppkUid'];
+      ppkName = ppkSnap.data()[unit.toString()]['ppkName'];
+
+      int totalPrice = 0;
+      List<LineItem> list = element.value;
+      List<Order> orderlist = [];
+      //hitung total price so
+      list.forEach((element) {
+        print("lineitem foreach");
+        totalPrice = totalPrice +
+            ((element.item.price * element.count) *
+                    (1 + (element.item.taxPercentage / 100)))
+                .round();
+      });
+      //Looping cart menjadi Order 
+      element.value.forEach((LineItem lineItem) {
+        Order order = Order(
+            count: lineItem.count,
+            itemId: lineItem.item.id,
+            itemImage: lineItem.item.image,
+            itemName: lineItem.item.name,
+            status: 0,
+            tax: lineItem.item.taxPercentage,
+            unitPrice: lineItem.item.price,
+            orderPrice: ((lineItem.item.price * lineItem.count) *
+                    (1 + lineItem.item.taxPercentage / 100))
+                .round());
+        print(order.itemName);
+        orderlist.add(order);
+        
+      });
+      // await Future.forEach(element.value, (LineItem lineItem)async{
+
+      // });
+
+      var order = SalesOrder(
+          id: await getLatestSalesOrderID().catchError((Object onError){print("GAGAL NGAMBIL ORDER ID");}),
+          ppName: ppName,
+          ppUid: ppUid,
+          sellerUid: element.key,
+          seller: element.value[0].item.seller,
+          unit: unit,
+          creationDate: DateTime.now(),
+          ppkName: ppkName,
+          ppkUid: ppkUid,
+          status: 0,
+          address: shippingAddress.address,
+          namaAlamat: shippingAddress.namaAlamat,
+          namaPenerima: shippingAddress.namaPenerima,
+          teleponPenerima: shippingAddress.teleponPenerima,
+          totalPrice: totalPrice,
+          listOrder: orderlist);
+      print("ADD");
+      await docRef.add(order.toMap());
+    }).then((value) => onComplete(true)).catchError((Object error) {
+      onComplete(false);
+      print("Error");
+    });
   }
 }

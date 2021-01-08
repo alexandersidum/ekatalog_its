@@ -1,54 +1,42 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:e_catalog/auth.dart';
-import 'package:e_catalog/components/bottom_sheet_decline_info.dart';
-import 'package:e_catalog/components/modal_bottom_sheet_app.dart';
 import 'package:e_catalog/constants.dart';
 import 'package:e_catalog/models/account.dart';
-import 'package:e_catalog/models/item.dart';
 import 'package:e_catalog/models/sales_order.dart';
-import 'package:e_catalog/screens/item_detail.dart';
-import 'package:e_catalog/screens/penyedia_screen/sales_order_detail_penyedia.dart';
 import 'package:e_catalog/utilities/order_services.dart';
-import 'package:flutter/material.dart';
+import "package:flutter/material.dart";
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class SalesOrderPenyedia extends StatefulWidget {
+class OrderConfirmationPP extends StatefulWidget {
   @override
-  _SalesOrderPenyediaState createState() => _SalesOrderPenyediaState();
+  _OrderConfirmationPPState createState() => _OrderConfirmationPPState();
 }
 
-class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
+class _OrderConfirmationPPState extends State<OrderConfirmationPP> {
   OrderServices orderService = OrderServices();
   bool onSearch = false;
   String searchQuery = '';
   sortedBy sorted = sortedBy.Default;
   Stream<List<SalesOrder>> orderStreams;
-  Seller seller;
+  PejabatPengadaan pp ;
 
-  bool itemChecker(List<Order> listOrder, String searched) {
+
+  @override
+  void didChangeDependencies() {
+    pp = Provider.of<Account>(context, listen: false) as PejabatPengadaan;
+    orderStreams = orderService.getPPSalesOrder(pp.uid, [0,1,2,3,4,5,6,7]);
+    super.didChangeDependencies();
+    
+  }
+  
+  bool itemChecker(List<Order> listOrder, String searched){
     bool output = false;
-    listOrder.forEach((element) {
-      if (element.itemName
-          .toLowerCase()
-          .trim()
-          .contains(searched.toLowerCase().trim())) {
-        output = true;
-      }
-      ;
-    });
+    listOrder.forEach((element) { if(element.itemName.toLowerCase().trim().contains(searched.toLowerCase().trim())){
+      output = true;
+    };});
     return output;
   }
 
-  @override
-  void initState() {
-    seller = Provider.of<Auth>(context, listen: false).getUserInfo;
-    orderStreams = orderService.getSellerSalesOrder(seller.uid, [1, 3, 6]);
-    super.initState();
-  }
-
-  Widget itemTile(
-      context, SalesOrder element, AsyncSnapshot orderSnap, int index) {
+  Widget itemTile(context, SalesOrder element) {
     Size size = MediaQuery.of(context).size;
     return Container(
       color: Colors.white,
@@ -69,36 +57,26 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
             ),
             Expanded(
               child: Stack(children: [
-                Positioned(
-                    top: 0,
-                    right: 0,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => StreamBuilder<Object>(
-                                  stream: orderStreams,
-                                  builder: (context, AsyncSnapshot snapshot) {
-                                    return SalesOrderDetailPenyedia(
-                                      streamOrder: orderSnap,
-                                      index: index,
-                                    );
-                                  }),
-                              fullscreenDialog: true,
-                            ));
-                          },
-                          child: Container(
-                            child: Text(
-                              "Detail",
-                              style: kCalibri,
-                            ),
-                          ),
-                        ),
-                        Container(child: Icon(Icons.chevron_right))
-                      ],
-                    )),
+                // Positioned(
+                //     top: 0,
+                //     right: 0,
+                //     child: Row(
+                //       mainAxisAlignment: MainAxisAlignment.end,
+                //       children: [
+                //         GestureDetector(
+                //           onTap: () {
+                //             //NAVIGATE
+                //           },
+                //           child: Container(
+                //             child: Text(
+                //               "Detail",
+                //               style: kCalibri,
+                //             ),
+                //           ),
+                //         ),
+                //         Container(child: Icon(Icons.chevron_right))
+                //       ],
+                //     )),
                 Container(
                   padding: EdgeInsets.only(
                       top: size.height / 100, right: size.width / 50),
@@ -203,37 +181,16 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        TextButton(
-          onPressed: () {
-            showModalBottomSheetApp(
-                context: context,
-                builder: (context) => DeclineBottomSheet(
-                      id: order.id,
-                      callback: (keterangan) async {
-                        await orderService.changeOrderStatus(
-                            docId: order.docId,
-                            keterangan: keterangan,
-                            newStatus: 4,
-                            callback: (isSuccess) => print(isSuccess));
-                      },
-                    ));
-          },
-          child: Text(
-            "Batalkan",
-            style: kCalibriBold.copyWith(color: kRedButtonColor),
-          ),
-        ),
-        order.status == 1
+        order.status == 3 || order.status == 4
             ? TextButton(
                 onPressed: () async {
-                  print("konfirmasi pressed");
                   await orderService.changeOrderStatus(
                       docId: order.docId,
-                      newStatus: 3,
+                      newStatus: 7,
                       callback: (isSuccess) => print(isSuccess));
                 },
                 child: Text(
-                  "Sanggupi",
+                  "Konfirmasi Penerimaan Barang",
                   style: kCalibriBold.copyWith(color: kBlueMainColor),
                 ),
               )
@@ -244,15 +201,10 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
 
   @override
   Widget build(BuildContext context) {
+    
     Size size = MediaQuery.of(context).size;
-
+    
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Sales Order", style: kCalibriBold),
-        centerTitle: false,
-        backgroundColor: kBlueMainColor,
-        elevation: 0,
-      ),
       body: Column(
         children: [
           Row(
@@ -352,17 +304,14 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
                   } else {
                     List<SalesOrder> finalItemList = onSearch
                         ? snapshot.data.where((element) {
+
                             // return element.itemName
                             //         .toLowerCase()
                             //         .contains(searchQuery.toLowerCase()) ||
-                            return itemChecker(
-                                    element.listOrder, searchQuery) ||
-                                element.id
-                                    .toLowerCase()
-                                    .contains(searchQuery.toLowerCase()) ||
-                                element.ppkName
-                                    .toLowerCase()
-                                    .contains(searchQuery.toLowerCase());
+                            return itemChecker(element.listOrder, searchQuery) ||
+                            element.ppkName
+                                .toLowerCase()
+                                .contains(searchQuery.toLowerCase());
                           }).toList()
                         : snapshot.data;
                     sortItem(finalItemList);
@@ -370,10 +319,7 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
                     return finalItemList.length > 0
                         ? ListView(
                             children: finalItemList
-                                .asMap()
-                                .map((i, e) => MapEntry(
-                                    i, itemTile(context, e, snapshot, i)))
-                                .values
+                                .map((e) => itemTile(context, e ))
                                 .toList())
                         : Container(
                             decoration:

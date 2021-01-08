@@ -1,30 +1,59 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_catalog/auth.dart';
-import 'package:e_catalog/components/bottom_sheet_decline_info.dart';
-import 'package:e_catalog/components/modal_bottom_sheet_app.dart';
+import 'package:e_catalog/components/custom_raised_button.dart';
 import 'package:e_catalog/constants.dart';
 import 'package:e_catalog/models/account.dart';
-import 'package:e_catalog/models/item.dart';
 import 'package:e_catalog/models/sales_order.dart';
-import 'package:e_catalog/screens/item_detail.dart';
-import 'package:e_catalog/screens/penyedia_screen/sales_order_detail_penyedia.dart';
+import 'package:e_catalog/screens/bpp_screen/pembayaran_detail_screen.dart';
 import 'package:e_catalog/utilities/order_services.dart';
-import 'package:flutter/material.dart';
+import "package:flutter/material.dart";
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class SalesOrderPenyedia extends StatefulWidget {
+class PembayaranScreen extends StatefulWidget {
   @override
-  _SalesOrderPenyediaState createState() => _SalesOrderPenyediaState();
+  _PembayaranScreenState createState() => _PembayaranScreenState();
 }
 
-class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
+class _PembayaranScreenState extends State<PembayaranScreen> {
   OrderServices orderService = OrderServices();
   bool onSearch = false;
   String searchQuery = '';
   sortedBy sorted = sortedBy.Default;
   Stream<List<SalesOrder>> orderStreams;
-  Seller seller;
+  BendaharaPengeluaran bpp;
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void didChangeDependencies() {
+    bpp = Provider.of<Auth>(context, listen: false).getUserInfo
+        as BendaharaPengeluaran;
+    orderStreams = orderService.getBPPSalesOrder(bpp.unit, [7]);
+    super.didChangeDependencies();
+  }
+
+  List<Widget> produkInfo(List<Order> listOrder) {
+    var output = listOrder
+        .map((e) => e.status != 2
+            ? Row(
+                textBaseline: TextBaseline.alphabetic,
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                children: [
+                  Text(
+                    e.count.toString() + "x ",
+                    style: kCalibriBold.copyWith(color: kBlueMainColor),
+                  ),
+                  Expanded(child: Text(e.itemName, style: kCalibri)),
+                  SizedBox(height: 10),
+                ],
+              )
+            : SizedBox())
+        .toList();
+    return output;
+  }
 
   bool itemChecker(List<Order> listOrder, String searched) {
     bool output = false;
@@ -40,15 +69,7 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
     return output;
   }
 
-  @override
-  void initState() {
-    seller = Provider.of<Auth>(context, listen: false).getUserInfo;
-    orderStreams = orderService.getSellerSalesOrder(seller.uid, [1, 3, 6]);
-    super.initState();
-  }
-
-  Widget itemTile(
-      context, SalesOrder element, AsyncSnapshot orderSnap, int index) {
+  Widget itemTile(context, SalesOrder element) {
     Size size = MediaQuery.of(context).size;
     return Container(
       color: Colors.white,
@@ -69,36 +90,26 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
             ),
             Expanded(
               child: Stack(children: [
-                Positioned(
-                    top: 0,
-                    right: 0,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => StreamBuilder<Object>(
-                                  stream: orderStreams,
-                                  builder: (context, AsyncSnapshot snapshot) {
-                                    return SalesOrderDetailPenyedia(
-                                      streamOrder: orderSnap,
-                                      index: index,
-                                    );
-                                  }),
-                              fullscreenDialog: true,
-                            ));
-                          },
-                          child: Container(
-                            child: Text(
-                              "Detail",
-                              style: kCalibri,
-                            ),
-                          ),
-                        ),
-                        Container(child: Icon(Icons.chevron_right))
-                      ],
-                    )),
+                // Positioned(
+                //     top: 0,
+                //     right: 0,
+                //     child: Row(
+                //       mainAxisAlignment: MainAxisAlignment.end,
+                //       children: [
+                //         GestureDetector(
+                //           onTap: () {
+                //             //NAVIGATE
+                //           },
+                //           child: Container(
+                //             child: Text(
+                //               "Detail",
+                //               style: kCalibri,
+                //             ),
+                //           ),
+                //         ),
+                //         Container(child: Icon(Icons.chevron_right))
+                //       ],
+                //     )),
                 Container(
                   padding: EdgeInsets.only(
                       top: size.height / 100, right: size.width / 50),
@@ -116,19 +127,52 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
                               color: kBlueMainColor),
                         ),
                       ),
+                      
                       Text(
                         element.getStatusPenyedia(),
                         style: kCalibriBold.copyWith(
                             fontSize: 16, color: Colors.orange),
                       ),
                       Text(
+                        element.seller,
+                        style: kCalibriBold.copyWith(
+                            fontSize: 14, color: kBlueMainColor),
+                      ),
+                      Text(
                         element.getUnit,
                         style: kCalibriBold.copyWith(fontSize: 14),
                       ),
-                      Column(
-                        children: element.listOrder
-                            .map((Order e) => orderInfo(size, e))
-                            .toList(),
+                      Text(
+                        "Barang sudah diterima, silahkan melakukan pembayaran",
+                        style: kCalibri.copyWith(fontSize: 13, color: kRedButtonColor),
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        children: [
+                           Expanded(
+                             flex : 2,
+                             child: Text("Produk :  ", style: kCalibriBold)),
+                          Expanded(
+                            flex : 5,
+                              child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: produkInfo(element.listOrder),
+                          )),
+                        ],
+                      ),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        children: [
+                           Expanded(
+                             flex : 2,
+                             child: Text("Total :  ", style: kCalibriBold)),
+                          Expanded(
+                              flex : 5,
+                              child : Text(NumberFormat.currency(
+                                            name: "Rp ", decimalDigits: 0)
+                                        .format(element.totalPrice), style: kCalibriBold)
+                              ),
+                        ],
                       ),
                       buttonListWidget(size, element)
                     ],
@@ -142,40 +186,7 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
     );
   }
 
-  Container orderInfo(Size size, Order element) {
-    return Container(
-      width: double.infinity,
-      margin: EdgeInsets.symmetric(vertical: size.height / 200),
-      padding: EdgeInsets.symmetric(
-          horizontal: size.width / 25, vertical: size.height / 120),
-      color: kBackgroundMainColor,
-      child: Column(
-        children: [
-          Row(
-            textBaseline: TextBaseline.alphabetic,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            children: [
-              Expanded(flex: 2, child: Text("Produk :", style: kCalibriBold)),
-              Expanded(flex: 5, child: Text(element.itemName, style: kCalibri)),
-            ],
-          ),
-          Row(
-            textBaseline: TextBaseline.alphabetic,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            children: [
-              Expanded(flex: 2, child: Text("Jumlah :", style: kCalibriBold)),
-              Expanded(
-                  flex: 5,
-                  child: Text(element.count.toString() + " unit",
-                      style: kCalibri)),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
+
 
   void sortItem(List<SalesOrder> initialList) {
     switch (sorted) {
@@ -197,48 +208,36 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
         initialList = initialList;
     }
     // return initialList;
+
   }
 
   Widget buttonListWidget(Size size, SalesOrder order) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        TextButton(
-          onPressed: () {
-            showModalBottomSheetApp(
-                context: context,
-                builder: (context) => DeclineBottomSheet(
-                      id: order.id,
-                      callback: (keterangan) async {
-                        await orderService.changeOrderStatus(
-                            docId: order.docId,
-                            keterangan: keterangan,
-                            newStatus: 4,
-                            callback: (isSuccess) => print(isSuccess));
+    return Container(
+      padding: EdgeInsets.symmetric(vertical : size.height/60),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          order.status == 7
+              ? Container(
+                    width: size.width/2,
+                    height: size.height/20,
+                    // padding: EdgeInsets.symmetric(horizontal:size.width/10, vertical: size.height/50),
+                    child: CustomRaisedButton(
+                      buttonChild: FittedBox(
+                                            child: Text("Lakukan Pembayaran",
+                            style: kCalibriBold.copyWith(color: Colors.white)),
+                      ),
+                      color: kBlueMainColor,
+                      callback: (){
+                        Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context)=>PembayaranDetailScreen(order: order,)));
                       },
-                    ));
-          },
-          child: Text(
-            "Batalkan",
-            style: kCalibriBold.copyWith(color: kRedButtonColor),
-          ),
-        ),
-        order.status == 1
-            ? TextButton(
-                onPressed: () async {
-                  print("konfirmasi pressed");
-                  await orderService.changeOrderStatus(
-                      docId: order.docId,
-                      newStatus: 3,
-                      callback: (isSuccess) => print(isSuccess));
-                },
-                child: Text(
-                  "Sanggupi",
-                  style: kCalibriBold.copyWith(color: kBlueMainColor),
-                ),
-              )
-            : SizedBox()
-      ],
+                    ),
+                  )
+                
+              : SizedBox()
+        ],
+      ),
     );
   }
 
@@ -248,7 +247,7 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text("Sales Order", style: kCalibriBold),
+        title: Text("Pembayaran", style: kCalibriBold),
         centerTitle: false,
         backgroundColor: kBlueMainColor,
         elevation: 0,
@@ -357,9 +356,6 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
                             //         .contains(searchQuery.toLowerCase()) ||
                             return itemChecker(
                                     element.listOrder, searchQuery) ||
-                                element.id
-                                    .toLowerCase()
-                                    .contains(searchQuery.toLowerCase()) ||
                                 element.ppkName
                                     .toLowerCase()
                                     .contains(searchQuery.toLowerCase());
@@ -370,10 +366,7 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
                     return finalItemList.length > 0
                         ? ListView(
                             children: finalItemList
-                                .asMap()
-                                .map((i, e) => MapEntry(
-                                    i, itemTile(context, e, snapshot, i)))
-                                .values
+                                .map((e) => itemTile(context, e))
                                 .toList())
                         : Container(
                             decoration:

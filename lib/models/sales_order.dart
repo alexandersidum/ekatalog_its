@@ -5,10 +5,7 @@ class SalesOrder{
 
   String id;
   String docId;
-  String itemName;
-  String itemId;
-  List itemImage;
-  int count;
+  List<Order> listOrder;
   int totalPrice;
   String seller; 
   String sellerUid; 
@@ -24,23 +21,23 @@ class SalesOrder{
   String ppkUid;
   String ppkName;
   int unit;
-  int tax;
-  int unitPrice;
   String feedback;
 
-  SalesOrder({this.id, this.docId, this.itemName, this.itemImage, this.ppkName, this.creationDate, this.itemId, this.count, this.totalPrice, this.seller, this.sellerUid, this.status, this.ppName, this.ppUid, this.ppkUid, this.unit, this.address, this.namaAlamat, this.namaPenerima,this.teleponPenerima,this.unitPrice, this.feedback, this.tax});
+  SalesOrder({this.id, this.docId, this.listOrder, this.ppkName, this.creationDate, this.totalPrice, this.seller, this.sellerUid, this.status, this.ppName, this.ppUid, this.ppkUid, this.unit, this.address, this.namaAlamat, this.namaPenerima,this.teleponPenerima, this.feedback});
 
   factory SalesOrder.fromDb(Map<String , dynamic> parsedData, String docId){
+    List<Order> orderList = parsedData['listOrder'].map<Order>((e) {
+      var order = Map<String, dynamic>.from(e);
+      // print(z['itemName']);
+      return Order.fromMap(order);
+    }).toList();
+
     return SalesOrder(
       docId: docId,
       id: parsedData['id'],
       seller: parsedData['seller'],
       sellerUid: parsedData['sellerUid'],
-      count: parsedData['count'],
       creationDate: DateTime.parse(parsedData['creationDate'].toDate().toString()),
-      itemId: parsedData['itemId'],
-      itemName: parsedData['itemName'],
-      itemImage: parsedData['itemImage'],
       status: parsedData['status'],
       totalPrice: parsedData['totalPrice'],
       ppName: parsedData['ppName'],
@@ -53,8 +50,8 @@ class SalesOrder{
       namaPenerima: parsedData['namaPenerima'],
       teleponPenerima: parsedData['teleponPenerima'],
       feedback: parsedData['feedback']!=null?parsedData['feedback']:'',
-      tax: parsedData['tax'],
-      unitPrice: parsedData['unitPrice'],
+      listOrder: orderList,
+      // listOrder : parsedData['listOrder'].map<Order>((Map<String, dynamic> e)=>Order.fromMap(e)).toList()
     );
   }
 
@@ -63,9 +60,6 @@ class SalesOrder{
       'id' : this.id,
       'seller' : this.seller,
       'sellerUid' : this.sellerUid,
-      'itemName' : this.itemName,
-      'itemId' : this.itemId,
-      'count' : this.count,
       'creationDate' : this.creationDate,
       'totalPrice' : this.totalPrice,
       'status' : this.status,
@@ -79,9 +73,7 @@ class SalesOrder{
       'namaPenerima' : this.namaPenerima,
       'teleponPenerima' : this.teleponPenerima,
       'feedback' : this.feedback,
-      'tax' : this.tax,
-      'unitPrice' : this.unitPrice,
-      'itemImage' : this.itemImage,
+      'listOrder' : this.listOrder.map((e) => e.toMap()).toList()
     };
   }
 
@@ -94,19 +86,22 @@ class SalesOrder{
       case 2:
         return "Ditolak";
       case 3:
-        return "Segera Dikirim";
+        return "Disanggupi dan Segera Dikirim";
       case 4:
-        return "Dibatalkan Penyedia";
+        return "Disanggupi Sebagian dan Segera Dikirim";
       case 5:
-        return "Dibatalkan PPK";
+        return "Dibatalkan Penyedia";
       case 6:
-        return "Menunggu Pembayaran";
+        return "Dibatalkan PPK";
       case 7:
+        return "Menunggu Pembayaran";
+      case 8:
         return "Selesai";
       default:
         return "Undefined";
     }
   }
+
 
   List<String> listUnit = [
     'Unit Urutan 0',
@@ -155,17 +150,65 @@ class SalesOrder{
       case 3:
         return "Segera Dikirim";
       case 4:
-        return "Dibatalkan Penyedia";
+        return "Segera Dikirim";
       case 5:
-        return "Dibatalkan PPK";
+        return "Dibatalkan Penyedia";
       case 6:
-        return "Menunggu Pembayaran";
+        return "Dibatalkan PPK";
       case 7:
+        return "Menunggu Pembayaran";
+      case 8:
         return "Selesai";
       default:
         return "Undefined";
     }
   }
+}
+
+class Order{
+  String docId;
+  String itemName;
+  String itemId;
+  List<String> itemImage;
+  int count;
+  int status;
+  int unitPrice;
+  int tax;
+  int orderPrice;
+
+  Order({this.docId, this.orderPrice ,this.itemId,this.itemName, this.itemImage, this.count, this.status, this.tax, this.unitPrice});
+
+  factory Order.fromMap(Map<String , dynamic> parsedData){
+
+    return Order(
+      itemId: parsedData['itemId'],
+      itemName: parsedData['itemName'],
+      itemImage: (parsedData['itemImage'] as List).cast<String>(),
+      count : parsedData['count'],
+      status: parsedData['status'],
+      tax: parsedData['tax'],
+      unitPrice: parsedData['unitPrice'],
+      orderPrice : parsedData['orderPrice']
+    );
+  }
+
+  Map<String , dynamic> toMap(){
+    return{
+      'itemName' : this.itemName,
+      'itemId' : this.itemId,
+      'count' : this.count,
+      'status' : this.status,
+      'itemImage' : this.itemImage,
+      'tax' : this.tax,
+      'unitPrice' : this.unitPrice,
+      'orderPrice' : this.orderPrice,
+    };
+  }
+
+  void setStatus(int newStatus){
+    this.status = newStatus;
+  }
+
 }
 
 // Status SalesOrder

@@ -205,6 +205,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
                     ),
                     child: DropdownButtonHideUnderline(
                       child: DropdownButton(
+                          hint: Text("Pilih peran"),
                           isExpanded: true,
                           dropdownColor: Colors.white,
                           value: selectedRoles,

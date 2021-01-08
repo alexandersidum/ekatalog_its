@@ -13,6 +13,46 @@ class SalesOrderDetail extends StatelessWidget {
 
   SalesOrderDetail({Key key, this.salesOrder}) : super(key: key);
 
+  List<Widget> produkInfo(List<Order> listOrder) {
+    var output = listOrder
+        .map((e) => Row(
+              textBaseline: TextBaseline.alphabetic,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              children: [
+                Text(
+                  e.count.toString() + "x ",
+                  style: kCalibriBold.copyWith(color: kBlueMainColor),
+                ),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(e.itemName, style: kCalibri),
+                      Text(
+                          "@" +
+                              NumberFormat.currency(
+                                      name: "Rp ", decimalDigits: 0)
+                                  .format(e.unitPrice),
+                          style: kCalibri.copyWith(color: Colors.orange)),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 10),
+              ],
+            ))
+        .toList();
+    return output;
+  }
+
+  int totalTax(List<Order> listOrder) {
+    int output = 0;
+    listOrder.forEach((element) {
+      output = output +
+          ((element.tax / 100) * element.unitPrice * element.count).round();
+    });
+    return output;
+  }
+
   @override
   Widget build(BuildContext context) {
     var size = MediaQuery.of(context).size;
@@ -77,19 +117,9 @@ class SalesOrderDetail extends StatelessWidget {
                               Expanded(
                                   child: Text("Produk :", style: kCalibriBold)),
                               Expanded(
-                                  child: Text(salesOrder.itemName,
-                                      style: kCalibri)),
-                            ],
-                          ),
-                          SizedBox(height: size.height / 100),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.baseline,
-                            children: [
-                              Expanded(
-                                  child: Text("Jumlah :", style: kCalibriBold)),
-                              Expanded(
-                                  child: Text("${salesOrder.count}",
-                                      style: kCalibri)),
+                                  child: Column(
+                                      children:
+                                          produkInfo(salesOrder.listOrder))),
                             ],
                           ),
                           SizedBox(height: size.height / 100),
@@ -134,7 +164,8 @@ class SalesOrderDetail extends StatelessWidget {
                                 child: Text(
                                     NumberFormat.currency(
                                             name: "Rp ", decimalDigits: 0)
-                                        .format(salesOrder.unitPrice),
+                                        .format(
+                                            salesOrder.listOrder[0].unitPrice),
                                     style: kCalibri),
                               ),
                             ],
@@ -145,7 +176,10 @@ class SalesOrderDetail extends StatelessWidget {
                               Expanded(
                                   child: Text("Pajak :", style: kCalibriBold)),
                               Expanded(
-                                child: Text((salesOrder.tax.toString() + "%"),
+                                child: Text(
+                                    NumberFormat.currency(
+                                            name: "Rp ", decimalDigits: 0)
+                                        .format(totalTax(salesOrder.listOrder)),
                                     style: kCalibri),
                               ),
                             ],
@@ -158,9 +192,9 @@ class SalesOrderDetail extends StatelessWidget {
                                       style: kCalibriBold)),
                               Expanded(
                                   child: Text(
-                                    NumberFormat.currency(
-                                            name: "Rp ", decimalDigits: 0)
-                                        .format(salesOrder.totalPrice),
+                                      NumberFormat.currency(
+                                              name: "Rp ", decimalDigits: 0)
+                                          .format(salesOrder.totalPrice),
                                       style: kCalibri)),
                             ],
                           ),
@@ -194,7 +228,9 @@ class SalesOrderDetail extends StatelessWidget {
                                                     keterangan: keterangan,
                                                     callback: (bool result) {
                                                       result
-                                                          ? Navigator.of(context).pop()
+                                                          ? Navigator.of(
+                                                                  context)
+                                                              .pop()
                                                           : null;
                                                     });
                                               },
