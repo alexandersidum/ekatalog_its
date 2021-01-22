@@ -1,5 +1,8 @@
 import 'package:e_catalog/components/item_tile.dart';
 import 'package:e_catalog/models/item.dart';
+import 'package:e_catalog/models/item_search.dart';
+import 'package:e_catalog/screens/searched_item_screen.dart';
+import 'package:e_catalog/utilities/item_services.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:e_catalog/constants.dart';
@@ -24,6 +27,79 @@ class ItemCatalogState extends State<ItemCatalog> {
   String searchText;
   sortedBy sorted = sortedBy.Default;
   bool isInit = true;
+  List<Category> categories = List();
+  ItemService _itemService = ItemService();
+
+  @override
+  void initState() {
+    getCategory();
+    print("STATE START");
+    super.initState();
+  }
+
+  getCategory() async {
+    categories = context.watch<List<Category>>();
+    setState(() {});
+  }
+
+  Widget categoriesTile(Category category, Size size) {
+    // return Text(category.name);
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => ChangeNotifierProvider(
+                create: (context) => ItemSearch(
+                    keyword: category.name.trim().toLowerCase(), mode: 0),
+                child: SearchedItemScreen())));
+      },
+      child: Align(
+        child: Container(
+          height: size.height / 2,
+          width: size.width / 2,
+          child: Card(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(5)),
+            elevation: 1,
+            clipBehavior: Clip.none,
+            child: Row(
+              children: [
+                Expanded(
+                  child: Container(
+                      constraints: BoxConstraints(maxHeight: size.height * 0.1),
+                      padding: EdgeInsets.all(1),
+                      width: double.infinity,
+                      child: ClipRRect(
+                        borderRadius:
+                            BorderRadius.vertical(top: Radius.circular(10)),
+                        child: FadeInImage(
+                          placeholder:
+                              AssetImage('assets/item_placeholder_300x300.png'),
+                          image: NetworkImage(
+                            category.thumbnailUrl,
+                          ),
+                          fit: BoxFit.contain,
+                        ),
+                      )),
+                ),
+                Expanded(
+                  child: Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: size.width / 50,
+                          vertical: size.height / 200),
+                      width: double.infinity,
+                      child: Text(
+                        category.name,
+                        style: kCalibriBold,
+                      )),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   var listCategory = [
     'AC',
     'Notebook',
@@ -100,6 +176,7 @@ class ItemCatalogState extends State<ItemCatalog> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     List<Item> itemList = Provider.of<List<Item>>(context);
+    categories = context.watch<List<Category>>();
     //List untuk pencarian
     List<Item> searchedList(String searchQuery) {
       return itemList
@@ -117,18 +194,18 @@ class ItemCatalogState extends State<ItemCatalog> {
         color: kBackgroundMainColor,
         child: CustomScrollView(
           slivers: [
-            SliverAppBar(
-              toolbarHeight: size.height / 10,
-              backgroundColor: kBlueMainColor,
-              stretch: false,
-              centerTitle: true,
-              title: Text(
-                "E-Katalog",
-                style: kMavenBold,
-              ),
-              floating: false,
-              pinned: false,
-            ),
+            // SliverAppBar(
+            //   toolbarHeight: size.height / 10,
+            //   backgroundColor: kBlueMainColor,
+            //   stretch: false,
+            //   centerTitle: true,
+            //   title: Text(
+            //     "E-Katalog",
+            //     style: kMavenBold,
+            //   ),
+            //   floating: false,
+            //   pinned: false,
+            // ),
             SliverPersistentHeader(
               delegate: UpperContainer(
                 sorted: sorted,
@@ -138,29 +215,69 @@ class ItemCatalogState extends State<ItemCatalog> {
                 checkCategory: checkCategory,
                 onTapCategory: addSelectedCategory,
                 size: size,
-                onChangedSearch: (search) {
-                  searchText = search;
-                  setState(() {
-                    if (search != null || search != '') {
-                      onSearch = true;
-                      selectedList = searchedList(searchText);
-                    } else {
-                      selectedList = List.from(itemList);
-                      // selectedList = itemList.map((e) => Item(image: e.image,name: e.name,isReady: e.isReady,price: e.price,seller: e.seller)).toList();
-                    }
-                  });
-                },
-                maxExtent: size.height * 0.2,
-                minExtent: size.height * 0.2,
+                // onChangedSearch: (search) {
+                //   searchText = search;
+                //   setState(() {
+                //     if (search != null || search != '') {
+                //       onSearch = true;
+                //       selectedList = searchedList(searchText);
+                //     } else {
+                //       selectedList = List.from(itemList);
+                //       // selectedList = itemList.map((e) => Item(image: e.image,name: e.name,isReady: e.isReady,price: e.price,seller: e.seller)).toList();
+                //     }
+                //   });
+                // },
+                maxExtent: size.height / 10,
+                minExtent: size.height / 10,
               ),
               floating: true,
               pinned: true,
+            ),
+            SliverToBoxAdapter(
+              child: Container(
+                width: size.width,
+                height: size.height / 3,
+                child: Column(
+                  children: [
+                    Align(
+                        alignment: Alignment.centerLeft,
+                        child: Padding(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: size.width / 50),
+                          child: Text("CATEGORY",
+                              style:
+                                  kCalibriBold.copyWith(color: kBlueMainColor)),
+                        )),
+                    Expanded(
+                      child: GridView.count(
+                        scrollDirection: Axis.horizontal,
+                        childAspectRatio: 2 / 5,
+                        crossAxisCount: 3,
+                        children: categories.length <= 0
+                            ? []
+                            : categories
+                                .map((e) => categoriesTile(e, size))
+                                .toList(),
+                      ),
+                    )
+                  ],
+                ),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                    vertical: size.height / 100, horizontal: size.width / 50),
+                child: Text("PRODUK TERBARU",
+                    style: kCalibriBold.copyWith(color: kBlueMainColor)),
+              ),
             ),
             SliverStaggeredGrid.countBuilder(
                 //Crossaxiscount belum menyesuaikan size hp
                 crossAxisCount: 2,
                 staggeredTileBuilder: (index) => StaggeredTile.fit(1),
                 itemBuilder: (context, index) {
+
                   Item currentItem = selectedList != null
                       ? selectedList[index]
                       : itemList[index];
@@ -222,104 +339,131 @@ class UpperContainer extends SliverPersistentHeaderDelegate {
     return Column(
       children: [
         Container(
-          padding: EdgeInsets.symmetric(horizontal: 10, vertical: 15),
-          height: MediaQuery.of(context).size.height * 0.1,
+          padding: EdgeInsets.symmetric(
+              horizontal: size.width / 50, vertical: size.height / 70),
+          height: MediaQuery.of(context).size.height / 11,
           decoration: BoxDecoration(
               color: kBlueMainColor,
-              borderRadius: BorderRadius.vertical(bottom: Radius.circular(10))),
-          child: TextField(
-            onChanged: onChangedSearch,
-            decoration: InputDecoration(
-                contentPadding: EdgeInsets.only(top: 5, left: 5),
-                suffixIcon: Icon(Icons.search),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(5)),
-                  borderSide: BorderSide(
-                    width: 0,
-                    style: BorderStyle.none,
-                  ),
+              borderRadius: BorderRadius.vertical(bottom: Radius.circular(5))),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  textInputAction: TextInputAction.search,
+                  //Pas disubmit masuk ke screen searched item
+                  onSubmitted: (value) {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => ChangeNotifierProvider<ItemSearch>(
+                            create: (context) => ItemSearch(
+                                keyword: value.trim().toLowerCase(), mode: 1),
+                            child: SearchedItemScreen())));
+                  },
+                  // onChanged: onChangedSearch,
+                  decoration: InputDecoration(
+                      contentPadding: EdgeInsets.only(top: 5, left: 10),
+                      suffixIcon: Icon(Icons.search),
+                      filled: true,
+                      fillColor: Colors.white,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(5)),
+                        borderSide: BorderSide(
+                          width: 0,
+                          style: BorderStyle.none,
+                        ),
+                      ),
+                      hintText: 'Cari produk..'),
                 ),
-                hintText: 'Search'),
+              ),
+              Stack(children: [
+                Container(
+                  width: size.width / 10,
+                  padding: EdgeInsets.only(left: size.width / 50),
+                  child: FittedBox(
+                      child: Icon(
+                    Icons.mail,
+                    color: Colors.white,
+                    size: size.height,
+                  )),
+                )
+              ])
+            ],
           ),
         ),
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Container(
-            padding: EdgeInsets.symmetric(
-                vertical: size.width / 50, horizontal: size.height / 50),
-            color: kBackgroundMainColor,
-            child: Row(
-                //Fungsi Sort Dropdown
-                children: [
-                  Container(
-                    margin: EdgeInsets.only(right: size.width / 100),
-                    height: size.height / 20,
-                    padding: EdgeInsets.only(
-                        right: size.width / 100, left: size.width / 50),
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(5),
-                        color: Colors.white,
-                        border: Border.all(
-                            color: kGrayConcreteColor,
-                            width: 1,
-                            style: BorderStyle.solid)),
-                    child: Theme(
-                      data: Theme.of(context).copyWith(
-                        canvasColor: Colors.white,
-                      ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton(
-                          
-                            value: sorted,
-                            items: dropDownSort(),
-                            onChanged: (value) {
-                              updateSortedStatus(value);
-                            }),
-                      ),
-                    ),
-                  ),
-                  Container(
-                    child: Row(
-                      children: listCategory
-                          .map<Widget>((e) => InkWell(
-                                onTap: () {
-                                  onTapCategory(e);
-                                },
-                                child: Container(
-                                  margin: EdgeInsets.symmetric(
-                                      horizontal: size.width / 150),
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: size.width / 80),
-                                  height: size.height / 20,
-                                  alignment: Alignment.center,
-                                  decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(5),
-                                    color: checkCategory(e)
-                                        ? kBlueMainColor
-                                        : Colors.white,
-                                    border: Border.all(
-                                        color: kGrayConcreteColor,
-                                        width: 1,
-                                        style: BorderStyle.solid),
-                                  ),
-                                  child: Text(
-                                    e,
-                                    style: kMaven.copyWith(
-                                      color: checkCategory(e)
-                                          ? Colors.white
-                                          : Colors.black,
-                                    ),
-                                  ),
-                                ),
-                              ))
-                          .toList(),
-                    ),
-                  ),
-                ]),
-          ),
-        )
+        // SingleChildScrollView(
+        //   scrollDirection: Axis.horizontal,
+        //   child: Container(
+        //     padding: EdgeInsets.symmetric(
+        //         vertical: size.width / 50, horizontal: size.height / 50),
+        //     color: kBackgroundMainColor,
+        //     child: Row(
+        //         //Fungsi Sort Dropdown
+        //         children: [
+        //           Container(
+        //             margin: EdgeInsets.only(right: size.width / 100),
+        //             height: size.height / 20,
+        //             padding: EdgeInsets.only(
+        //                 right: size.width / 100, left: size.width / 50),
+        //             decoration: BoxDecoration(
+        //                 borderRadius: BorderRadius.circular(5),
+        //                 color: Colors.white,
+        //                 border: Border.all(
+        //                     color: kGrayConcreteColor,
+        //                     width: 1,
+        //                     style: BorderStyle.solid)),
+        //             child: Theme(
+        //               data: Theme.of(context).copyWith(
+        //                 canvasColor: Colors.white,
+        //               ),
+        //               child: DropdownButtonHideUnderline(
+        //                 child: DropdownButton(
+        //                     value: sorted,
+        //                     items: dropDownSort(),
+        //                     onChanged: (value) {
+        //                       updateSortedStatus(value);
+        //                     }),
+        //               ),
+        //             ),
+        //           ),
+        //           Container(
+        //             child: Row(
+        //               children: listCategory
+        //                   .map<Widget>((e) => InkWell(
+        //                         onTap: () {
+        //                           onTapCategory(e);
+        //                         },
+        //                         child: Container(
+        //                           margin: EdgeInsets.symmetric(
+        //                               horizontal: size.width / 150),
+        //                           padding: EdgeInsets.symmetric(
+        //                               horizontal: size.width / 80),
+        //                           height: size.height / 20,
+        //                           alignment: Alignment.center,
+        //                           decoration: BoxDecoration(
+        //                             borderRadius: BorderRadius.circular(5),
+        //                             color: checkCategory(e)
+        //                                 ? kBlueMainColor
+        //                                 : Colors.white,
+        //                             border: Border.all(
+        //                                 color: kGrayConcreteColor,
+        //                                 width: 1,
+        //                                 style: BorderStyle.solid),
+        //                           ),
+        //                           child: Text(
+        //                             e,
+        //                             style: kMaven.copyWith(
+        //                               color: checkCategory(e)
+        //                                   ? Colors.white
+        //                                   : Colors.black,
+        //                             ),
+        //                           ),
+        //                         ),
+        //                       ))
+        //                   .toList(),
+        //             ),
+        //           ),
+        //         ]),
+        //   ),
+        // )
       ],
     );
   }

@@ -47,17 +47,16 @@ class Auth {
       String name,
       String namaPerusahaan,
       String lokasiPerusahaan,
-      int telepon,
+      String telepon,
       Function onComplete,
       File image) async {
-    //ExceptionHandlingnya masih ga work
     try {
       await _auth
           .createUserWithEmailAndPassword(email: _email, password: _password)
           .then((result) async {
         if (result.user != null) {
-          await uploadImage(image).then((value) {
-            _firestore.collection('users').doc(result.user.uid).set({
+          await uploadImage(image).then((value) async{
+            await _firestore.collection('users').doc(result.user.uid).set({
               'uid': result.user.uid,
               'registrationDate': FieldValue.serverTimestamp(),
               'email': result.user.email,

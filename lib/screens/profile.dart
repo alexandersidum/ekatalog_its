@@ -149,7 +149,7 @@ class Profile extends StatelessWidget {
             ),
             Expanded(
               child: Container(
-                padding: EdgeInsets.only(top: size.height / 20),
+                padding: EdgeInsets.only(top: size.height / 50),
                 decoration: BoxDecoration(
                     color: kBackgroundMainColor,
                     borderRadius: BorderRadius.vertical(

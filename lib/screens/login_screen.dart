@@ -45,10 +45,11 @@ class _LoginScreenState extends State<LoginScreen> {
         }
         else{
           validationText = AuthExceptionHandler.generateExceptionMessage(status);
-        } 
-        isLoading = false;
+          isLoading = false;
         setState(() {
         });
+        } 
+        
     });
     
     
@@ -69,146 +70,153 @@ class _LoginScreenState extends State<LoginScreen> {
     checkLogin();
     var size = MediaQuery.of(context).size;
     return Scaffold(
-      resizeToAvoidBottomInset: false,
+      resizeToAvoidBottomInset: true,
       backgroundColor: kBackgroundMainColor,
       body: ModalProgressHUD(
           inAsyncCall: isLoading,
           child: SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  height: size.height * 0.06,
-                ),
-                Padding(
-                  padding: EdgeInsets.only(left: size.width * 0.05),
-                  child: Text('Welcome to Login',
-                      style: kMavenBold.copyWith(
-                        color: kBlueDarkColor,
-                        fontSize: size.height * 0.035,
-                      )),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(
-                      left: size.width * 0.05,
-                      top: size.height * 0.01,
-                      right: size.width * 0.2),
-                  child: Text(
-                    'Silahkan Masuk dengan menggunakan E-mail dan Password yang sesuai',
-                    style: TextStyle(
-                        color: kBlueDarkColor, fontFamily: 'MavenPro'),
+            child: SingleChildScrollView(
+              physics: ClampingScrollPhysics(),
+                          child: Container(
+                            height: size.height,
+                            width: size.width,
+                                                      child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    height: size.height * 0.06,
                   ),
-                ),
-                SizedBox(
-                  height: size.height * 0.05,
-                ),
-                Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                        borderRadius:
-                            BorderRadius.vertical(top: Radius.circular(40)),
-                        color: kBlueMainColor),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                              vertical: size.height * 0.02,
-                              horizontal: size.width * 0.08),
-                          child: Text('LOGIN FORM',
-                              style: kMavenBold.copyWith(
-                                color: Colors.white,
-                                fontSize: size.height * 0.03,
-                              )),
-                        ),
-                        SizedBox(
-                          height: size.height * 0.05,
-                        ),
-                        Padding(
-                          padding: EdgeInsets.symmetric(
-                              horizontal: size.width * 0.1),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Text('Email',
-                                  style: kCalibriBold.copyWith(
-                                    color: Colors.white,
-                                    fontSize: size.height * 0.027,
-                                  )),
-                              CustomTextField(
-                                controller: emailController,
-                                hintText: 'Email',
-                                keyboardType: TextInputType.emailAddress,
-                                color: Colors.white,
-                              ),
-                              SizedBox(
-                                height: size.height * 0.02,
-                              ),
-                              Text('Password',
-                                  style: kCalibriBold.copyWith(
-                                    color: Colors.white,
-                                    fontSize: size.height * 0.027,
-                                  )),
-                              CustomTextField(
-                                controller: passwordController,
-                                hintText: 'Password',
-                                keyboardType: TextInputType.visiblePassword,
-                                isObscure: true,
-                                color: Colors.white,
-                              ),
-                              Container(
-                                padding: EdgeInsets.all(size.height/100),
-                                child: Text(
-                                  validationText,
-                                  style: kCalibriBold.copyWith(
-                                    color : kRedButtonColor,
-                                    fontSize: size.height/40,
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                height: size.height * 0.06,
-                              ),
-                              CustomRaisedButton(
-                                buttonHeight: size.height/12,
-                                callback: (){
-                                  loginCallback();
-                                },
-                                color: kOrangeButtonColor,
-                                buttonChild: Text(
-                                  "Login Now",
-                                  textAlign: TextAlign.center,
-                                  style : kMavenBold.copyWith(
-                                    fontSize: size.height*0.028
-                                  )
-                                ),
-                              ),
-                              SizedBox(
-                                height: size.height * 0.02,
-                              ),
-                              CustomRaisedButton(
-                                buttonHeight: size.height/18,
-                                callback: (){
-                                  Navigator.pushNamed(context, RegistrationScreen.routeId);
-                                  },
-                                color: kLightBlueButtonColor,
-                                buttonChild: Text(
-                                  "Register",
-                                  textAlign: TextAlign.center,
-                                  style : kMavenBold.copyWith(
-                                    fontSize: size.height*0.028
-                                  )
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                  Padding(
+                    padding: EdgeInsets.only(left: size.width * 0.05),
+                    child: Text('Welcome to Login',
+                        style: kMavenBold.copyWith(
+                            color: kBlueDarkColor,
+                            fontSize: size.height * 0.035,
+                        )),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(
+                        left: size.width * 0.05,
+                        top: size.height * 0.01,
+                        right: size.width * 0.2),
+                    child: Text(
+                      'Silahkan Masuk dengan menggunakan E-mail dan Password yang sesuai',
+                      style: TextStyle(
+                            color: kBlueDarkColor, fontFamily: 'MavenPro'),
                     ),
                   ),
-                )
-              ],
+                  SizedBox(
+                    height: size.height * 0.05,
+                  ),
+                  Expanded(
+                    child: Container(
+                      decoration: BoxDecoration(
+                            borderRadius:
+                                BorderRadius.vertical(top: Radius.circular(40)),
+                            color: kBlueMainColor),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                  vertical: size.height * 0.02,
+                                  horizontal: size.width * 0.08),
+                              child: Text('LOGIN FORM',
+                                  style: kMavenBold.copyWith(
+                                    color: Colors.white,
+                                    fontSize: size.height * 0.03,
+                                  )),
+                            ),
+                            SizedBox(
+                              height: size.height * 0.05,
+                            ),
+                            Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: size.width * 0.1),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Text('Email',
+                                      style: kCalibriBold.copyWith(
+                                        color: Colors.white,
+                                        fontSize: size.height * 0.027,
+                                      )),
+                                  CustomTextField(
+                                    controller: emailController,
+                                    hintText: 'Email',
+                                    keyboardType: TextInputType.emailAddress,
+                                    color: Colors.white,
+                                  ),
+                                  SizedBox(
+                                    height: size.height * 0.02,
+                                  ),
+                                  Text('Password',
+                                      style: kCalibriBold.copyWith(
+                                        color: Colors.white,
+                                        fontSize: size.height * 0.027,
+                                      )),
+                                  CustomTextField(
+                                    controller: passwordController,
+                                    hintText: 'Password',
+                                    keyboardType: TextInputType.visiblePassword,
+                                    isObscure: true,
+                                    color: Colors.white,
+                                  ),
+                                  Container(
+                                    padding: EdgeInsets.all(size.height/100),
+                                    child: Text(
+                                      validationText,
+                                      style: kCalibriBold.copyWith(
+                                        color : kRedButtonColor,
+                                        fontSize: size.height/40,
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: size.height * 0.06,
+                                  ),
+                                  CustomRaisedButton(
+                                    buttonHeight: size.height/12,
+                                    callback: (){
+                                      loginCallback();
+                                    },
+                                    color: kOrangeButtonColor,
+                                    buttonChild: Text(
+                                      "Login Now",
+                                      textAlign: TextAlign.center,
+                                      style : kMavenBold.copyWith(
+                                        fontSize: size.height*0.028
+                                      )
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    height: size.height * 0.02,
+                                  ),
+                                  CustomRaisedButton(
+                                    buttonHeight: size.height/18,
+                                    callback: (){
+                                      Navigator.pushNamed(context, RegistrationScreen.routeId);
+                                      },
+                                    color: kLightBlueButtonColor,
+                                    buttonChild: Text(
+                                      "Register",
+                                      textAlign: TextAlign.center,
+                                      style : kMavenBold.copyWith(
+                                        fontSize: size.height*0.028
+                                      )
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
+                          ),
             ),
           )),
     );

@@ -6,8 +6,9 @@ import 'package:e_catalog/constants.dart';
 class DeclineBottomSheet extends StatefulWidget {
   Function callback;
   String id;
+  String title;
 
-  DeclineBottomSheet({this.id, this.callback});
+  DeclineBottomSheet({this.id, this.callback, this.title});
 
   @override
   State<DeclineBottomSheet> createState() => DeclineBottomSheetState();
@@ -33,11 +34,11 @@ class DeclineBottomSheetState extends State<DeclineBottomSheet>{
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: EdgeInsets.all(size.width/100),
+                padding: EdgeInsets.symmetric(horizontal : size.width/10),
                 child: Text(
-                  "Alasan Pembatalan ${widget.id}",
+                  widget.title!=null?widget.title : "Alasan Pembatalan ${widget.id}",
                   textAlign: TextAlign.center,
-                  style: kMavenBold,
+                  style: kCalibriBold,
                 ),
               ),
               SizedBox(
@@ -81,7 +82,7 @@ class DeclineBottomSheetState extends State<DeclineBottomSheet>{
               ),
               Container(
                 height: size.height / 20,
-                width: size.width / 3,
+                width: size.width / 2,
                 child: CustomRaisedButton(
                   color: kRedButtonColor,
                   callback: (){

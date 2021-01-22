@@ -43,7 +43,8 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
   @override
   void initState() {
     seller = Provider.of<Auth>(context, listen: false).getUserInfo;
-    orderStreams = orderService.getSellerSalesOrder(seller.uid, [1, 3, 6]);
+    orderStreams = orderService
+        .getSellerSalesOrder(seller.uid, [1, 3, 6]).asBroadcastStream();
     super.initState();
   }
 
@@ -78,13 +79,27 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
                         GestureDetector(
                           onTap: () {
                             Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => StreamBuilder<Object>(
-                                  stream: orderStreams,
-                                  builder: (context, AsyncSnapshot snapshot) {
-                                    return SalesOrderDetailPenyedia(
-                                      streamOrder: orderSnap,
-                                      index: index,
-                                    );
+                              builder: (context) => StreamBuilder(
+                                  stream: orderService.getSellerSalesOrder(
+                                      seller.uid, [1, 3, 6]),
+                                  // stream : orderStreams,
+                                  builder: (context,
+                                      AsyncSnapshot<List<SalesOrder>>
+                                          snapshot) {
+                                    print("REBUILD");
+                                    if (snapshot.data != null) {
+                                      try {
+                                        return SalesOrderDetailPenyedia(
+                                          order: snapshot.data[index],
+                                          streamOrder: snapshot,
+                                          index: index,
+                                        );
+                                      } catch (e) {
+                                        Navigator.of(context).pop();
+                                      }
+                                    } else {
+                                      Container();
+                                    }
                                   }),
                               fullscreenDialog: true,
                             ));
@@ -213,7 +228,7 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
                         await orderService.changeOrderStatus(
                             docId: order.docId,
                             keterangan: keterangan,
-                            newStatus: 4,
+                            newStatus: 5,
                             callback: (isSuccess) => print(isSuccess));
                       },
                     ));
@@ -227,11 +242,30 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
             ? TextButton(
                 onPressed: () async {
                   print("konfirmasi pressed");
+                  int status = 4;
+                  bool isTotalDeclined = true;
+                  bool isPartialDeclined = false;
+                  order.listOrder.forEach((element) {
+                    if (element.status == 0) isTotalDeclined = false;
+                    if (element.status == 1) isPartialDeclined = true;
+                  });
+                  if (isPartialDeclined) status = 3;
+                  if (isTotalDeclined) status = 5;
+
                   await orderService.changeOrderStatus(
                       docId: order.docId,
-                      newStatus: 3,
+                      newStatus: status,
                       callback: (isSuccess) => print(isSuccess));
                 },
+
+                // () async {
+                //   print("konfirmasi pressed");
+
+                //   await orderService.changeOrderStatus(
+                //       docId: order.docId,
+                //       newStatus: 3,
+                //       callback: (isSuccess) => Navigator.of(context).pop());
+                // },
                 child: Text(
                   "Sanggupi",
                   style: kCalibriBold.copyWith(color: kBlueMainColor),

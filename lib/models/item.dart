@@ -1,3 +1,5 @@
+import 'package:e_catalog/utilities/item_services.dart';
+
 class Item {
 
 //Masih prototype
@@ -7,6 +9,7 @@ class Item {
   String id;
   String name;
   List<String> image;
+  List<String> keywords;
   String description;
   String category;
   String seller;
@@ -23,9 +26,10 @@ class Item {
 
   //0 belum disetujui 1 disetujui 2 proses negosiasi 3 ditolak
 
-  Item({this.id, this.name, this.image, this.creationDate, this.keteranganPengajuan, this.description,this.category, this.ukpbjPrice, this.sellerPrice, this.seller, this.stock, this.price, this.sold, this.taxPercentage, this.sellerUid, this.status});
-
+  Item({this.id, this.name, this.image, this.keywords, this.creationDate, this.keteranganPengajuan, this.description,this.category, this.ukpbjPrice, this.sellerPrice, this.seller, this.stock, this.price, this.sold, this.taxPercentage, this.sellerUid, this.status});
+  
   factory Item.fromDb(Map<String, dynamic> parsedData){
+
     return(
       Item(
         id : parsedData['id'],
@@ -44,7 +48,12 @@ class Item {
         taxPercentage : parsedData['taxPercentage'],
         status : parsedData['status'],
         keteranganPengajuan : parsedData['keteranganPengajuan'],
+        // keywords : (parsedData['keywords'] as List).cast<String>(),
       ));
+  }
+
+  updateItemKeyword(String id, String name)async{
+    await ItemService().updateItemKeyword(this.id, keywordGenerator(this.name));
   }
 
   Map<String , dynamic> toMap(){
@@ -54,7 +63,7 @@ class Item {
       'description' : this.description,
       'seller' : this.seller,
       'sellerUid' : this.sellerUid,
-      'category' : this.category,
+      'category' : this.category.trim().toLowerCase(),
       'price' : this.price,
       'sold' : this.sold,
       'sellerPrice' : this.sellerPrice,
@@ -63,7 +72,21 @@ class Item {
       'taxPercentage' : this.taxPercentage,
       'status' : this.status,
       'keteranganPengajuan' : this.keteranganPengajuan,
+      'keywords' : keywordGenerator(this.name)
     };
+  }
+
+  List<String> keywordGenerator(String name) {
+    List<String> output = List();
+    var words = name.split(" ");
+    words.forEach((e) {
+      String temp = '';
+      for (int i = 0; i < e.length; i++) {
+        temp = temp + e[i];
+        output.add(temp.toLowerCase());
+      }
+    });
+    return output;
   }
 
   String getStatus(){
@@ -86,6 +109,15 @@ class Item {
       case 5:
         return "Ditolak UKPBJ";
         break;
+      case 6:
+        return "Pengajuan Perubahan Harga";
+        break;
+      case 7:
+        return "Perubahan Harga ditolak";
+        break;
+      case 8:
+        return "Dihapus Penyedia";
+        break;
       default:
         return "Undefined";
     }
@@ -93,3 +125,17 @@ class Item {
 
 }
 
+class Category{
+  String name;
+  String thumbnailUrl;
+
+  Category({this.name, this.thumbnailUrl});
+
+  factory Category.fromDb(Map<String, dynamic> parsedData){
+    return(
+      Category(
+        name: parsedData['name'],
+        thumbnailUrl: parsedData['thumbnail']
+      ));
+  }
+}

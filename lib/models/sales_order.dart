@@ -22,8 +22,14 @@ class SalesOrder{
   String ppkName;
   int unit;
   String feedback;
+  String imageBuktiPembayaran;
+  String keteranganPembayaran;
 
-  SalesOrder({this.id, this.docId, this.listOrder, this.ppkName, this.creationDate, this.totalPrice, this.seller, this.sellerUid, this.status, this.ppName, this.ppUid, this.ppkUid, this.unit, this.address, this.namaAlamat, this.namaPenerima,this.teleponPenerima, this.feedback});
+  SalesOrder({this.id, this.docId, this.listOrder, this.ppkName, 
+  this.creationDate, this.totalPrice, this.seller, 
+  this.sellerUid, this.status, this.ppName, this.ppUid, 
+  this.ppkUid, this.unit, this.address, this.namaAlamat, 
+  this.namaPenerima,this.teleponPenerima, this.feedback, this.imageBuktiPembayaran, this.keteranganPembayaran});
 
   factory SalesOrder.fromDb(Map<String , dynamic> parsedData, String docId){
     List<Order> orderList = parsedData['listOrder'].map<Order>((e) {
@@ -31,7 +37,7 @@ class SalesOrder{
       // print(z['itemName']);
       return Order.fromMap(order);
     }).toList();
-
+    print(parsedData['status']);
     return SalesOrder(
       docId: docId,
       id: parsedData['id'],
@@ -51,6 +57,8 @@ class SalesOrder{
       teleponPenerima: parsedData['teleponPenerima'],
       feedback: parsedData['feedback']!=null?parsedData['feedback']:'',
       listOrder: orderList,
+      imageBuktiPembayaran: parsedData['imageBuktiUrl'],
+      keteranganPembayaran: parsedData['keteranganPembayaran'],
       // listOrder : parsedData['listOrder'].map<Order>((Map<String, dynamic> e)=>Order.fromMap(e)).toList()
     );
   }
@@ -96,6 +104,10 @@ class SalesOrder{
       case 7:
         return "Menunggu Pembayaran";
       case 8:
+        return "Menunggu Konfirmasi Pembayaran";
+      case 9:
+        return "Pembayaran ditolak";
+      case 10:
         return "Selesai";
       default:
         return "Undefined";
@@ -158,6 +170,39 @@ class SalesOrder{
       case 7:
         return "Menunggu Pembayaran";
       case 8:
+        return "Menunggu Konfirmasi Pembayaran";
+      case 9:
+        return "Pembayaran ditolak";
+      case 10:
+        return "Selesai";
+      default:
+        return "Undefined";
+    }
+  }
+
+  String getStatusPP(){
+    switch(this.status){
+      case 0:
+        return "Menunggu Persetujuan PPK";
+      case 1:
+        return "Disetujui PPK";
+      case 2:
+        return "Ditolak PPK";
+      case 3:
+        return "Disanggupi sebagian dan Segera Dikrim";
+      case 4:
+        return "Disanggupi dan Segera Dikrim";
+      case 5:
+        return "Dibatalkan Penyedia";
+      case 6:
+        return "Dibatalkan PPK";
+      case 7:
+        return "Menunggu Pembayaran";
+      case 8:
+        return "Menunggu Konfirmasi Pembayaran";
+      case 9:
+        return "Pembayaran ditolak Penyedia";
+      case 10:
         return "Selesai";
       default:
         return "Undefined";

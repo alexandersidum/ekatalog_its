@@ -247,14 +247,14 @@ class _CartConfirmationState extends State<CartConfirmation> {
             ),
             Container(
               margin: EdgeInsets.all(size.width / 50),
-              padding: EdgeInsets.all(size.height / 100),
+              padding: EdgeInsets.all(size.height / 50),
               decoration: BoxDecoration(color: Colors.white),
               child: Column(
                 children: [
                   Container(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      account.getUnit,
+                      account.getUnit.toUpperCase(),
                       style: kCalibriBold.copyWith(color: kBlueDarkColor),
                     ),
                   ),
@@ -262,8 +262,9 @@ class _CartConfirmationState extends State<CartConfirmation> {
               ),
             ),
             Container(
-              padding: EdgeInsets.symmetric(horizontal: size.height / 10),
+              padding: EdgeInsets.symmetric(horizontal: size.width / 20),
               height: size.height / 15,
+              width: size.width,
               child: CustomRaisedButton(
                 callback: () async{
                   //TODO Validator Kalau ada data yang kosong atau salah

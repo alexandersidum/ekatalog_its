@@ -47,12 +47,12 @@ class SalesOrderPPKState extends State<SalesOrderPPK> {
     switch (sorted) {
       case sortedBy.Terbaru:
         finalOrderList.sort((a, b) {
-          return a.creationDate.compareTo(b.creationDate);
+          return b.creationDate.compareTo(a.creationDate);
         });
         break;
       case sortedBy.Terlama:
         finalOrderList.sort((a, b) {
-          return b.creationDate.compareTo(a.creationDate);
+          return a.creationDate.compareTo(b.creationDate);
         });
         break;
       case sortedBy.Default:
@@ -222,9 +222,6 @@ class SalesOrderPPKState extends State<SalesOrderPPK> {
   @override
   Widget build(BuildContext context) {
     List<SalesOrder> listOrder = Provider.of<List<SalesOrder>>(context);
-    if (listOrder != null) {
-      listOrder = listOrder.where((element) => element.status == 1).toList();
-    }
     var size = MediaQuery.of(context).size;
 
     manageOrder(listOrder);

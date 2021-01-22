@@ -10,21 +10,22 @@ import 'package:intl/intl.dart';
 
 class SalesOrderDetailPenyedia extends StatefulWidget {
   AsyncSnapshot<List<SalesOrder>> streamOrder;
+  SalesOrder order;
   int index;
-  SalesOrderDetailPenyedia({ this.index, this.streamOrder});
+  SalesOrderDetailPenyedia({this.index, this.streamOrder, this.order});
 
   @override
   State<StatefulWidget> createState() => SalesOrderDetailState();
-  
 }
 
-class SalesOrderDetailState extends State<SalesOrderDetailPenyedia>{
+class SalesOrderDetailState extends State<SalesOrderDetailPenyedia> {
   SalesOrder salesOrder;
   OrderServices orderServices = OrderServices();
- 
+
   @override
   Widget build(BuildContext context) {
-    salesOrder = widget.streamOrder.data[widget.index];
+    salesOrder = widget.order;
+    // salesOrder = widget.streamOrder.data[widget.index];
     void closeScreen() {
       Navigator.pop(context);
     }
@@ -115,7 +116,6 @@ class SalesOrderDetailState extends State<SalesOrderDetailPenyedia>{
                           ],
                         ),
                         Column(children: orderList(size)),
-                        
                         SizedBox(height: size.height / 100),
                         Row(
                           children: [
@@ -221,6 +221,8 @@ class SalesOrderDetailState extends State<SalesOrderDetailPenyedia>{
                           },
                         ),
                       ),
+                      //Hanya muncul saat salesOrder belum dibatalkan / disanggupi (setelah disetujui PPK)
+                      salesOrder.status==1?
                       Container(
                         width: size.width / 3,
                         height: size.height / 20,
@@ -231,13 +233,23 @@ class SalesOrderDetailState extends State<SalesOrderDetailPenyedia>{
                           color: kBlueMainColor,
                           callback: () async {
                             print("konfirmasi pressed");
+                            int status = 4;
+                            bool isTotalDeclined = true;
+                            bool isPartialDeclined = false;
+                            salesOrder.listOrder.forEach((element) {
+                              if (element.status == 0) isTotalDeclined = false;
+                              if (element.status == 1) isPartialDeclined = true;
+                            });
+                            if(isPartialDeclined) status = 3;
+                            if(isTotalDeclined) status = 5;
+
                             await orderServices.changeOrderStatus(
                                 docId: salesOrder.docId,
-                                newStatus: 3,
+                                newStatus: status,
                                 callback: (isSuccess) => print(isSuccess));
                           },
                         ),
-                      ),
+                      ):SizedBox(),
                     ],
                   )
                 ],
@@ -251,9 +263,7 @@ class SalesOrderDetailState extends State<SalesOrderDetailPenyedia>{
     return salesOrder.listOrder.map((e) {
       return Container(
         color: kBackgroundMainColor,
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+        child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Container(
             height: size.width * 0.25,
             width: size.width * 0.25,
@@ -265,88 +275,80 @@ class SalesOrderDetailState extends State<SalesOrderDetailPenyedia>{
           ),
           Expanded(
             child: Container(
-              padding: EdgeInsets.only(top: size.height/100),
+              padding: EdgeInsets.only(top: size.height / 100),
               child: Column(children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.baseline,
                   children: [
                     Expanded(
-                      flex: 2,
-                      child: Text("Produk :", style: kCalibriBold)),
-                    Expanded(
-                      flex: 5,
-                      child: Text(e.itemName, style: kCalibri)),
+                        flex: 2, child: Text("Produk :", style: kCalibriBold)),
+                    Expanded(flex: 5, child: Text(e.itemName, style: kCalibri)),
                   ],
                 ),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.baseline,
                   children: [
                     Expanded(
-                      flex: 2,
-                      child: Text("Jumlah :", style: kCalibriBold)),
+                        flex: 2, child: Text("Jumlah :", style: kCalibriBold)),
                     Expanded(
-                      flex: 5,
-                      child: Text(e.count.toString(), style: kCalibri)),
+                        flex: 5,
+                        child: Text(e.count.toString(), style: kCalibri)),
                   ],
                 ),
                 Row(children: [
                   Expanded(
-                    flex: 2,
-                    child: Text("Harga :", style: kCalibriBold)),
+                      flex: 2, child: Text("Harga :", style: kCalibriBold)),
                   Expanded(
-                    flex: 5,
+                      flex: 5,
                       child: Text(
                           NumberFormat.currency(name: "Rp ", decimalDigits: 0)
                               .format(e.orderPrice),
-                          style: kCalibri)
-                          ),
+                          style: kCalibri)),
                 ]),
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.baseline,
                   children: [
                     Expanded(
-                      flex: 2,
-                      child: Text("Status :", style: kCalibriBold)),
+                        flex: 2, child: Text("Status :", style: kCalibriBold)),
                     Expanded(
-                      flex: 5,
-                      child: Text(e.status==0?"Menunggu Respon":e.status==1?"Disanggupi":e.status==2?"Dibatalkan":e.status.toString(), style: kCalibri)),
+                        flex: 5,
+                        child: Text(
+                            e.status == 0
+                                ? "Sanggup"
+                                : e.status == 1
+                                    ? "Dibatalkan"
+                                    : e.status.toString(),
+                            style: kCalibri)),
                   ],
                 ),
-                e.status==0?Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                  InkWell(
-                      onTap: (){
-                        e.setStatus(2);
-                        orderServices.changeSubOrderStatus(
-                          docId: salesOrder.docId,
-                          newOrderList: salesOrder.listOrder,
-                          newTotalPrice : salesOrder.totalPrice-e.orderPrice,
-                          callback: (){
-                            //TODO Yang dilakukan saat sukses/ gagal
-                          }
-                        );
-                      },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: size.width/30, vertical: size.height/100),
-                        child: Text("Batalkan", style: kCalibriBold.copyWith(color:kRedButtonColor),)),
-                    ),
-                  InkWell(
-                      onTap: (){
-                        e.setStatus(1);
-                        orderServices.changeSubOrderStatus(
-                          docId: salesOrder.docId,
-                          newOrderList: salesOrder.listOrder,
-                          callback: (){
-                            //TODO Yang dilakukan saat sukses/ gagal
-                          }
-                        );
-                      },
-                      child: Container(
-                        padding: EdgeInsets.symmetric(horizontal: size.width/30, vertical: size.height/100),
-                        child: Text("Sanggupi", style: kCalibriBold.copyWith(color:Colors.blueAccent),)),
-                    ),
-                ]):SizedBox()
+                //Hanya muncul saat sales order status belum dikonfirmasi penyedia
+                e.status == 0 && salesOrder.status==1
+                    ? Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+                        InkWell(
+                          onTap: () {
+                            e.setStatus(1);
+                            orderServices.changeSubOrderStatus(
+                                docId: salesOrder.docId,
+                                newOrderList: salesOrder.listOrder,
+                                newTotalPrice:
+                                    salesOrder.totalPrice - e.orderPrice,
+                                callback: (bool isSuccess) {
+                                  setState(() {});
+                                  //TODO Yang dilakukan saat sukses/ gagal
+                                });
+                          },
+                          child: Container(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: size.width / 30,
+                                  vertical: size.height / 100),
+                              child: Text(
+                                "Batalkan",
+                                style: kCalibriBold.copyWith(
+                                    color: kRedButtonColor),
+                              )),
+                        ),
+                      ])
+                    : SizedBox()
               ]),
             ),
           ),

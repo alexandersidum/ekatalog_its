@@ -118,7 +118,7 @@ class Seller extends Account {
 
 class PejabatPengadaan extends Account {
   int unit;
-  List<String> listUnit = [
+  static List<String> listUnit = [
     'Unit Urutan 0',
     'Unit Urutan 1',
     'Unit Urutan 2',
@@ -130,6 +130,19 @@ class PejabatPengadaan extends Account {
     'Unit Urutan 8',
     'Unit Urutan 9',
   ];
+
+  static Map<int, String> mapUnit = {
+    0:'Unit Urutan 0',
+    1:'Unit Urutan 1',
+    2:'Unit Urutan 2',
+    3:'Unit Urutan 3',
+    4:'Unit Urutan 4',
+    5:'Unit Urutan 5',
+    6:'Unit Urutan 6',
+    7:'Unit Urutan 7',
+    8:'Unit Urutan 8',
+    9:'Unit Urutan 9',
+  };
 
   PejabatPengadaan(
       {String name,

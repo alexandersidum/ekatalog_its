@@ -1,29 +1,108 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_catalog/models/sales_order.dart';
 import 'package:e_catalog/models/cart.dart';
 import 'package:e_catalog/models/shipping_address.dart';
 import 'package:collection/collection.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path/path.dart' as p;
 
 class OrderServices {
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseStorage _fstorage = FirebaseStorage.instance;
   String salesOrderPath = 'sales_order';
+  String unitPath = 'unit';
   String miscPath = 'misc';
   String usersPath = 'users';
+  
 
-  Stream<List<SalesOrder>> getSalesOrder(int unit) {
+  Future<bool> uploadPembayaranBPP(
+      {String salesOrderDocId, String keterangan, String imageBuktiUrl}) async {
+    Map<String, dynamic> input = {
+      "status": 8,
+      "keteranganPembayaran": keterangan!=null?keterangan : "",
+      "imageBuktiUrl" : imageBuktiUrl
+    };
+    return _firestore
+        .collection(salesOrderPath)
+        .doc(salesOrderDocId)
+        .update(input).then((value) => true).catchError((Object error)=>false);
+  }
+
+  // Future<bool> konfirmasiPembayaranPenyedia(
+  //     {String salesOrderDocId, String keterangan, bool isAccepted}) async {
+  //   Map<String, dynamic> input = {
+  //     "status": 8,
+  //     "keteranganPembayaran": keterangan!=null?keterangan : "",
+  //     "imageBuktiUrl" : imageBuktiUrl
+  //   };
+  //   return _firestore
+  //       .collection(salesOrderPath)
+  //       .doc(salesOrderDocId)
+  //       .update(input).then((value) => true).catchError((Object error)=>false);
+  // }
+
+  Future<void> uploadBuktiPembayaran(File buktiPhoto, Function callback) async {
+    String fileName = p.basename(buktiPhoto.path);
+    Reference storageRef = _fstorage.ref().child('foto_bukti/$fileName');
+    await storageRef.putFile(buktiPhoto);
+    await storageRef
+        .getDownloadURL()
+        .then((value) => callback(value))
+        .catchError((Object error) => callback(null));
+  }
+
+
+
+   Future<bool> konfirmasiPembayaranPenyedia(
+      {SalesOrder order,
+      bool isAccepted,
+      String keterangan, 
+      int unit,
+      Function callback}) async {
+        //STEP TERAKHIR JADI DIMASUKKAN LAPORAN
+    bool output = false;
+    var salesOrderRef = _firestore.collection(salesOrderPath);
+    var unitRef = _firestore.collection(unitPath);
+    Map <String, dynamic> input = {"status":isAccepted?10:9};
+    if(keterangan!=null) input["keterangan"]=keterangan;
+
+    await _firestore.runTransaction((transaction) async{
+      await transaction.update(salesOrderRef
+        .doc(order.docId), input);
+      if(isAccepted){
+        await transaction.set(unitRef
+        .doc(order.unit.toString()).collection("laporan").doc(order.creationDate.year.toString()),{
+          'pengeluaran': FieldValue.increment(order.totalPrice),
+          'jumlahPengadaan': FieldValue.increment(1),
+          'pembelianTerakhir' : order.id
+        }, SetOptions(merge:true));
+      }
+    }).then((value) {
+      output = true;
+      callback(true);
+    } ).catchError((Object error){
+      print(error);
+      output = false;
+      callback(false);
+    });
+    return output;
+  }
+
+  Stream<List<SalesOrder>> getSalesOrder({int unit, List<int> status}) {
     //Sales order sesuai unit
     return _firestore
         .collection(salesOrderPath)
-        .where("unit", whereIn: [unit])
+        .where("unit", isEqualTo:  unit)
+        .where('status', whereIn: status)
         .snapshots()
         .map((QuerySnapshot snapshot) => snapshot.docs
             .map((DocumentSnapshot e) => SalesOrder.fromDb(e.data(), e.id))
             .toList());
   }
 
-
-  Stream<List<SalesOrder>> getBPPSalesOrder(
-      int unit, List<int> status) {
+  Stream<List<SalesOrder>> getBPPSalesOrder(int unit, List<int> status) {
     //Sales order buat bpp
     return _firestore
         .collection(salesOrderPath)
@@ -35,8 +114,7 @@ class OrderServices {
             .toList());
   }
 
-  Stream<List<SalesOrder>> getPPSalesOrder(
-      String ppUid, List<int> status) {
+  Stream<List<SalesOrder>> getPPSalesOrder(String ppUid, List<int> status) {
     //Sales order buat pp
     return _firestore
         .collection(salesOrderPath)
@@ -174,23 +252,21 @@ class OrderServices {
       Function callback}) async {
     var docRef = _firestore.collection(salesOrderPath);
     bool output = false;
-    bool isDeclined = true;
+    bool isTotalDeclined = true;
+    bool isPartialDeclined = false;
 
     newOrderList.forEach((element) {
-      if(element.status == 1) isDeclined = false ;
+      if (element.status == 0) isTotalDeclined = false;
+      else if (element.status == 1) isPartialDeclined = true;
     });
-    
-    Map input ={"listOrder":newOrderList.map((e) => e.toMap()).toList()};
-    if(newTotalPrice!=null)input['totalPrice']=newTotalPrice;
-    if(isDeclined)input['status']=5;
 
-    await docRef
-        .doc(docId)
-        .update(
-          input
-        )
-        .then((value) {
-          print("SAKSES");
+    Map<String,dynamic> input = {"listOrder": newOrderList.map((e) => e.toMap()).toList()};
+    if (newTotalPrice != null) input['totalPrice'] = newTotalPrice;
+    if (isTotalDeclined) input['status'] = 5;
+    else if (isPartialDeclined) input['status'] = 3;
+    else {input['status'] = 4;}
+    await docRef.doc(docId).update(input).then((value) {
+      print("SAKSES");
       output = true;
       callback(true);
     });
@@ -310,7 +386,7 @@ class OrderServices {
                     (1 + (element.item.taxPercentage / 100)))
                 .round();
       });
-      //Looping cart menjadi Order 
+      //Looping cart menjadi Order
       element.value.forEach((LineItem lineItem) {
         Order order = Order(
             count: lineItem.count,
@@ -325,14 +401,15 @@ class OrderServices {
                 .round());
         print(order.itemName);
         orderlist.add(order);
-        
       });
       // await Future.forEach(element.value, (LineItem lineItem)async{
 
       // });
 
       var order = SalesOrder(
-          id: await getLatestSalesOrderID().catchError((Object onError){print("GAGAL NGAMBIL ORDER ID");}),
+          id: await getLatestSalesOrderID().catchError((Object onError) {
+            print("GAGAL NGAMBIL ORDER ID");
+          }),
           ppName: ppName,
           ppUid: ppUid,
           sellerUid: element.key,

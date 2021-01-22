@@ -160,10 +160,15 @@ class CatalogHomeState extends State<CatalogHome> {
         StreamProvider<List<Item>>(
           create: (context) => ItemService(
             uid: _auth.getUser.uid,
-          ).getItemsWithStatus([1]),
+          ).getLatestApprovedItems(),
           updateShouldNotify: (_, __) => true,
         ),
         
+        StreamProvider<List<Category>>(
+          create: (context) => ItemService(
+            uid: _auth.getUser.uid,
+          ).getItemCategory(),
+        ),
       ],
       child: Scaffold(
           //Appbar sementara

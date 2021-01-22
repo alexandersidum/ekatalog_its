@@ -33,6 +33,7 @@ class ItemDetail extends StatefulWidget {
 class ItemDetailState extends State<ItemDetail> {
   @override
   void initState() {
+    
     isInfoOnly = widget.isInfoOnly;
     isWithOption = widget.isWithOption;
     if (isInfoOnly) {
@@ -156,7 +157,7 @@ class ItemDetailState extends State<ItemDetail> {
 
     if (item == null) item = ModalRoute.of(context).settings.arguments;
     List<String> imageUrls = item.image.cast<String>();
-
+    itemService.keywordGenerator(item.name).forEach((element) {print(element);});
     Size size = MediaQuery.of(context).size;
     return Scaffold(
         appBar: AppBar(
@@ -193,7 +194,9 @@ class ItemDetailState extends State<ItemDetail> {
                     CarouselSlider(
                         //Diganti images dari item nanti
                         items: imageUrls.map((url) {
-                          return Builder(builder: (context) {
+                          if(url!=null){
+                            print("IMAGE");
+                            return Builder(builder: (context) {
                             return Container(
                               margin: EdgeInsets.all(2),
                               width: size.width,
@@ -203,6 +206,7 @@ class ItemDetailState extends State<ItemDetail> {
                                   fit: BoxFit.contain),
                             );
                           });
+                          }
                         }).toList(),
                         options: CarouselOptions(
                           onPageChanged: (index, reason) {
@@ -293,14 +297,14 @@ class ItemDetailState extends State<ItemDetail> {
     return Container(
       //warna sementara dan desain masih jelek
       color: Colors.white,
-      height: size.height * 0.11,
+      height: size.height * 0.1,
       child: Row(mainAxisAlignment: MainAxisAlignment.spaceAround, children: [
         Expanded(
           flex: 2,
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal : size.width / 120, vertical : size.height/100),
             child: FlatButton(
-              height: size.height/15,
+              height: size.height,
                 color: Colors.white,
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(size.width / 40),
@@ -327,7 +331,7 @@ class ItemDetailState extends State<ItemDetail> {
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal : size.width / 120, vertical : size.height/100),
             child: FlatButton(
-              height: size.height/15,
+              height: size.height,
                 minWidth: size.width / 2.5,
                 color: kBlueMainColor,
                 shape: RoundedRectangleBorder(
@@ -448,7 +452,7 @@ class TopInfo extends StatelessWidget {
         Text(
           // "${item.price}",
           NumberFormat.currency(name: "Rp ", decimalDigits: 0)
-              .format(isInfoOnly ? item.sellerPrice : item.price),
+              .format(item.price!=null ? item.price : item.sellerPrice ),
           style: kCalibriBold.copyWith(
               fontSize: size.height / 30, color: kBlueMainColor),
         ),

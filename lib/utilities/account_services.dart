@@ -31,6 +31,4 @@ Future<Seller> getSellerInfo(String sellerUid)async{
   return seller;
 }
 
-
-
 }

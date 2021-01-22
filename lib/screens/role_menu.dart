@@ -4,11 +4,14 @@ import 'package:e_catalog/models/sales_order.dart';
 import 'package:e_catalog/screens/add_product_screen.dart';
 import 'package:e_catalog/screens/bpp_screen/pembayaran_screen.dart';
 import 'package:e_catalog/screens/penyedia_screen/negotiation_screen_penyedia.dart';
+import 'package:e_catalog/screens/penyedia_screen/pembayaran_screen_penyedia.dart';
+import 'package:e_catalog/screens/penyedia_screen/product_screen.dart';
 import 'package:e_catalog/screens/penyedia_screen/rekening_screen.dart';
 import 'package:e_catalog/screens/penyedia_screen/sales_order_penyedia.dart';
 import 'package:e_catalog/screens/pp_screen/order_confirmation.dart';
 import 'package:e_catalog/screens/ppk_screen/quotation_screen.dart';
 import 'package:e_catalog/screens/ppk_screen/sales_order_screen_ppk.dart';
+import 'package:e_catalog/screens/ukpbj_screen/laporan_screen.dart';
 import 'package:e_catalog/screens/ukpbj_screen/manage_product.dart';
 import 'package:e_catalog/screens/ukpbj_screen/negotiation_screen.dart';
 import 'package:e_catalog/utilities/item_services.dart';
@@ -51,7 +54,7 @@ class RoleMenu extends StatelessWidget {
         return OrderConfirmationPP();
         break;
       case 2:
-        return MenuPenyedia(size: size, account: account);
+        return MenuPenyedia(size: size, account: account as Seller);
         break;
       case 3:
         return MenuPPK(size: size);
@@ -80,7 +83,7 @@ class MenuPenyedia extends StatelessWidget {
       : super(key: key);
 
   final Size size;
-  final Account account;
+  final Seller account;
 
   @override
   Widget build(BuildContext context) {
@@ -104,6 +107,9 @@ class MenuPenyedia extends StatelessWidget {
               child: Column(
                   children: ListTile.divideTiles(context: context, tiles: [
                 ListTile(
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ProductScreenPenyedia()));
+                  },
                   title: Text(
                     'Produk Saya',
                     style: kCalibri,
@@ -175,6 +181,17 @@ class MenuPenyedia extends StatelessWidget {
               child: Column(
                   children: ListTile.divideTiles(context: context, tiles: [
                 ListTile(
+                  onTap: (){
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => StreamProvider<List<SalesOrder>>(
+                              create: (context) =>
+                                  OrderServices().getSellerSalesOrder(
+                                    account.uid, [7,8,9]
+                                  ),
+                              updateShouldNotify: (_, __) => true,
+                              child: PembayaranScreenPenyedia(),
+                            )));
+                  },
                   title: Text(
                     'Pembayaran',
                     style: kCalibri,
@@ -234,10 +251,7 @@ class MenuPPK extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var ppk = Provider.of<Auth>(context).getUserInfo as PejabatPembuatKomitmen;
-    return StreamProvider<List<SalesOrder>>(
-      //Unit dari ppk seharusnya list
-      create: (context) => OrderServices().getSalesOrder(ppk.unit),
-      child: Container(
+    return Container(
         child: Column(
           children: [
             Container(
@@ -260,7 +274,10 @@ class MenuPPK extends StatelessWidget {
                     Navigator.of(context).push(MaterialPageRoute(
                         builder: (context) => StreamProvider<List<SalesOrder>>(
                               create: (context) =>
-                                  OrderServices().getSalesOrder(ppk.unit),
+                                  OrderServices().getSalesOrder(
+                                    unit: ppk.unit,
+                                    status: [0]
+                                  ),
                               updateShouldNotify: (_, __) => true,
                               child: QuotationScreen(),
                             )));
@@ -276,7 +293,11 @@ class MenuPPK extends StatelessWidget {
                     Navigator.of(context).push(MaterialPageRoute(
                         builder: (context) => StreamProvider<List<SalesOrder>>(
                               create: (context) =>
-                                  OrderServices().getSalesOrder(ppk.unit),
+                                  OrderServices().getSalesOrder(
+                                    unit: ppk.unit,
+                                    status: [1,2,3,4,5,6,7,8,9,10]
+                                    //TODO LIMIT DOCUMENT
+                                  ),
                               updateShouldNotify: (_, __) => true,
                               child: SalesOrderPPK(),
                             )));
@@ -312,7 +333,6 @@ class MenuPPK extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 }
@@ -391,6 +411,9 @@ class MenuUKPBJ extends StatelessWidget {
             child: Column(
                 children: ListTile.divideTiles(context: context, tiles: [
               ListTile(
+                onTap: (){
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context)=>LaporanScreen()));
+                },
                 title: Text(
                   'Laporan Pengadaan Ekatalog',
                   style: kCalibri,

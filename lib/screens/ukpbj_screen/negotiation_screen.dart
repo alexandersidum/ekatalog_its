@@ -20,6 +20,13 @@ class _NegotationScreenPPKState extends State<NegotationScreenPPK> {
   bool onSearch = false;
   String searchQuery = '';
   sortedBy sorted = sortedBy.Default;
+  Stream<List<Item>> negotiationItemStream;
+
+  @override
+  void initState() {
+    negotiationItemStream = itemService.getItemsWithStatus([2, 3, 4,6]);
+    super.initState();
+  }
 
   void sortItem(List<Item> initialList) {
     switch (sorted) {
@@ -171,7 +178,7 @@ class _NegotationScreenPPKState extends State<NegotationScreenPPK> {
           child: CustomRaisedButton(
             buttonChild: FittedBox(
               child: Text(
-                //Kalau masih menunggu bisa dibatalkan
+                //Kalau masih menunggu status 2 bisa dibatalkan
                 item.status==2?"Batalkan":"TOLAK",
                 style: kCalibriBold.copyWith(color: Colors.white),
               ),
@@ -188,9 +195,10 @@ class _NegotationScreenPPKState extends State<NegotationScreenPPK> {
                   builder: (context) {
                     return DeclineBottomSheet(
                       id: item.name,
+                      title: "Alasan Penolakan Penggantian Harga ${item.name}",
                       callback: (keterangan) async {
                         bool isSuccess = await itemService
-                            .setItemStatus(item.id, 5, keterangan: keterangan);
+                            .setItemStatus(item.id, 7, keterangan: keterangan);
                         print("MENOLAK $isSuccess");
                       },
                     );
@@ -301,7 +309,7 @@ class _NegotationScreenPPKState extends State<NegotationScreenPPK> {
           ),
           Expanded(
             child: StreamBuilder(
-                stream: itemService.getItemsWithStatus([2, 3, 4]),
+                stream: negotiationItemStream,
                 builder: (context, AsyncSnapshot<List<Item>> snapshot) {
                   if (snapshot.hasError) {
                     return Container(
@@ -348,7 +356,7 @@ class _NegotationScreenPPKState extends State<NegotationScreenPPK> {
                     return finalItemList.length > 0
                         ? ListView(
                             children: finalItemList
-                                .map((e) => itemTile(context, e))
+                                .map((e) => e.status==6?changePriceTile(context, e):itemTile(context, e))
                                 .toList())
                         : Container(
                             decoration:
@@ -363,6 +371,106 @@ class _NegotationScreenPPKState extends State<NegotationScreenPPK> {
                   }
                 }),
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget changePriceTile(context, Item element) {
+    Size size = MediaQuery.of(context).size;
+    String sellerPrice = NumberFormat.currency(name: "Rp ", decimalDigits: 0)
+        .format(element.sellerPrice);
+    String prevPrice = NumberFormat.currency(name: "Rp ", decimalDigits: 0)
+        .format(element.price);
+    return Container(
+      // height: size.height * 0.15,
+      color: Colors.white,
+      margin: EdgeInsets.all(5),
+      child: Column(
+        children: [
+          Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Container(
+              height: size.height * 0.145,
+              width: size.width * 0.3,
+              margin: EdgeInsets.only(right: 10),
+              child: Image(
+                fit: BoxFit.cover,
+                image: NetworkImage(element.image[0].toString()),
+              ),
+            ),
+            Expanded(
+              child: Stack(children: [
+                Positioned(
+                    top: 0,
+                    right: 0,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) => ItemDetail(
+                                infoItem: element,
+                                isWithOption: false,
+                                isInfoOnly: true,
+                              ),
+                              fullscreenDialog: true,
+                            ));
+                          },
+                          child: Container(
+                            child: Text(
+                              "Detail",
+                              style: kCalibri,
+                            ),
+                          ),
+                        ),
+                        Container(child: Icon(Icons.chevron_right))
+                      ],
+                    )),
+                Container(
+                  padding: EdgeInsets.only(top: size.height / 100),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(right: size.width / 6),
+                        child: Text(
+                          element.name,
+                          style: kCalibriBold.copyWith(
+                              fontSize: 15, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                      Text(
+                        '${element.seller}',
+                        style: kCalibri.copyWith(
+                          fontSize: 13,
+                        ),
+                      ),
+                      Text(
+                        '${element.getStatus()}',
+                        style: kCalibriBold.copyWith(
+                          fontSize: 13,
+                          color: element.status==2?kBlueMainColor:element.status==3?Colors.green:Colors.red
+                        ),
+                      ),
+                      Text(
+                        "Harga Awal : $prevPrice",
+                        style: kCalibriBold.copyWith(
+                            fontSize: 14, color: Colors.orange),
+                      ),
+                      Text(
+                        "Harga Baru : $sellerPrice",
+                        style: kCalibriBold.copyWith(
+                            fontSize: 14, color: kBlueMainColor),
+                      ),
+                    ],
+                  ),
+                ),
+              ]),
+            ),
+          ]),
+          buttonListWidget(size, element)
         ],
       ),
     );

@@ -1,3 +1,4 @@
+import 'package:e_catalog/auth.dart';
 import 'package:e_catalog/constants.dart';
 import 'package:e_catalog/models/account.dart';
 import 'package:e_catalog/models/sales_order.dart';
@@ -22,10 +23,9 @@ class _OrderConfirmationPPState extends State<OrderConfirmationPP> {
 
   @override
   void didChangeDependencies() {
-    pp = Provider.of<Account>(context, listen: false) as PejabatPengadaan;
+    pp = Provider.of<Auth>(context, listen: false).getUserInfo as PejabatPengadaan;
     orderStreams = orderService.getPPSalesOrder(pp.uid, [0,1,2,3,4,5,6,7]);
     super.didChangeDependencies();
-    
   }
   
   bool itemChecker(List<Order> listOrder, String searched){
@@ -94,10 +94,16 @@ class _OrderConfirmationPPState extends State<OrderConfirmationPP> {
                               color: kBlueMainColor),
                         ),
                       ),
+                      
                       Text(
-                        element.getStatusPenyedia(),
+                        element.getStatusPP(),
                         style: kCalibriBold.copyWith(
                             fontSize: 16, color: Colors.orange),
+                      ),
+                      Text(
+                        element.seller,
+                        style: kCalibriBold.copyWith(
+                            fontSize: 14, color: kBlueMainColor),
                       ),
                       Text(
                         element.getUnit,
@@ -105,7 +111,10 @@ class _OrderConfirmationPPState extends State<OrderConfirmationPP> {
                       ),
                       Column(
                         children: element.listOrder
-                            .map((Order e) => orderInfo(size, e))
+                            .map((Order e){
+                              //Kalau sub ordernya ditolak tidak ditampilkan
+                              return e.status==0?orderInfo(size, e):SizedBox();
+                            } )
                             .toList(),
                       ),
                       buttonListWidget(size, element)
@@ -205,7 +214,8 @@ class _OrderConfirmationPPState extends State<OrderConfirmationPP> {
     Size size = MediaQuery.of(context).size;
     
     return Scaffold(
-      body: Column(
+      body: pp!=null?
+      Column(
         children: [
           Row(
             children: [
@@ -281,7 +291,7 @@ class _OrderConfirmationPPState extends State<OrderConfirmationPP> {
                       ),
                     );
                   }
-                  if (snapshot == null || snapshot.data == null) {
+                  else if (snapshot == null || snapshot.data == null) {
                     return Container(
                       decoration: BoxDecoration(color: kBackgroundMainColor),
                       child: Center(
@@ -335,7 +345,8 @@ class _OrderConfirmationPPState extends State<OrderConfirmationPP> {
                 }),
           ),
         ],
-      ),
+      )
+      :CircularProgressIndicator(),
     );
   }
 

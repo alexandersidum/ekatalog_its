@@ -31,7 +31,7 @@ class _PembayaranScreenState extends State<PembayaranScreen> {
   void didChangeDependencies() {
     bpp = Provider.of<Auth>(context, listen: false).getUserInfo
         as BendaharaPengeluaran;
-    orderStreams = orderService.getBPPSalesOrder(bpp.unit, [7]);
+    orderStreams = orderService.getBPPSalesOrder(bpp.unit, [7,8,9]);
     super.didChangeDependencies();
   }
 
@@ -143,7 +143,10 @@ class _PembayaranScreenState extends State<PembayaranScreen> {
                         style: kCalibriBold.copyWith(fontSize: 14),
                       ),
                       Text(
-                        "Barang sudah diterima, silahkan melakukan pembayaran",
+                        element.status==7?"Barang sudah diterima, silahkan melakukan pembayaran"
+                        :element.status==8?"Pembayaran sudah dilakukan, menunggu konfirmasi penyedia"
+                        :element.status==9?"Pembayaran ditolak penyedia, silahkan followup"
+                        :"Error mengambil data",
                         style: kCalibri.copyWith(fontSize: 13, color: kRedButtonColor),
                       ),
                       Row(
@@ -217,7 +220,7 @@ class _PembayaranScreenState extends State<PembayaranScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          order.status == 7
+          order.status == 7 || order.status == 9
               ? Container(
                     width: size.width/2,
                     height: size.height/20,

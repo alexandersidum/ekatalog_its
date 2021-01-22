@@ -59,7 +59,7 @@ class _RegistrationScreenState extends State<RegistrationScreen> {
     var namaPerusahaan = _namaPerusahaanController.text;
     var unit = units.indexOf(selectedUnit)+1;
     var alamatPerusahaan = _lokasiPerusahaanController.text;
-    var telepon = int.parse(_teleponController.text);
+    var telepon = _teleponController.text;
     var name = _nameController.text.toString();
     Provider.of<Auth>(context, listen: false).signUp(
         email,
