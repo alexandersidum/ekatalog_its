@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:e_catalog/auth.dart';
 import 'package:e_catalog/components/custom_raised_button.dart';
 import 'package:e_catalog/constants.dart';
@@ -8,6 +9,7 @@ import 'package:e_catalog/utilities/order_services.dart';
 import "package:flutter/material.dart";
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:e_catalog/components/photo_detail.dart';
 
 class PembayaranScreen extends StatefulWidget {
   @override
@@ -72,21 +74,49 @@ class _PembayaranScreenState extends State<PembayaranScreen> {
   Widget itemTile(context, SalesOrder element) {
     Size size = MediaQuery.of(context).size;
     return Container(
+      padding: EdgeInsets.all(5),
       color: Colors.white,
       margin: EdgeInsets.all(5),
       child: Column(
         children: [
           Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Container(
+            // Container(
+            //   height: size.width * 0.25,
+            //   width: size.width * 0.25,
+            //   margin: EdgeInsets.only(right: 10),
+            //   child: Image(
+            //     fit: BoxFit.contain,
+            //     image: NetworkImage(element.listOrder[0].itemImage[0] != null
+            //         ? element.listOrder[0].itemImage[0]
+            //         : ""),
+            //   ),
+            // ),
+            element.imageBuktiPenerimaan!=null?Container(
               height: size.width * 0.25,
               width: size.width * 0.25,
               margin: EdgeInsets.only(right: 10),
-              child: Image(
-                fit: BoxFit.contain,
-                image: NetworkImage(element.listOrder[0].itemImage[0] != null
-                    ? element.listOrder[0].itemImage[0]
-                    : ""),
-              ),
+              child: (element.imageBuktiPenerimaan.trim().isNotEmpty)?GestureDetector(
+                onTap: (){Navigator.of(context).push(MaterialPageRoute(builder : (context)=>PhotoDetail(heroTag:"imageBuktiPenerimaan", imageUrl: element.imageBuktiPenerimaan,)));
+                },child: Hero(
+                                tag: "imageBuktiPenerimaan",
+                                child: Container(
+                                  width: size.width / 4,
+                                  height: size.width / 4,
+                                  child: CachedNetworkImage(
+                                    placeholder: (context, url) =>
+                                        CircularProgressIndicator(),
+                                    imageUrl: element.imageBuktiPenerimaan,
+                                    errorWidget: (context, url, err) =>
+                                        Icon(Icons.error),
+                                  ),
+                                ),
+                              ),
+              ):Center(child: Text("No image", style:kCalibri)),
+            ):Container(
+              height: size.width * 0.25,
+              width: size.width * 0.25,
+              margin: EdgeInsets.only(right: 10),
+              child: Center(child: Text("No image", style:kCalibri)),
             ),
             Expanded(
               child: Stack(children: [

@@ -80,7 +80,8 @@ class Profile extends StatelessWidget {
         return SizedBox();
     }
     return ListTile(
-        leading: Icon(Icons.menu
+        leading: Icon(Icons.menu,
+        
         ),
         title: Text(menuText, style: kCalibri),
         trailing: Icon(Icons.keyboard_arrow_right),

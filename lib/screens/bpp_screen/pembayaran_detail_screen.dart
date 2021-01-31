@@ -57,8 +57,7 @@ class _PembayaranDetailScreenState extends State<PembayaranDetailScreen> {
         inAsyncCall: isLoading,
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: size.width / 15),
-          child: sellerBilling != null
-              ? SingleChildScrollView(
+          child: SingleChildScrollView(
                   child: Column(
                     children: [
                       Container(
@@ -201,7 +200,6 @@ class _PembayaranDetailScreenState extends State<PembayaranDetailScreen> {
                     ],
                   ),
                 )
-              : CircularProgressIndicator(),
         ),
       ),
     );

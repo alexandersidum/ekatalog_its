@@ -1,7 +1,10 @@
 import 'package:e_catalog/models/account.dart';
-import 'package:e_catalog/models/item.dart';
 import 'package:e_catalog/models/sales_order.dart';
+import 'package:e_catalog/models/menu_state.dart';
+import 'package:e_catalog/models/cart.dart';
 import 'package:e_catalog/screens/add_product_screen.dart';
+import 'package:e_catalog/screens/admin_screen/manage_category_screen.dart';
+import 'package:e_catalog/screens/admin_screen/manage_user_screen.dart';
 import 'package:e_catalog/screens/bpp_screen/pembayaran_screen.dart';
 import 'package:e_catalog/screens/penyedia_screen/negotiation_screen_penyedia.dart';
 import 'package:e_catalog/screens/penyedia_screen/pembayaran_screen_penyedia.dart';
@@ -14,13 +17,12 @@ import 'package:e_catalog/screens/ppk_screen/sales_order_screen_ppk.dart';
 import 'package:e_catalog/screens/ukpbj_screen/laporan_screen.dart';
 import 'package:e_catalog/screens/ukpbj_screen/manage_product.dart';
 import 'package:e_catalog/screens/ukpbj_screen/negotiation_screen.dart';
-import 'package:e_catalog/utilities/item_services.dart';
 import 'package:e_catalog/utilities/order_services.dart';
 import 'package:flutter/material.dart';
 import 'package:e_catalog/constants.dart';
 import 'package:provider/provider.dart';
-import '';
 import '../auth.dart';
+import 'admin_screen/user_pending_screen.dart';
 
 class RoleMenu extends StatelessWidget {
   static const routeId = 'RoleMenu';
@@ -72,6 +74,11 @@ class RoleMenu extends StatelessWidget {
           size: size,
         );
         break;
+      case 9:
+        return MenuAdmin(
+          size: size,
+        );
+        break;
       default:
         return SizedBox();
     }
@@ -108,7 +115,8 @@ class MenuPenyedia extends StatelessWidget {
                   children: ListTile.divideTiles(context: context, tiles: [
                 ListTile(
                   onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ProductScreenPenyedia()));
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => ProductScreenPenyedia()));
                   },
                   title: Text(
                     'Produk Saya',
@@ -181,13 +189,11 @@ class MenuPenyedia extends StatelessWidget {
               child: Column(
                   children: ListTile.divideTiles(context: context, tiles: [
                 ListTile(
-                  onTap: (){
+                  onTap: () {
                     Navigator.of(context).push(MaterialPageRoute(
                         builder: (context) => StreamProvider<List<SalesOrder>>(
-                              create: (context) =>
-                                  OrderServices().getSellerSalesOrder(
-                                    account.uid, [7,8,9]
-                                  ),
+                              create: (context) => OrderServices()
+                                  .getSellerSalesOrder(account.uid, [7, 8, 9]),
                               updateShouldNotify: (_, __) => true,
                               child: PembayaranScreenPenyedia(),
                             )));
@@ -230,6 +236,21 @@ class MenuPenyedia extends StatelessWidget {
                     style: kCalibri,
                   ),
                   trailing: Icon(Icons.keyboard_arrow_right),
+                ),
+                ListTile(
+                  title: Text(
+                    'Logout',
+                    style: kCalibri,
+                  ),
+                  onTap: () {
+                    Provider.of<Auth>(context, listen: false).signOut(context,
+                        () {
+                      Provider.of<MenuState>(context, listen: false)
+                          .setMenuSelected(0);
+                      Provider.of<Cart>(context, listen: false).clearCart();
+                    });
+                  },
+                  trailing: Icon(Icons.keyboard_arrow_right),
                 )
               ]).toList()),
             ),
@@ -252,87 +273,98 @@ class MenuPPK extends StatelessWidget {
   Widget build(BuildContext context) {
     var ppk = Provider.of<Auth>(context).getUserInfo as PejabatPembuatKomitmen;
     return Container(
-        child: Column(
-          children: [
-            Container(
-              padding: EdgeInsets.only(
-                  top: size.height / 40,
-                  left: size.width / 30,
-                  bottom: size.height / 100),
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Pengadaan',
-                style: kCalibriBold,
-              ),
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.only(
+                top: size.height / 40,
+                left: size.width / 30,
+                bottom: size.height / 100),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Pengadaan',
+              style: kCalibriBold,
             ),
-            Container(
-              color: Colors.white,
-              child: Column(
-                  children: ListTile.divideTiles(context: context, tiles: [
-                ListTile(
-                  onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => StreamProvider<List<SalesOrder>>(
-                              create: (context) =>
-                                  OrderServices().getSalesOrder(
-                                    unit: ppk.unit,
-                                    status: [0]
-                                  ),
-                              updateShouldNotify: (_, __) => true,
-                              child: QuotationScreen(),
-                            )));
-                  },
+          ),
+          Container(
+            color: Colors.white,
+            child: Column(
+                children: ListTile.divideTiles(context: context, tiles: [
+              ListTile(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => StreamProvider<List<SalesOrder>>(
+                            create: (context) => OrderServices()
+                                .getSalesOrder(unit: ppk.unit, status: [0]),
+                            updateShouldNotify: (_, __) => true,
+                            child: QuotationScreen(),
+                          )));
+                },
+                title: Text(
+                  'Quotation',
+                  style: kCalibri,
+                ),
+                trailing: Icon(Icons.keyboard_arrow_right),
+              ),
+              ListTile(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => StreamProvider<List<SalesOrder>>(
+                            create: (context) => OrderServices().getSalesOrder(
+                                unit: ppk.unit,
+                                status: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+                                //TODO LIMIT DOCUMENT
+                                ),
+                            updateShouldNotify: (_, __) => true,
+                            child: SalesOrderPPK(),
+                          )));
+                },
+                title: Text('Sales Order', style: kCalibri),
+                trailing: Icon(Icons.keyboard_arrow_right),
+              ),
+            ]).toList()),
+          ),
+          Container(
+            margin: EdgeInsets.only(
+                top: size.height / 40,
+                left: size.width / 30,
+                bottom: size.height / 100),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Bantuan',
+              style: kCalibriBold,
+            ),
+          ),
+          Container(
+            color: Colors.white,
+            child: Column(
+                children: ListTile.divideTiles(context: context, tiles: [
+              ListTile(
+                title: Text(
+                  'Kontak Bantuan',
+                  style: kCalibri,
+                ),
+                trailing: Icon(Icons.keyboard_arrow_right),
+              ),
+              ListTile(
                   title: Text(
-                    'Quotation',
+                    'Logout',
                     style: kCalibri,
                   ),
-                  trailing: Icon(Icons.keyboard_arrow_right),
-                ),
-                ListTile(
                   onTap: () {
-                    Navigator.of(context).push(MaterialPageRoute(
-                        builder: (context) => StreamProvider<List<SalesOrder>>(
-                              create: (context) =>
-                                  OrderServices().getSalesOrder(
-                                    unit: ppk.unit,
-                                    status: [1,2,3,4,5,6,7,8,9,10]
-                                    //TODO LIMIT DOCUMENT
-                                  ),
-                              updateShouldNotify: (_, __) => true,
-                              child: SalesOrderPPK(),
-                            )));
+                    Provider.of<Auth>(context, listen: false).signOut(context,
+                        () {
+                      Provider.of<MenuState>(context, listen: false)
+                          .setMenuSelected(0);
+                      Provider.of<Cart>(context, listen: false).clearCart();
+                    });
                   },
-                  title: Text('Sales Order', style: kCalibri),
-                  trailing: Icon(Icons.keyboard_arrow_right),
-                ),
-              ]).toList()),
-            ),
-            Container(
-              margin: EdgeInsets.only(
-                  top: size.height / 40,
-                  left: size.width / 30,
-                  bottom: size.height / 100),
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Bantuan',
-                style: kCalibriBold,
-              ),
-            ),
-            Container(
-              color: Colors.white,
-              child: Column(
-                  children: ListTile.divideTiles(context: context, tiles: [
-                ListTile(
-                  title: Text(
-                    'Kontak Bantuan',
-                    style: kCalibri,
-                  ),
-                  trailing: Icon(Icons.keyboard_arrow_right),
+                  trailing: Icon(Icons.exit_to_app),
                 )
-              ]).toList()),
-            ),
-          ],
-        ),
+            ]).toList()),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -411,8 +443,9 @@ class MenuUKPBJ extends StatelessWidget {
             child: Column(
                 children: ListTile.divideTiles(context: context, tiles: [
               ListTile(
-                onTap: (){
-                  Navigator.of(context).push(MaterialPageRoute(builder: (context)=>LaporanScreen()));
+                onTap: () {
+                  Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => LaporanScreen()));
                 },
                 title: Text(
                   'Laporan Pengadaan Ekatalog',
@@ -483,18 +516,16 @@ class MenuBPP extends StatelessWidget {
                 children: ListTile.divideTiles(context: context, tiles: [
               ListTile(
                 onTap: () {
-                 //Navigate ke Pembayaran
-                 Navigator.of(context).push(MaterialPageRoute(builder: (context)=>PembayaranScreen()));
+                  //Navigate ke Pembayaran
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => PembayaranScreen()));
                 },
                 title: Text('Pembayaran', style: kCalibri),
                 trailing: Icon(Icons.keyboard_arrow_right),
               ),
               ListTile(
                 onTap: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => ManageProduct(
-                            initialTab: 0,
-                          )));
+                  
                 },
                 title: Text('Riwayat Pembayaran', style: kCalibri),
                 trailing: Icon(Icons.keyboard_arrow_right),
@@ -523,6 +554,77 @@ class MenuBPP extends StatelessWidget {
                 ),
                 trailing: Icon(Icons.keyboard_arrow_right),
               ),
+              ListTile(
+                  title: Text(
+                    'Logout',
+                    style: kCalibri,
+                  ),
+                  onTap: () {
+                    Provider.of<Auth>(context, listen: false).signOut(context,
+                        () {
+                      Provider.of<MenuState>(context, listen: false)
+                          .setMenuSelected(0);
+                      Provider.of<Cart>(context, listen: false).clearCart();
+                    });
+                  },
+                  trailing: Icon(Icons.exit_to_app),
+                )
+            ]).toList()),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class MenuAdmin extends StatelessWidget {
+  const MenuAdmin({
+    Key key,
+    @required this.size,
+  }) : super(key: key);
+
+  final Size size;
+
+  @override
+  Widget build(BuildContext context) {
+    var admin = Provider.of<Auth>(context).getUserInfo as Admin;
+    return Container(
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.only(
+                top: size.height / 40,
+                left: size.width / 30,
+                bottom: size.height / 100),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Kelola User',
+              style: kCalibriBold,
+            ),
+          ),
+          Container(
+            color: Colors.white,
+            child: Column(
+                children: ListTile.divideTiles(context: context, tiles: [
+              ListTile(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => UserPendingScreen()));
+                },
+                title: Text(
+                  'User Pending',
+                  style: kCalibri,
+                ),
+                trailing: Icon(Icons.keyboard_arrow_right),
+              ),
+              ListTile(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => ManageUserScreen()));
+                },
+                title: Text('Manage User', style: kCalibri),
+                trailing: Icon(Icons.keyboard_arrow_right),
+              ),
             ]).toList()),
           ),
           Container(
@@ -532,7 +634,7 @@ class MenuBPP extends StatelessWidget {
                 bottom: size.height / 100),
             alignment: Alignment.centerLeft,
             child: Text(
-              'Bantuan',
+              'Kelola Produk',
               style: kCalibriBold,
             ),
           ),
@@ -541,14 +643,46 @@ class MenuBPP extends StatelessWidget {
             child: Column(
                 children: ListTile.divideTiles(context: context, tiles: [
               ListTile(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => ManageCategoryScreen()));
+                },
                 title: Text(
-                  'Kontak Bantuan',
+                  'Manage Kategori Barang',
                   style: kCalibri,
                 ),
                 trailing: Icon(Icons.keyboard_arrow_right),
               )
             ]).toList()),
           ),
+          Container(
+            margin: EdgeInsets.only(
+                top: size.height / 40,
+                left: size.width / 30,
+                bottom: size.height / 100),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Other',
+              style: kCalibriBold,
+            ),
+          ),
+          Container(
+            color: Colors.white,
+            child: ListTile(
+              title: Text(
+                'Logout',
+                style: kCalibri,
+              ),
+              onTap: () {
+                Provider.of<Auth>(context, listen: false).signOut(context, () {
+                  Provider.of<MenuState>(context, listen: false)
+                      .setMenuSelected(0);
+                  Provider.of<Cart>(context, listen: false).clearCart();
+                });
+              },
+              trailing: Icon(Icons.exit_to_app),
+            ),
+          )
         ],
       ),
     );

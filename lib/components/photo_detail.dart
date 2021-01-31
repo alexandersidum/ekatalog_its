@@ -13,6 +13,7 @@ class PhotoDetail extends StatelessWidget {
       child: Hero(
         tag: heroTag,
         child: CachedNetworkImage(
+          fit: BoxFit.contain,
           imageUrl: imageUrl,
           imageBuilder: (context, imageProvider){
             return PhotoView(

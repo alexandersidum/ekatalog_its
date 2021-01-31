@@ -6,13 +6,13 @@ import 'package:e_catalog/constants.dart';
 import 'package:e_catalog/models/sales_order.dart';
 import 'package:e_catalog/utilities/order_services.dart';
 import "package:flutter/material.dart";
+import 'package:flutter/scheduler.dart';
 import 'package:intl/intl.dart';
 
 class SalesOrderDetailPenyedia extends StatefulWidget {
-  AsyncSnapshot<List<SalesOrder>> streamOrder;
   SalesOrder order;
   int index;
-  SalesOrderDetailPenyedia({this.index, this.streamOrder, this.order});
+  SalesOrderDetailPenyedia({this.index, this.order});
 
   @override
   State<StatefulWidget> createState() => SalesOrderDetailState();
@@ -25,7 +25,6 @@ class SalesOrderDetailState extends State<SalesOrderDetailPenyedia> {
   @override
   Widget build(BuildContext context) {
     salesOrder = widget.order;
-    // salesOrder = widget.streamOrder.data[widget.index];
     void closeScreen() {
       Navigator.pop(context);
     }
@@ -209,7 +208,7 @@ class SalesOrderDetailState extends State<SalesOrderDetailPenyedia> {
                                         await orderServices.changeOrderStatus(
                                             docId: salesOrder.docId,
                                             keterangan: keterangan,
-                                            newStatus: 4,
+                                            newStatus: 5,
                                             callback: (isSuccess) {
                                               print(isSuccess);
                                               if (isSuccess) {
@@ -222,34 +221,40 @@ class SalesOrderDetailState extends State<SalesOrderDetailPenyedia> {
                         ),
                       ),
                       //Hanya muncul saat salesOrder belum dibatalkan / disanggupi (setelah disetujui PPK)
-                      salesOrder.status==1?
-                      Container(
-                        width: size.width / 3,
-                        height: size.height / 20,
-                        child: CustomRaisedButton(
-                          buttonChild: Text("Konfirmasi",
-                              style:
-                                  kCalibriBold.copyWith(color: Colors.white)),
-                          color: kBlueMainColor,
-                          callback: () async {
-                            print("konfirmasi pressed");
-                            int status = 4;
-                            bool isTotalDeclined = true;
-                            bool isPartialDeclined = false;
-                            salesOrder.listOrder.forEach((element) {
-                              if (element.status == 0) isTotalDeclined = false;
-                              if (element.status == 1) isPartialDeclined = true;
-                            });
-                            if(isPartialDeclined) status = 3;
-                            if(isTotalDeclined) status = 5;
+                      salesOrder.status == 1
+                          ? Container(
+                              width: size.width / 3,
+                              height: size.height / 20,
+                              child: CustomRaisedButton(
+                                buttonChild: Text("Konfirmasi",
+                                    style: kCalibriBold.copyWith(
+                                        color: Colors.white)),
+                                color: kBlueMainColor,
+                                callback: () async {
+                                  print("konfirmasi pressed");
+                                  //Default konfirmasinya sukses
+                                  int status = 4;
+                                  bool isTotalDeclined = true;
+                                  bool isPartialDeclined = false;
+                                  //Mengecek apa ada yg didecline kalau iya maka akan jadi partial declinse statusnya
+                                  salesOrder.listOrder.forEach((element) {
+                                    if (element.status == 0)
+                                      isTotalDeclined = false;
+                                    if (element.status == 1)
+                                      isPartialDeclined = true;
+                                  });
+                                  if (isPartialDeclined) status = 3;
+                                  if (isTotalDeclined) status = 5;
 
-                            await orderServices.changeOrderStatus(
-                                docId: salesOrder.docId,
-                                newStatus: status,
-                                callback: (isSuccess) => print(isSuccess));
-                          },
-                        ),
-                      ):SizedBox(),
+                                  await orderServices.changeOrderStatus(
+                                      docId: salesOrder.docId,
+                                      newStatus: status,
+                                      callback: (isSuccess) =>
+                                          print(isSuccess));
+                                },
+                              ),
+                            )
+                          : SizedBox(),
                     ],
                   )
                 ],
@@ -322,10 +327,11 @@ class SalesOrderDetailState extends State<SalesOrderDetailPenyedia> {
                   ],
                 ),
                 //Hanya muncul saat sales order status belum dikonfirmasi penyedia
-                e.status == 0 && salesOrder.status==1
+                e.status == 0 && salesOrder.status == 1
                     ? Row(mainAxisAlignment: MainAxisAlignment.end, children: [
                         InkWell(
                           onTap: () {
+                            //Status order jadi 1 alias dibatalkan
                             e.setStatus(1);
                             orderServices.changeSubOrderStatus(
                                 docId: salesOrder.docId,

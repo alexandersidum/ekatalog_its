@@ -10,7 +10,6 @@ import 'package:provider/provider.dart';
 import 'package:e_catalog/auth.dart';
 import 'package:e_catalog/utilities/item_services.dart';
 import 'package:e_catalog/constants.dart';
-import 'playground.dart';
 import 'package:e_catalog/models/menu_state.dart';
 
 //BottomNavbar belum diimplementasikan
@@ -54,14 +53,14 @@ class CatalogHomeState extends State<CatalogHome> {
     AppBar(
       title: Text("Keranjang",
       style: kCalibriBold),
-      centerTitle: true,
+      centerTitle: false,
       backgroundColor: kBlueMainColor,
       elevation: 0,
     ),
     AppBar(
       title: Text("Mail",
       style: kCalibriBold,),
-      centerTitle: true,
+      centerTitle: false,
       backgroundColor: kBlueMainColor,
       elevation: 0,
     ),
@@ -150,7 +149,7 @@ class CatalogHomeState extends State<CatalogHome> {
       providers: [
         Provider<ItemService>(
             create: (context) => ItemService(
-                  uid: _auth.getUser.uid,
+                  uid: _auth.getUser.uid??'',
                 )),
         // ProxyProvider<Auth, Account>(
         //   //Provider for user information
@@ -167,7 +166,7 @@ class CatalogHomeState extends State<CatalogHome> {
         StreamProvider<List<Category>>(
           create: (context) => ItemService(
             uid: _auth.getUser.uid,
-          ).getItemCategory(),
+          ).getStreamCategory(),
         ),
       ],
       child: Scaffold(

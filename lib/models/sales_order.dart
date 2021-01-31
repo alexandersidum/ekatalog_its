@@ -23,13 +23,15 @@ class SalesOrder{
   int unit;
   String feedback;
   String imageBuktiPembayaran;
+  String imageBuktiPenerimaan;
   String keteranganPembayaran;
+
 
   SalesOrder({this.id, this.docId, this.listOrder, this.ppkName, 
   this.creationDate, this.totalPrice, this.seller, 
   this.sellerUid, this.status, this.ppName, this.ppUid, 
   this.ppkUid, this.unit, this.address, this.namaAlamat, 
-  this.namaPenerima,this.teleponPenerima, this.feedback, this.imageBuktiPembayaran, this.keteranganPembayaran});
+  this.namaPenerima,this.teleponPenerima, this.feedback, this.imageBuktiPembayaran, this.imageBuktiPenerimaan, this.keteranganPembayaran});
 
   factory SalesOrder.fromDb(Map<String , dynamic> parsedData, String docId){
     List<Order> orderList = parsedData['listOrder'].map<Order>((e) {
@@ -58,6 +60,7 @@ class SalesOrder{
       feedback: parsedData['feedback']!=null?parsedData['feedback']:'',
       listOrder: orderList,
       imageBuktiPembayaran: parsedData['imageBuktiUrl'],
+      imageBuktiPenerimaan: parsedData['bukti_penerimaan'],
       keteranganPembayaran: parsedData['keteranganPembayaran'],
       // listOrder : parsedData['listOrder'].map<Order>((Map<String, dynamic> e)=>Order.fromMap(e)).toList()
     );
@@ -81,8 +84,39 @@ class SalesOrder{
       'namaPenerima' : this.namaPenerima,
       'teleponPenerima' : this.teleponPenerima,
       'feedback' : this.feedback,
-      'listOrder' : this.listOrder.map((e) => e.toMap()).toList()
+      'listOrder' : this.listOrder.map((e) => e.toMap()).toList(),
+      'keyword' : generateKeyword()
     };
+  }
+
+  List<String> generateKeyword() {
+    List<String> output = List();
+    output.add(this.id.toLowerCase());
+    this.listOrder.forEach((order){
+      if(order.status==0){
+      output.add(order.itemName.toLowerCase());
+      List<String> words = order.itemName.split(" ");
+      words.forEach((word){
+        output.add(word.toLowerCase());
+      });
+      }
+    });
+    output.add(this.seller.toLowerCase());
+    List<String> sellerWord = this.seller.replaceAll("."," ").split(" ");
+    sellerWord.forEach((sWord){
+        if(sWord.isNotEmpty){
+          output.add(sWord.toLowerCase());
+        }
+      }
+    );
+    output.add(this.ppName.toLowerCase());
+    List<String> ppWord = this.ppName.replaceAll("."," ").split(" ");
+    ppWord.forEach((pWord){
+        output.add(pWord.toLowerCase());
+      }
+    );
+    output.add(this.getUnit.toLowerCase());
+    return output;
   }
 
   String getStatus(){
@@ -249,6 +283,8 @@ class Order{
       'orderPrice' : this.orderPrice,
     };
   }
+
+  
 
   void setStatus(int newStatus){
     this.status = newStatus;

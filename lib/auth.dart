@@ -18,7 +18,8 @@ class Auth {
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
   FirebaseStorage _fstorage = FirebaseStorage.instance;
   User _user;
-  var _userInfo;
+  //apa dynamic?
+  Account _userInfo;
 
   User get getUser => _user;
   Account get getUserInfo => _userInfo;
@@ -33,6 +34,10 @@ class Auth {
   Future<bool> checkAuth() async {
     if (_auth.currentUser != null) {
       await checkUserInfo(_auth.currentUser.uid);
+      if (_userInfo.isBlocked) {
+        await _auth.signOut();
+        return false;
+      }
       return true;
     } else {
       return false;
@@ -55,7 +60,7 @@ class Auth {
           .createUserWithEmailAndPassword(email: _email, password: _password)
           .then((result) async {
         if (result.user != null) {
-          await uploadImage(image).then((value) async{
+          await uploadImage(image).then((value) async {
             await _firestore.collection('users').doc(result.user.uid).set({
               'uid': result.user.uid,
               'registrationDate': FieldValue.serverTimestamp(),
@@ -94,8 +99,16 @@ class Auth {
             .signInWithEmailAndPassword(email: email, password: password)
             .then((value) async {
           if (value.user != null) {
+            print("value user not null");
             await checkUserInfo(value.user.uid);
-            onComplete(AuthResultStatus.successful);
+            if (_userInfo.isBlocked) {
+              print("user is blocked");
+              await _auth.signOut();
+              onComplete(AuthResultStatus.blocked);
+            }
+            else{
+              onComplete(AuthResultStatus.successful);
+            }
           } else {
             onComplete(AuthResultStatus.undefined);
           }
@@ -115,65 +128,78 @@ class Auth {
         .snapshots()
         .map((DocumentSnapshot document) {
       var role = document.data()['role'];
-      switch (role) {
-        case 0:
-          _userInfo = Account.generateGuest();
-          break;
-        case 1:
-          _userInfo = PejabatPengadaan.fromDb(document.data());
-          break;
-        case 2:
-          _userInfo = Seller.fromDb(document.data());
-          break;
-        case 3:
-          _userInfo = PejabatPembuatKomitmen.fromDb(document.data());
-          break;
-        case 4:
-          _userInfo = UnitKerjaPengadaan.fromDb(document.data());
-          break;
-        case 5:
-          _userInfo = Audit.fromDb(document.data());
-          break;
-        case 6:
-          _userInfo = BendaharaPengeluaran.fromDb(document.data());
-          break;
-        default:
-          _userInfo = Account.fromDb(document.data());
+      if (!document.data()['is_accepted']) {
+        _userInfo = Account.generateUnacceptedAccount(document.data());
+      } else {
+        switch (role) {
+          case 0:
+            _userInfo = Account.generateGuest();
+            break;
+          case 1:
+            _userInfo = PejabatPengadaan.fromDb(document.data());
+            break;
+          case 2:
+            _userInfo = Seller.fromDb(document.data());
+            break;
+          case 3:
+            _userInfo = PejabatPembuatKomitmen.fromDb(document.data());
+            break;
+          case 4:
+            _userInfo = UnitKerjaPengadaan.fromDb(document.data());
+            break;
+          case 5:
+            _userInfo = Audit.fromDb(document.data());
+            break;
+          case 6:
+            _userInfo = BendaharaPengeluaran.fromDb(document.data());
+            break;
+          default:
+            _userInfo = Account.fromDb(document.data());
+        }
       }
       return _userInfo;
     });
   }
 
   Future<void> checkUserInfo(uid) async {
+    print("Checkuserinfo ");
     await _firestore.collection('users').doc(uid).get().then((value) {
       if (value.exists) {
-        // is accepted untuk memfilter langsung?
+        print("Checkuserinfo VALUE EXIST ");
         bool isAccepted = value.data()['is_accepted'];
         int role = value.data()['role'];
-        switch (role) {
-          case 0:
-            _userInfo = Account.generateGuest();
-            break;
-          case 1:
-            _userInfo = PejabatPengadaan.fromDb(value.data());
-            break;
-          case 2:
-            _userInfo = Seller.fromDb(value.data());
-            break;
-          case 3:
-            _userInfo = PejabatPembuatKomitmen.fromDb(value.data());
-            break;
-          case 4:
-            _userInfo = UnitKerjaPengadaan.fromDb(value.data());
-            break;
-          case 5:
-            _userInfo = Audit.fromDb(value.data());
-            break;
-          case 6:
-            _userInfo = BendaharaPengeluaran.fromDb(value.data());
-            break;
-          default:
-            _userInfo = Account.fromDb(value.data());
+        if (!isAccepted) {
+          print("Checkuserinfo VALUE EXIST ");
+          _userInfo = Account.generateUnacceptedAccount(value.data());
+        } else {
+          switch (role) {
+            case 0:
+              _userInfo = Account.generateGuest();
+              break;
+            case 1:
+              _userInfo = PejabatPengadaan.fromDb(value.data());
+              break;
+            case 2:
+              _userInfo = Seller.fromDb(value.data());
+              break;
+            case 3:
+              _userInfo = PejabatPembuatKomitmen.fromDb(value.data());
+              break;
+            case 4:
+              _userInfo = UnitKerjaPengadaan.fromDb(value.data());
+              break;
+            case 5:
+              _userInfo = Audit.fromDb(value.data());
+              break;
+            case 6:
+              _userInfo = BendaharaPengeluaran.fromDb(value.data());
+              break;
+            case 9:
+              _userInfo = Admin.fromDb(value.data());
+              break;
+            default:
+              _userInfo = Account.fromDb(value.data());
+          }
         }
       }
     });
@@ -181,11 +207,10 @@ class Auth {
 
   Future<void> signOut(BuildContext context, Function callback) async {
     await _auth.signOut().whenComplete(() {
-      print(_user);
       if (_user == null) {
-        callback();
         Navigator.pushNamedAndRemoveUntil(
             context, LoginScreen.routeId, (Route<dynamic> route) => false);
+        callback();
       }
     });
   }
@@ -193,7 +218,6 @@ class Auth {
 
 class AuthExceptionHandler {
   static handleException(e) {
-    print(e.code);
     var status;
     switch (e.code) {
       case "ERROR_INVALID_EMAIL":
@@ -257,6 +281,9 @@ class AuthExceptionHandler {
       case AuthResultStatus.emailAlreadyExists:
         errorMessage = "Email telah digunakan pada akun lain.";
         break;
+      case AuthResultStatus.blocked:
+        errorMessage = "Akun diblokir";
+        break;
       default:
         errorMessage = "Terjadi kesalahan dalam proses.";
     }
@@ -275,4 +302,6 @@ enum AuthResultStatus {
   operationNotAllowed,
   tooManyRequests,
   undefined,
+  //in firestore
+  blocked,
 }

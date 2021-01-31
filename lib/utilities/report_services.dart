@@ -1,12 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_catalog/models/sales_order.dart';
-import 'package:e_catalog/models/shipping_address.dart';
 import 'package:e_catalog/models/unit.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
 class ReportServices {
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  FirebaseStorage _fstorage = FirebaseStorage.instance;
   String salesOrderPath = 'sales_order';
   String unitPath = 'unit';
   String miscPath = 'misc';

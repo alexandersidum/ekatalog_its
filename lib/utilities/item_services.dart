@@ -177,6 +177,7 @@ class ItemService {
     });
     callback(output);
   }
+  
 
   Future<void> editItemImage(
       List<ImageEditInfo> itemImage, Function callback) async {
@@ -330,10 +331,59 @@ class ItemService {
     return isSuccess;
   }
 
-  Stream<List<Category>> getItemCategory(){
+  Stream<List<Category>> getStreamCategory(){
     return _firestore
-        .collection(categoryPath).snapshots().map((e) => e.docs.map((e) => Category.fromDb(e.data())).toList());
+        .collection(categoryPath).snapshots().map((e) => e.docs.map((e) => Category.fromDb(e.data(), e.id)).toList());
   }
+
+  Future<List<Category>> getCategory()async {
+    return await _firestore
+        .collection(categoryPath).get().then((col)=>col.docs.map((doc)=>Category.fromDb(doc.data(), doc.id)).toList());
+  }
+
+  Future<String> uploadCategoryImage(File image) async {
+    print("Sampai uploadcatimage");
+      try {
+        print("Sampai uploadcatimage try");
+        String fileName = p.basename(image.path);
+        Reference storageRef = _fstorage.ref().child('category_images/$fileName');
+        await storageRef.putFile(image);
+        return await storageRef.getDownloadURL();
+      }
+      catch(e){
+        return null;
+      }
+  }
+
+  Future<bool> addCategory(String name, File image) async {
+    bool output = false;
+    await uploadCategoryImage(image).then(
+      (String url)async{
+        if(url!=null){
+          print("Sampai di url!=null");
+         await _firestore.collection(categoryPath).add({
+            'name' : name,
+            'thumbnail' : url
+          }).then((a)=>output = true).catchError((e)=>throw ("Gagal add Category ke Database"));
+        }
+        else{
+          print("Sampai else url!=null");
+          throw ("Gagal add Category ImageUrl null");
+        }
+      }
+    ).catchError((a){output = false;});
+    return output;
+  }
+
+  // Future<String> editCategory(Category category, File image) async {
+  //   await uploadCategoryImage(image).then(
+  //     (String url){
+  //       if(url!=null){
+  //         _firestore.collection(categoryPath).add()
+  //       }
+  //     }
+  //   );
+  // }
 
   Future<List<Item>> getItemListByCategory(String selectedCategory)async {
     return await _firestore

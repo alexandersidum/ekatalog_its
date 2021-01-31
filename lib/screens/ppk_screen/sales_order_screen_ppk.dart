@@ -20,9 +20,24 @@ class SalesOrderPPK extends StatefulWidget {
 class SalesOrderPPKState extends State<SalesOrderPPK> {
   sortedBy sorted = sortedBy.Default;
   List<SalesOrder> finalOrderList = [];
+  List<SalesOrder> listOrder = [];
   OrderServices os = OrderServices();
   String searchQuery;
   bool onSearch = false;
+
+  @override
+  void initState() { 
+    getSalesOrder();
+    super.initState();
+  }
+
+  getSalesOrder()async{
+    //unitnya
+    listOrder = await os.getSalesOrderPPK(status: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], unit: [1]);
+    setState(() {
+          
+        });
+  }
 
   bool itemChecker(List<Order> listOrder, String searched) {
     bool output = false;
@@ -237,6 +252,7 @@ class SalesOrderPPKState extends State<SalesOrderPPK> {
         child: Column(
           children: [
             Container(
+              color: kBlueMainColor,
               padding: EdgeInsets.symmetric(
                   horizontal: size.width / 100, vertical: size.height / 200),
               child: Row(

@@ -301,7 +301,7 @@ class _PembayaranScreenPenyediaState extends State<PembayaranScreenPenyedia> {
         elevation: 0,
       ),
       body: listOrder == null
-          ? CircularProgressIndicator()
+          ? Center(child: CircularProgressIndicator())
           : listOrder.isEmpty
               ? Center(
                   child: Text(

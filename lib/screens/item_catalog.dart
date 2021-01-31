@@ -33,12 +33,11 @@ class ItemCatalogState extends State<ItemCatalog> {
   @override
   void initState() {
     getCategory();
-    print("STATE START");
     super.initState();
   }
 
   getCategory() async {
-    categories = context.watch<List<Category>>();
+    categories = context.read<List<Category>>();
     setState(() {});
   }
 
@@ -253,7 +252,7 @@ class ItemCatalogState extends State<ItemCatalog> {
                         scrollDirection: Axis.horizontal,
                         childAspectRatio: 2 / 5,
                         crossAxisCount: 3,
-                        children: categories.length <= 0
+                        children: categories==null
                             ? []
                             : categories
                                 .map((e) => categoriesTile(e, size))

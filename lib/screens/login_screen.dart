@@ -1,5 +1,6 @@
 import 'package:e_catalog/screens/catalog_home.dart';
 import 'package:e_catalog/screens/register_screen.dart';
+import 'package:e_catalog/screens/role_menu.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../auth.dart';
@@ -41,7 +42,8 @@ class _LoginScreenState extends State<LoginScreen> {
       await Provider.of<Auth>(context, listen: false)
         .signIn(emailController.text, passwordController.text, (AuthResultStatus status) {
         if(status==AuthResultStatus.successful){
-          Navigator.pushReplacementNamed(context, CatalogHome.routeId);
+          int role = Provider.of<Auth>(context, listen: false).getUserInfo.role;
+          navigateLogin(role);
         }
         else{
           validationText = AuthExceptionHandler.generateExceptionMessage(status);
@@ -49,17 +51,24 @@ class _LoginScreenState extends State<LoginScreen> {
         setState(() {
         });
         } 
-        
     });
-    
-    
   }
+
+  void navigateLogin(int role) async {
+    //Jika role PP dan Guest maka navigate ke home
+    if(role==0||role==1){
+          Navigator.pushReplacementNamed(context, CatalogHome.routeId);
+        }
+        else{
+          Navigator.of(context).pushReplacement(MaterialPageRoute(builder:(context)=>RoleMenu()));
+        } 
+    }
 
   void checkLogin()  async{
     await Provider.of<Auth>(context, listen: false).checkAuth().then((value) {
       if(value){
         WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.pushReplacementNamed(context, CatalogHome.routeId);
+          navigateLogin(Provider.of<Auth>(context, listen: false).getUserInfo.role);
       });
       }
     });

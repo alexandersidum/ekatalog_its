@@ -44,15 +44,17 @@ class AddProductScreenState extends State<AddProductScreen> {
   List<ImageEditInfo> pickedImageInfo = [ImageEditInfo(), ImageEditInfo(), ImageEditInfo()];
   //TODO Dummy Kategori
   List<String> listKategori = [
-    "Alat Kantor",
-    "AC",
-    "Monitor",
-    "Smartphone",
-    "PC",
-    "Laptop",
-    "Proyektor",
-    "Elektronik"
   ];
+  // List<String> listKategori = [
+  //   "Alat Kantor",
+  //   "AC",
+  //   "Monitor",
+  //   "Smartphone",
+  //   "PC",
+  //   "Laptop",
+  //   "Proyektor",
+  //   "Elektronik"
+  // ];
   //TODO Validator
   TextEditingController _nameController = TextEditingController();
   TextEditingController _sellerPriceController = TextEditingController();
@@ -86,6 +88,17 @@ class AddProductScreenState extends State<AddProductScreen> {
         }
       index++;
     });
+    await getCategory();
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  Future<void> getCategory()async{
+    setState(() {
+      isLoading = true;
+    });
+    listKategori = await db.getCategory().then((listCategory)=>listCategory.map((e)=>e.name).toList());
     setState(() {
       isLoading = false;
     });
@@ -107,6 +120,7 @@ class AddProductScreenState extends State<AddProductScreen> {
       getNetworkImage(item.image);
     }
     else{
+      getCategory();
       print("widget  null");
     }
     super.initState();
@@ -239,12 +253,13 @@ class AddProductScreenState extends State<AddProductScreen> {
                       ),
                       child: DropdownButtonHideUnderline(
                         child: DropdownButton(
+                            hint: Text("Pilih Kategori", style:kCalibri),
                             isExpanded: true,
                             dropdownColor: Colors.white,
-                            value: selectedCategory,
+                            value: listKategori.contains(selectedCategory)?selectedCategory:null,
                             items: listKategori
                                 .map((kategori) => DropdownMenuItem<String>(
-                                      child: FittedBox(child: Text(kategori)),
+                                      child: FittedBox(child: Text(kategori, style: kCalibri)),
                                       value: kategori,
                                     ))
                                 .toList(),

@@ -1,11 +1,16 @@
 import 'package:e_catalog/auth.dart';
+import 'package:e_catalog/components/custom_text_field.dart';
+import 'package:e_catalog/components/modal_bottom_sheet_app.dart';
 import 'package:e_catalog/constants.dart';
 import 'package:e_catalog/models/account.dart';
 import 'package:e_catalog/models/sales_order.dart';
 import 'package:e_catalog/utilities/order_services.dart';
 import "package:flutter/material.dart";
 import 'package:intl/intl.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:io';
 import 'package:provider/provider.dart';
+import 'package:e_catalog/components/custom_raised_button.dart';
 
 class OrderConfirmationPP extends StatefulWidget {
   @override
@@ -19,6 +24,9 @@ class _OrderConfirmationPPState extends State<OrderConfirmationPP> {
   sortedBy sorted = sortedBy.Default;
   Stream<List<SalesOrder>> orderStreams;
   PejabatPengadaan pp ;
+  ImagePicker _imagePicker = ImagePicker();
+  File pickedImage;
+  TextEditingController keteranganController = TextEditingController();
 
 
   @override
@@ -34,6 +42,87 @@ class _OrderConfirmationPPState extends State<OrderConfirmationPP> {
       output = true;
     };});
     return output;
+  }
+
+  Future<void> pickImage() async {
+    await _imagePicker.getImage(source: ImageSource.gallery).then((pickedFile) {
+      if (pickedFile != null) {
+        pickedImage = File(pickedFile.path);
+      } 
+    });
+    setState(() {});
+    return;
+  }
+
+  Widget konfirmasiPenerimaanSheet(Size size, SalesOrder so) {
+    return StatefulBuilder(
+      builder: (context, setStater) {
+        return Container(
+          width: size.width,
+          height: size.height / 1.5,
+          decoration: BoxDecoration(color: kBlueMainColor,
+          borderRadius: BorderRadius.only(topLeft: Radius.circular(10), topRight: Radius.circular(10))),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                padding : EdgeInsets.symmetric(horizontal: size.width/20, vertical:size.height/100),
+                child : Text("Masukkan Bukti Penerimaan dan Keterangan jika diperlukan",textAlign : TextAlign.center, style:kCalibri.copyWith(color: Colors.white))),
+              Container(
+                child: GestureDetector(
+                  onTap: () async{
+                    await pickImage();
+                    setStater((){});
+                  },
+                  child: Container(
+                    margin: EdgeInsets.symmetric(vertical : size.height/30),
+                    height: size.height / 5,
+                    width: size.height / 5,
+                    color: Colors.white,
+                    alignment: Alignment.centerLeft,
+                    child: pickedImage != null
+                        ? Image.file(
+                            pickedImage,
+                            fit: BoxFit.cover,
+                            height: size.height / 5,
+                            width: size.height / 5,
+                          )
+                        : Align(
+                          alignment: Alignment.center,
+                          child: Icon(Icons.add_a_photo)),
+                  ),
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(vertical : size.height/100, horizontal:size.width/10),
+                child: CustomTextField(
+                  maxLine: 3,
+                  hintText: "Keterangan",
+                  controller: keteranganController,
+                ),
+              ),
+              Container(
+                padding: EdgeInsets.symmetric(vertical : size.height/100, horizontal:size.width/10),
+                child: CustomRaisedButton(
+                color: kOrangeButtonColor,
+                callback: ()async{
+                  await orderService.setProductReceiveStatus(
+                    buktiPenerimaan: pickedImage,
+                    docId: so.docId,
+                    keterangan: keteranganController.text,
+                    newStatus: 7,
+                    callback: (bool a){
+                      Navigator.of(context).pop(a);
+                    }
+                  );
+                },
+                buttonChild: Text("Konfirmasi", style: kCalibriBold.copyWith(color: Colors.black)),
+              ),)
+            ],
+          ),
+        );
+      }
+    );
   }
 
   Widget itemTile(context, SalesOrder element) {
@@ -192,11 +281,19 @@ class _OrderConfirmationPPState extends State<OrderConfirmationPP> {
       children: [
         order.status == 3 || order.status == 4
             ? TextButton(
-                onPressed: () async {
-                  await orderService.changeOrderStatus(
-                      docId: order.docId,
-                      newStatus: 7,
-                      callback: (isSuccess) => print(isSuccess));
+                onPressed: ()  async{
+                  bool isSuccess = await showModalBottomSheetApp(
+                    context: context,
+                    builder: (context)=>konfirmasiPenerimaanSheet(size, order)
+                  ).whenComplete((){
+                    pickedImage = null;
+                    keteranganController.clear();
+                  });
+                  if(isSuccess!=null){
+                    Scaffold.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text(isSuccess?'BERHASIL':"GAGAL", style: kMavenBold,))
+                  );}
                 },
                 child: Text(
                   "Konfirmasi Penerimaan Barang",

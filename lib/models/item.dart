@@ -9,7 +9,6 @@ class Item {
   String id;
   String name;
   List<String> image;
-  List<String> keywords;
   String description;
   String category;
   String seller;
@@ -26,7 +25,7 @@ class Item {
 
   //0 belum disetujui 1 disetujui 2 proses negosiasi 3 ditolak
 
-  Item({this.id, this.name, this.image, this.keywords, this.creationDate, this.keteranganPengajuan, this.description,this.category, this.ukpbjPrice, this.sellerPrice, this.seller, this.stock, this.price, this.sold, this.taxPercentage, this.sellerUid, this.status});
+  Item({this.id, this.name, this.image, this.creationDate, this.keteranganPengajuan, this.description,this.category, this.ukpbjPrice, this.sellerPrice, this.seller, this.stock, this.price, this.sold, this.taxPercentage, this.sellerUid, this.status});
   
   factory Item.fromDb(Map<String, dynamic> parsedData){
 
@@ -63,7 +62,8 @@ class Item {
       'description' : this.description,
       'seller' : this.seller,
       'sellerUid' : this.sellerUid,
-      'category' : this.category.trim().toLowerCase(),
+      'category' : this.category.trim(),
+      'categoryLower' : this.category.trim().toLowerCase(),
       'price' : this.price,
       'sold' : this.sold,
       'sellerPrice' : this.sellerPrice,
@@ -126,16 +126,26 @@ class Item {
 }
 
 class Category{
+  String docId;
   String name;
   String thumbnailUrl;
 
-  Category({this.name, this.thumbnailUrl});
+  Category({this.name, this.thumbnailUrl, this.docId});
 
-  factory Category.fromDb(Map<String, dynamic> parsedData){
+  factory Category.fromDb(Map<String, dynamic> parsedData, String id){
     return(
       Category(
         name: parsedData['name'],
-        thumbnailUrl: parsedData['thumbnail']
+        thumbnailUrl: parsedData['thumbnail'],
+        docId: id
       ));
   }
+
+  Map<String, dynamic> toMap(){
+    return {
+      'name': name,
+      'thumbnail' : thumbnailUrl
+    };
+  }
+
 }

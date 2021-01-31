@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_catalog/auth.dart';
 import 'package:e_catalog/components/bottom_sheet_decline_info.dart';
@@ -11,7 +13,11 @@ import 'package:e_catalog/screens/penyedia_screen/sales_order_detail_penyedia.da
 import 'package:e_catalog/utilities/order_services.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:pdf/pdf.dart';
 import 'package:provider/provider.dart';
+import 'package:e_catalog/utilities/invoice_generator.dart' as ig;
+import 'package:path_provider/path_provider.dart';
+import 'package:e_catalog/components/pdf_view_screen.dart';
 
 class SalesOrderPenyedia extends StatefulWidget {
   @override
@@ -25,6 +31,16 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
   sortedBy sorted = sortedBy.Default;
   Stream<List<SalesOrder>> orderStreams;
   Seller seller;
+
+  createInvoice(SalesOrder salesOrder)async{
+    final String dir ="/storage/emulated/0/Download";
+    final String path = '$dir/example.pdf';
+    final File file = File(path);
+    Uint8List invoice = await ig.generateInvoice(PdfPageFormat.a4, salesOrder);
+    await file.writeAsBytes(invoice);
+    Navigator.of(context).push(MaterialPageRoute(builder: (context)=>PdfScreen(path:path)));
+  }
+
 
   bool itemChecker(List<Order> listOrder, String searched) {
     bool output = false;
@@ -42,9 +58,10 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
 
   @override
   void initState() {
+    print("INIT STATES Order");
     seller = Provider.of<Auth>(context, listen: false).getUserInfo;
     orderStreams = orderService
-        .getSellerSalesOrder(seller.uid, [1, 3, 6]).asBroadcastStream();
+        .getSellerSalesOrder(seller.uid, [1, 3, 4 , 7]).asBroadcastStream();
     super.initState();
   }
 
@@ -80,25 +97,26 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
                           onTap: () {
                             Navigator.of(context).push(MaterialPageRoute(
                               builder: (context) => StreamBuilder(
-                                  stream: orderService.getSellerSalesOrder(
-                                      seller.uid, [1, 3, 6]),
-                                  // stream : orderStreams,
+                                  // stream: orderService.getSellerSalesOrder(
+                                  //     seller.uid, [1, 3, 4, 7]),
+                                      stream: orderService.getSingleSalesOrder(
+                                        docId: element.docId
+                                      ),
                                   builder: (context,
-                                      AsyncSnapshot<List<SalesOrder>>
+                                      AsyncSnapshot<SalesOrder>
                                           snapshot) {
                                     print("REBUILD");
                                     if (snapshot.data != null) {
                                       try {
                                         return SalesOrderDetailPenyedia(
-                                          order: snapshot.data[index],
-                                          streamOrder: snapshot,
+                                          order: snapshot.data,
                                           index: index,
                                         );
                                       } catch (e) {
-                                        Navigator.of(context).pop();
+                                        return Container();
                                       }
                                     } else {
-                                      Container();
+                                      return Container();
                                     }
                                   }),
                               fullscreenDialog: true,
@@ -219,6 +237,12 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
         TextButton(
+          child: Text("Test PDf"),
+          onPressed: (){
+            createInvoice(order);
+          },
+        ),
+        TextButton(
           onPressed: () {
             showModalBottomSheetApp(
                 context: context,
@@ -280,149 +304,154 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Sales Order", style: kCalibriBold),
-        centerTitle: false,
-        backgroundColor: kBlueMainColor,
-        elevation: 0,
-      ),
-      body: Column(
-        children: [
-          Row(
-            children: [
-              Container(
-                margin: EdgeInsets.only(right: size.width / 100),
-                height: size.height / 20,
-                padding: EdgeInsets.only(
-                    right: size.width / 100, left: size.width / 50),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(5),
-                    color: Colors.white,
-                    border: Border.all(
-                        color: kGrayConcreteColor,
-                        width: 1,
-                        style: BorderStyle.solid)),
-                child: Theme(
-                  data: Theme.of(context).copyWith(canvasColor: Colors.white),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton(
-                        value: sorted,
-                        items: dropDownSort(size),
-                        onChanged: (value) {
-                          setState(() {
-                            sorted = value;
-                          });
-                        }),
+    return GestureDetector(
+      onTap: (){
+        FocusScope.of(context).unfocus();
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text("Sales Order", style: kCalibriBold),
+          centerTitle: false,
+          backgroundColor: kBlueMainColor,
+          elevation: 0,
+        ),
+        body: Column(
+          children: [
+            Row(
+              children: [
+                Container(
+                  margin: EdgeInsets.only(right: size.width / 100),
+                  height: size.height / 20,
+                  padding: EdgeInsets.only(
+                      right: size.width / 100, left: size.width / 50),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      color: Colors.white,
+                      border: Border.all(
+                          color: kGrayConcreteColor,
+                          width: 1,
+                          style: BorderStyle.solid)),
+                  child: Theme(
+                    data: Theme.of(context).copyWith(canvasColor: Colors.white),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton(
+                          value: sorted,
+                          items: dropDownSort(size),
+                          onChanged: (value) {
+                            setState(() {
+                              sorted = value;
+                            });
+                          }),
+                    ),
                   ),
                 ),
-              ),
-              Expanded(
-                child: Container(
-                  height: MediaQuery.of(context).size.height / 18,
-                  width: MediaQuery.of(context).size.width * 0.7,
-                  child: TextField(
-                    decoration: InputDecoration(
-                        contentPadding: EdgeInsets.only(top: 5, left: 5),
-                        suffixIcon: Icon(Icons.search),
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-                          borderSide: BorderSide(
-                            width: 0,
-                            style: BorderStyle.none,
+                Expanded(
+                  child: Container(
+                    height: MediaQuery.of(context).size.height / 18,
+                    width: MediaQuery.of(context).size.width * 0.7,
+                    child: TextField(
+                      decoration: InputDecoration(
+                          contentPadding: EdgeInsets.only(top: 5, left: 5),
+                          suffixIcon: Icon(Icons.search),
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                            borderSide: BorderSide(
+                              width: 0,
+                              style: BorderStyle.none,
+                            ),
+                          ),
+                          hintText: 'Search'),
+                      onChanged: (value) {
+                        if (value.isNotEmpty || value != null) {
+                          onSearch = true;
+                          searchQuery = value;
+                        } else {
+                          onSearch = false;
+                          searchQuery = value;
+                        }
+                        setState(() {});
+                      },
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            Expanded(
+              child: StreamBuilder(
+                  stream: orderStreams,
+                  builder: (context, AsyncSnapshot<List<SalesOrder>> snapshot) {
+                    if (snapshot.hasError) {
+                      return Container(
+                        decoration: BoxDecoration(color: kBackgroundMainColor),
+                        child: Text(
+                          "Error Mengambil Data",
+                          style: kCalibriBold,
+                        ),
+                      );
+                    }
+                    if (snapshot == null || snapshot.data == null) {
+                      return Container(
+                        decoration: BoxDecoration(color: kBackgroundMainColor),
+                        child: Center(
+                          child: Text(
+                            "Tidak ada Order",
+                            style: kCalibriBold,
                           ),
                         ),
-                        hintText: 'Search'),
-                    onChanged: (value) {
-                      if (value.isNotEmpty || value != null) {
-                        onSearch = true;
-                        searchQuery = value;
-                      } else {
-                        onSearch = false;
-                        searchQuery = value;
-                      }
-                      setState(() {});
-                    },
-                  ),
-                ),
-              ),
-            ],
-          ),
-          Expanded(
-            child: StreamBuilder(
-                stream: orderStreams,
-                builder: (context, AsyncSnapshot<List<SalesOrder>> snapshot) {
-                  if (snapshot.hasError) {
-                    return Container(
-                      decoration: BoxDecoration(color: kBackgroundMainColor),
-                      child: Text(
-                        "Error Mengambil Data",
-                        style: kCalibriBold,
-                      ),
-                    );
-                  }
-                  if (snapshot == null || snapshot.data == null) {
-                    return Container(
-                      decoration: BoxDecoration(color: kBackgroundMainColor),
-                      child: Center(
-                        child: Text(
-                          "Tidak ada Order",
-                          style: kCalibriBold,
+                      );
+                    } else if (snapshot.data.length <= 0) {
+                      return Container(
+                        decoration: BoxDecoration(color: kBackgroundMainColor),
+                        child: Center(
+                          child: Text(
+                            "Tidak ada Order",
+                            style: kCalibriBold,
+                          ),
                         ),
-                      ),
-                    );
-                  } else if (snapshot.data.length <= 0) {
-                    return Container(
-                      decoration: BoxDecoration(color: kBackgroundMainColor),
-                      child: Center(
-                        child: Text(
-                          "Tidak ada Order",
-                          style: kCalibriBold,
-                        ),
-                      ),
-                    );
-                  } else {
-                    List<SalesOrder> finalItemList = onSearch
-                        ? snapshot.data.where((element) {
-                            // return element.itemName
-                            //         .toLowerCase()
-                            //         .contains(searchQuery.toLowerCase()) ||
-                            return itemChecker(
-                                    element.listOrder, searchQuery) ||
-                                element.id
-                                    .toLowerCase()
-                                    .contains(searchQuery.toLowerCase()) ||
-                                element.ppkName
-                                    .toLowerCase()
-                                    .contains(searchQuery.toLowerCase());
-                          }).toList()
-                        : snapshot.data;
-                    sortItem(finalItemList);
+                      );
+                    } else {
+                      List<SalesOrder> finalItemList = onSearch
+                          ? snapshot.data.where((element) {
+                              // return element.itemName
+                              //         .toLowerCase()
+                              //         .contains(searchQuery.toLowerCase()) ||
+                              return itemChecker(
+                                      element.listOrder, searchQuery) ||
+                                  element.id
+                                      .toLowerCase()
+                                      .contains(searchQuery.toLowerCase()) ||
+                                  element.ppkName
+                                      .toLowerCase()
+                                      .contains(searchQuery.toLowerCase());
+                            }).toList()
+                          : snapshot.data;
+                      sortItem(finalItemList);
 
-                    return finalItemList.length > 0
-                        ? ListView(
-                            children: finalItemList
-                                .asMap()
-                                .map((i, e) => MapEntry(
-                                    i, itemTile(context, e, snapshot, i)))
-                                .values
-                                .toList())
-                        : Container(
-                            decoration:
-                                BoxDecoration(color: kBackgroundMainColor),
-                            child: Center(
-                              child: Text(
-                                "Order Tidak Ditemukan",
-                                style: kCalibriBold,
+                      return finalItemList.length > 0
+                          ? ListView(
+                              children: finalItemList
+                                  .asMap()
+                                  .map((i, e) => MapEntry(
+                                      i, itemTile(context, e, snapshot, i)))
+                                  .values
+                                  .toList())
+                          : Container(
+                              decoration:
+                                  BoxDecoration(color: kBackgroundMainColor),
+                              child: Center(
+                                child: Text(
+                                  "Order Tidak Ditemukan",
+                                  style: kCalibriBold,
+                                ),
                               ),
-                            ),
-                          );
-                  }
-                }),
-          ),
-        ],
+                            );
+                    }
+                  }),
+            ),
+          ],
+        ),
       ),
     );
   }

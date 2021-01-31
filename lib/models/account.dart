@@ -1,6 +1,4 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_catalog/models/item.dart';
-import 'package:e_catalog/utilities/order_services.dart';
 
 class Account {
   //Belum tau propertinya apa aja
@@ -12,9 +10,11 @@ class Account {
       this.registrationDate,
       this.role,
       this.uid,
-      this.imageUrl});
+      this.imageUrl,
+      this.isBlocked,
+      this.isAccepted,
+      });
 
-  FirebaseFirestore firestore = FirebaseFirestore.instance;
   List<String> listRole = ['Guest','Pejabat Pengadaan', 'Penyedia', 'Pejabat Pembuat Komitmen', 'UKPBJ', 'Audit', 'BPP'];
   String name;
   String email;
@@ -23,17 +23,36 @@ class Account {
   DateTime registrationDate;
   String uid;
   int role;
+  bool isBlocked;
+  bool isAccepted;
+
+  factory Account.generateUnacceptedAccount(Map<String, dynamic> parsedData) {
+    return Account(
+      email: parsedData['email'],
+      name: parsedData['name'],
+      imageUrl: parsedData['imageUrl'],
+      registrationDate:
+          DateTime.now(),
+      role: 0,
+      telepon: null,
+      uid: parsedData['uid'],
+      isAccepted: parsedData['is_accepted'],
+      isBlocked: parsedData['is_blocked'],
+    );
+  }
 
   factory Account.generateGuest() {
     return Account(
-      email: "guest",
-      name: "guest",
+      email: "",
+      name: "Pengunjung",
       imageUrl: "",
       registrationDate:
           DateTime.now(),
       role: 0,
       telepon: null,
       uid: "guest",
+      isAccepted: true,
+      isBlocked: false,
     );
   }
 
@@ -47,11 +66,55 @@ class Account {
       role: parsedData['role'],
       telepon: parsedData['telepon'],
       uid: parsedData['uid'],
+      isAccepted: parsedData['is_accepted'],
+      isBlocked: parsedData['is_blocked'],
     );
   }
 
+  factory Account.generateRoleBasedAccount(Map<String, dynamic> parsedData) {
+    switch(parsedData['role']){
+      case 0:
+            return Account.generateGuest();
+            break;
+          case 1:
+            return PejabatPengadaan.fromDb(parsedData);
+            break;
+          case 2:
+            return Seller.fromDb(parsedData);
+            break;
+          case 3:
+            return PejabatPembuatKomitmen.fromDb(parsedData);
+            break;
+          case 4:
+            return UnitKerjaPengadaan.fromDb(parsedData);
+            break;
+          case 5:
+            return Audit.fromDb(parsedData);
+            break;
+          case 6:
+            return BendaharaPengeluaran.fromDb(parsedData);
+            break;
+          case 9:
+            return Admin.fromDb(parsedData);
+            break;
+          default:
+            return Account.fromDb(parsedData);
+
+    }
+    // return Account(
+    //   email: parsedData['email'],
+    //   name: parsedData['name'],
+    //   imageUrl: parsedData['imageUrl'],
+    //   registrationDate:
+    //       DateTime.parse(parsedData['registrationDate'].toDate().toString()),
+    //   role: parsedData['role'],
+    //   telepon: parsedData['telepon'],
+    //   uid: parsedData['uid'],
+    // );
+  }
+
   String get getRole {
-    return listRole[this.role];
+    return this.role==9?"Admin":listRole[this.role];
   }
 }
 
@@ -71,6 +134,8 @@ class Seller extends Account {
       DateTime registrationDate,
       String uid,
       int role,
+      bool isBlocked,
+      bool isAccepted,
       this.location,
       this.namaPerusahaan,
       this.namaBank,
@@ -83,7 +148,9 @@ class Seller extends Account {
             telepon: telepon,
             registrationDate: registrationDate,
             uid: uid,
-            role: role);
+            role: role,
+            isBlocked: isBlocked,
+            isAccepted : isAccepted);
 
   factory Seller.fromDb(Map<String, dynamic> parsedData) {
     return Seller(
@@ -100,20 +167,22 @@ class Seller extends Account {
       namaBank: parsedData['namaBank'],
       atasNamaRekening: parsedData['atasNamaRekening'],
       nomorRekening: parsedData['nomorRekening'],
+      isAccepted: parsedData['is_accepted'],
+      isBlocked: parsedData['is_blocked'],
     );
   }
 
 
-  Stream<List<Item>> listProduct() {
-    return super
-        .firestore
-        .collection('items')
-        .where('sellerUid', isEqualTo: this.uid)
-        .orderBy('price')
-        .snapshots()
-        .map((event) =>
-            event.docs.map((doc) => Item.fromDb(doc.data())).toList());
-  }
+  // Stream<List<Item>> listProduct() {
+  //   return super
+  //       .firestore
+  //       .collection('items')
+  //       .where('sellerUid', isEqualTo: this.uid)
+  //       .orderBy('price')
+  //       .snapshots()
+  //       .map((event) =>
+  //           event.docs.map((doc) => Item.fromDb(doc.data())).toList());
+  // }
 }
 
 class PejabatPengadaan extends Account {
@@ -152,6 +221,8 @@ class PejabatPengadaan extends Account {
       DateTime registrationDate,
       String uid,
       int role,
+      bool isBlocked,
+      bool isAccepted,
       this.unit})
       : super(
             name: name,
@@ -160,6 +231,8 @@ class PejabatPengadaan extends Account {
             imageUrl: imageUrl,
             registrationDate: registrationDate,
             uid: uid,
+            isBlocked: isBlocked,
+            isAccepted : isAccepted,
             role: role);
 
   String get getUnit {
@@ -196,6 +269,8 @@ class PejabatPengadaan extends Account {
       role: parsedData['role'],
       telepon: parsedData['telepon'],
       uid: parsedData['uid'],
+      isAccepted: parsedData['is_accepted'],
+      isBlocked: parsedData['is_blocked'],
     );
   }
 }
@@ -224,6 +299,8 @@ class PejabatPembuatKomitmen extends Account {
       DateTime registrationDate,
       String uid,
       int role,
+      bool isBlocked,
+      bool isAccepted,
       this.unit})
       : super(
             name: name,
@@ -232,6 +309,8 @@ class PejabatPembuatKomitmen extends Account {
             imageUrl: imageUrl,
             registrationDate: registrationDate,
             uid: uid,
+            isBlocked: isBlocked,
+            isAccepted : isAccepted,
             role: role);
 
   String get getUnit {
@@ -268,6 +347,8 @@ class PejabatPembuatKomitmen extends Account {
       role: parsedData['role'],
       telepon: parsedData['telepon'],
       uid: parsedData['uid'],
+      isAccepted: parsedData['is_accepted'],
+      isBlocked: parsedData['is_blocked'],
     );
   }
 }
@@ -282,6 +363,8 @@ class UnitKerjaPengadaan extends Account {
       int telepon,
       DateTime registrationDate,
       String uid,
+      bool isBlocked,
+      bool isAccepted,
       int role})
       : super(
             name: name,
@@ -290,6 +373,8 @@ class UnitKerjaPengadaan extends Account {
             imageUrl: imageUrl,
             registrationDate: registrationDate,
             uid: uid,
+            isBlocked: isBlocked,
+            isAccepted : isAccepted,
             role: role);
 
 
@@ -303,6 +388,8 @@ class UnitKerjaPengadaan extends Account {
       role: parsedData['role'],
       telepon: parsedData['telepon'],
       uid: parsedData['uid'],
+      isAccepted: parsedData['is_accepted'],
+      isBlocked: parsedData['is_blocked'],
     );
   }
 }
@@ -317,6 +404,8 @@ class Audit extends Account {
       int telepon,
       DateTime registrationDate,
       String uid,
+      bool isBlocked,
+      bool isAccepted,
       int role})
       : super(
             name: name,
@@ -325,6 +414,8 @@ class Audit extends Account {
             imageUrl: imageUrl,
             registrationDate: registrationDate,
             uid: uid,
+            isBlocked: isBlocked,
+            isAccepted : isAccepted,
             role: role);
 
 
@@ -338,6 +429,8 @@ class Audit extends Account {
       role: parsedData['role'],
       telepon: parsedData['telepon'],
       uid: parsedData['uid'],
+      isAccepted: parsedData['is_accepted'],
+      isBlocked: parsedData['is_blocked'],
     );
   }
 }
@@ -365,6 +458,8 @@ class BendaharaPengeluaran extends Account {
       int telepon,
       DateTime registrationDate,
       String uid,
+      bool isBlocked,
+      bool isAccepted,
       int role,
       this.unit})
       : super(
@@ -374,6 +469,8 @@ class BendaharaPengeluaran extends Account {
             imageUrl: imageUrl,
             registrationDate: registrationDate,
             uid: uid,
+            isBlocked: isBlocked,
+            isAccepted : isAccepted,
             role: role);
 
   String get getUnit {
@@ -410,6 +507,48 @@ class BendaharaPengeluaran extends Account {
       role: parsedData['role'],
       telepon: parsedData['telepon'],
       uid: parsedData['uid'],
+      isAccepted: parsedData['is_accepted'],
+      isBlocked: parsedData['is_blocked'],
+    );
+  }
+}
+
+class Admin extends Account {
+  
+  Admin(
+      {String name,
+      String email,
+      String imageUrl,
+      int telepon,
+      DateTime registrationDate,
+      bool isBlocked,
+      bool isAccepted,
+      String uid,
+      int role})
+      : super(
+            name: name,
+            email: email,
+            telepon: telepon,
+            imageUrl: imageUrl,
+            registrationDate: registrationDate,
+            uid: uid,
+            isBlocked: isBlocked,
+            isAccepted : isAccepted,
+            role: role);
+
+
+  factory Admin.fromDb(Map<String, dynamic> parsedData) {
+    return Admin(
+      email: parsedData['email'],
+      name: parsedData['name'],
+      imageUrl: parsedData['imageUrl'],
+      registrationDate:
+          DateTime.parse(parsedData['registrationDate'].toDate().toString()),
+      role: parsedData['role'],
+      telepon: parsedData['telepon'],
+      uid: parsedData['uid'],
+      isAccepted: parsedData['is_accepted'],
+      isBlocked: parsedData['is_blocked'],
     );
   }
 }

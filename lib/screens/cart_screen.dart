@@ -24,7 +24,6 @@ class CartScreen extends StatelessWidget {
     Size size = MediaQuery.of(context).size;
 
     return Container(
-      height: size.height * 0.15,
       color: Colors.white,
       margin: EdgeInsets.all(5),
       child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [

@@ -281,6 +281,8 @@ class QuotationScreenState extends State<QuotationScreen> {
         child: Column(
           children: [
             Container(
+              
+                      color: kBlueMainColor,
               padding: EdgeInsets.symmetric(horizontal : size.width/100, vertical:size.height/200),
               child: Row(
                 children: [
