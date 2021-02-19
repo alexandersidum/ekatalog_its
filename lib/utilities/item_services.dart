@@ -4,9 +4,20 @@ import 'dart:io';
 import 'package:e_catalog/models/item.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
+// Status Item
+// 0 : Belum Disetujui UKPBJ
+// 1 : Disetujui UKPBJ
+// 2 : Proses Negosiasi
+// 3 : Negosiasi Diterima Penyedia
+// 4 : Negosiasi Ditolak Penyedia
+// 5 : Ditolak UKPBJ
+// 6 : Negosiasi Perubahan Harga
+// 7 : Perubahan Harga ditolak UKPBJ
+// 8 : Dihapus Penyedia
+
+
 class ItemService {
   ItemService({this.uid});
-  //TODO apa perlu uid?
   final String uid;
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
   FirebaseStorage _fstorage = FirebaseStorage.instance;
@@ -25,7 +36,7 @@ class ItemService {
   Stream<List<Item>> getItemsWithStatus(List<int> status) {
     return _firestore
         .collection(itemsPath)
-        .where('status', whereIn: status)
+        .where('status', whereIn: status).orderBy('creationDate',descending: true)
         .snapshots()
         .map((QuerySnapshot snapshot) => snapshot.docs
             .map((DocumentSnapshot document) => Item.fromDb(document.data()))
@@ -38,7 +49,8 @@ class ItemService {
         .where('status', isEqualTo: 1).limit(10)
         .snapshots()
         .map((QuerySnapshot snapshot) => snapshot.docs
-            .map((DocumentSnapshot document) => Item.fromDb(document.data()))
+            .map((DocumentSnapshot document) {
+              return Item.fromDb(document.data());} )
             .toList());
   }
 
@@ -51,8 +63,6 @@ class ItemService {
         .snapshots()
         .map((QuerySnapshot snapshot) =>
             snapshot.docs.map((DocumentSnapshot document) {
-              print(
-                  "isfromcache = " + document.metadata.isFromCache.toString());
               return Item.fromDb(document.data());
             }).toList());
   }
@@ -66,7 +76,6 @@ class ItemService {
       "sellerPrice": newSellerPrice,
       "status": 6
     };
-    print(newSellerPrice);
     return _firestore
         .collection(itemsPath)
         .doc(itemId)
@@ -92,18 +101,14 @@ class ItemService {
   Future<void> proposeItem(
       {Item item, List<File> images, Function callback}) async {
     try {
-      print("Sampai uploaditemimage TRY");
       await uploadItemImage(images, (List<String> listImage) async {
         if (listImage.length <= 0) {
-          print("Sampai uploaditemimage value length <=0");
           throw ("Image Upload Failed");
         } else {
-          print("Sampai uploaditemimage value length >0");
           await _firestore
               .collection(itemsPath)
               .add(item.toMap())
               .then((value) async {
-                print("Sukses add item map");
                 value != null
                     ? await _firestore.doc(value.path).update({
                         'id': _firestore.doc(value.path).id.toString(),
@@ -111,16 +116,13 @@ class ItemService {
                         'image': listImage
                       }).then((value) {
                         callback(true);
-                        print("sukses set id date");
                       }).catchError(() {
-                        print("error set id date");
                         callback(false);
                       })
                     : throw ("Image Upload Failed");
               })
-              .timeout(Duration(seconds: 10))
+              .timeout(Duration(seconds: 30), onTimeout: (){throw ("Error Timeout");})
               .catchError((error) {
-                //TODO Ada yang tidak beres disini
                 throw ("Upload Failed");
               });
         }
@@ -132,28 +134,22 @@ class ItemService {
 
   Future<void> editItem(
       {Item item, List<ImageEditInfo> images, Function callback}) async {
-    //Lakukan test lagi
     if (images != null) {
       await editItemImage(images, (List<String> listImage) async {
         if (listImage.length <= 0) {
-          print("LIST IMAGE <0");
           throw ("Image Upload Failed");
         } else {
-          print("else image length");
           Map<String, dynamic> mapItem = item.toMap();
           mapItem['image'] = listImage;
-          print("Mappedimage");
           await _firestore
               .collection(itemsPath)
               .doc(item.id)
               .update(mapItem)
               .then((value) async {
-            print("then firestore");
             callback(true);
           }).timeout(Duration(seconds: 30), onTimeout: () {
             callback(false);
           }).catchError((error) {
-            //TODO Ada yang tidak beres disini
             callback(false);
             throw ("Upload Failed");
           });
@@ -163,12 +159,9 @@ class ItemService {
   }
 
   Future<void> uploadItemImage(List<File> itemImage, Function callback) async {
-    print("Sampai uploaditemimage");
-    print(itemImage);
     List<String> output = [];
     await Future.forEach(itemImage, (image) async {
       if (image != null) {
-        print("Sampai uploaditemimage item != null");
         String fileName = p.basename(image.path);
         Reference storageRef = _fstorage.ref().child('item_images/$fileName');
         await storageRef.putFile(image);
@@ -181,21 +174,15 @@ class ItemService {
 
   Future<void> editItemImage(
       List<ImageEditInfo> itemImage, Function callback) async {
-    print("Sampai uploaditemimage");
     List<String> output = [];
-
     await Future.forEach(itemImage, (ImageEditInfo image) async {
-      print("a");
       if (image == null) {
-        print("image is null");
+
       } else if (image.isChanged && image.imageFile != null) {
         //Jika image berubah dan filenya tidak kosong berarti image diganti
-        print("c");
         //delete dulu sebelum upload image baru
         if (image.existingUrl != null) {
-          print("deleting");
           await _fstorage.refFromURL(image.existingUrl).delete();
-          print("deleteddddddddddddddddddddddddddddddddddddddddddddddddd");
         }
         String fileName = p.basename(image.imageFile.path);
         Reference storageRef = _fstorage.ref().child('item_images/$fileName');
@@ -205,19 +192,15 @@ class ItemService {
           image.existingUrl != null &&
           !image.isChanged) {
         //Jika image tidak berubah dan url tidak kosong berarti image tetap
-        print("e");
         output.add(image.existingUrl);
       } else if (image.isChanged &&
           image.imageFile == null &&
           image.existingUrl != null) {
         //Kalau berubah tapi tidak ada file yang diberikan berarti dihapus
         if (image.existingUrl != null) {
-          print("deleting");
           await _fstorage.refFromURL(image.existingUrl).delete();
-          print("deleteddddddddddddddddddddddddddddddddddddddddddddddddd");
         }
       }
-      print(output);
     });
     callback(output);
   }
@@ -268,14 +251,12 @@ class ItemService {
 
   Future<bool> acceptItemProposal(Item item) async {
     bool isSuccess = false;
-
     await _firestore
         .collection(itemsPath)
         .doc(item.id)
         .update({
           'status': 1,
           'price': item.status == 3 ? item.ukpbjPrice : item.sellerPrice,
-          //
         })
         .then((value) => isSuccess = true)
         .catchError((Object error) {
@@ -342,9 +323,7 @@ class ItemService {
   }
 
   Future<String> uploadCategoryImage(File image) async {
-    print("Sampai uploadcatimage");
       try {
-        print("Sampai uploadcatimage try");
         String fileName = p.basename(image.path);
         Reference storageRef = _fstorage.ref().child('category_images/$fileName');
         await storageRef.putFile(image);
@@ -360,14 +339,12 @@ class ItemService {
     await uploadCategoryImage(image).then(
       (String url)async{
         if(url!=null){
-          print("Sampai di url!=null");
          await _firestore.collection(categoryPath).add({
             'name' : name,
             'thumbnail' : url
           }).then((a)=>output = true).catchError((e)=>throw ("Gagal add Category ke Database"));
         }
         else{
-          print("Sampai else url!=null");
           throw ("Gagal add Category ImageUrl null");
         }
       }
@@ -375,41 +352,26 @@ class ItemService {
     return output;
   }
 
-  // Future<String> editCategory(Category category, File image) async {
-  //   await uploadCategoryImage(image).then(
-  //     (String url){
-  //       if(url!=null){
-  //         _firestore.collection(categoryPath).add()
-  //       }
-  //     }
-  //   );
-  // }
-
   Future<List<Item>> getItemListByCategory(String selectedCategory)async {
     return await _firestore
         .collection(itemsPath).where('categoryLower', isEqualTo: selectedCategory).where('status', isEqualTo: 1).get()
         .then((value) => value.docs.map((e) => Item.fromDb(e.data())).toList()).catchError((Object err)=>List<Item>());
   }
 
-  Future<List<Item>> getItemListBySearch(String keyword)async {
+  //Get item list dengan keyword
+  Future<List<Item>> getItemListBySearch(String keyword, {int status})async {
     List<String> keywords = keyword.trim().toLowerCase().split(" ");
-    keywords.forEach((element) {print(element);});
     return await _firestore
-        .collection(itemsPath).where('keyword', arrayContainsAny: keywords).where('status', isEqualTo: 1).get()
+        .collection(itemsPath).where('keywords', arrayContainsAny: keywords).where('status', isEqualTo:status?? 1).get()
         .then((value) => value.docs.map((e) => Item.fromDb(e.data())).toList()).catchError((Object err)=>List<Item>());
   }
-
 }
 
-
-
-
-//Class tambahan untuk mempermudah manage gambar
+//Class tambahan untuk mempermudah manage gambar saat edit produk
 class ImageEditInfo {
   String existingUrl;
   File imageFile;
   bool isChanged = false;
   ImageEditInfo({this.existingUrl, this.imageFile, this.isChanged = false});
-
   void changeStatus(bool status) => isChanged = status;
 }

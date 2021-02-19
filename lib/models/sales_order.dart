@@ -1,8 +1,4 @@
-//model buat sales order
-import 'package:e_catalog/models/cart.dart';
-
 class SalesOrder{
-
   String id;
   String docId;
   List<Order> listOrder;
@@ -10,7 +6,6 @@ class SalesOrder{
   String seller; 
   String sellerUid; 
   DateTime creationDate;
-  //shipping
   String namaPenerima;
   String namaAlamat;
   String teleponPenerima;
@@ -21,25 +16,24 @@ class SalesOrder{
   String ppkUid;
   String ppkName;
   int unit;
+  String namaUnit;
   String feedback;
   String imageBuktiPembayaran;
   String imageBuktiPenerimaan;
   String keteranganPembayaran;
-
+  String ppkCode;
 
   SalesOrder({this.id, this.docId, this.listOrder, this.ppkName, 
   this.creationDate, this.totalPrice, this.seller, 
-  this.sellerUid, this.status, this.ppName, this.ppUid, 
+  this.sellerUid, this.status, this.ppName, this.ppUid, this.namaUnit,
   this.ppkUid, this.unit, this.address, this.namaAlamat, 
-  this.namaPenerima,this.teleponPenerima, this.feedback, this.imageBuktiPembayaran, this.imageBuktiPenerimaan, this.keteranganPembayaran});
+  this.namaPenerima,this.teleponPenerima, this.feedback, this.ppkCode, this.imageBuktiPembayaran, this.imageBuktiPenerimaan, this.keteranganPembayaran});
 
   factory SalesOrder.fromDb(Map<String , dynamic> parsedData, String docId){
     List<Order> orderList = parsedData['listOrder'].map<Order>((e) {
       var order = Map<String, dynamic>.from(e);
-      // print(z['itemName']);
       return Order.fromMap(order);
     }).toList();
-    print(parsedData['status']);
     return SalesOrder(
       docId: docId,
       id: parsedData['id'],
@@ -62,8 +56,9 @@ class SalesOrder{
       imageBuktiPembayaran: parsedData['imageBuktiUrl'],
       imageBuktiPenerimaan: parsedData['bukti_penerimaan'],
       keteranganPembayaran: parsedData['keteranganPembayaran'],
-      // listOrder : parsedData['listOrder'].map<Order>((Map<String, dynamic> e)=>Order.fromMap(e)).toList()
-    );
+      ppkCode: parsedData['ppkCode'],
+      namaUnit : parsedData['namaUnit']??"",
+     );
   }
 
   Map<String , dynamic> toMap(){
@@ -85,7 +80,9 @@ class SalesOrder{
       'teleponPenerima' : this.teleponPenerima,
       'feedback' : this.feedback,
       'listOrder' : this.listOrder.map((e) => e.toMap()).toList(),
-      'keyword' : generateKeyword()
+      'keyword' : generateKeyword(),
+      'ppkCode' : this.ppkCode,
+      'namaUnit' : this.namaUnit
     };
   }
 
@@ -115,7 +112,7 @@ class SalesOrder{
         output.add(pWord.toLowerCase());
       }
     );
-    output.add(this.getUnit.toLowerCase());
+    output.add(this.namaUnit.toLowerCase());
     return output;
   }
 

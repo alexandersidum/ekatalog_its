@@ -21,11 +21,15 @@ class ManageProduct extends StatefulWidget {
 class _ManageProductState extends State<ManageProduct> {
   int selectedTab = 0;
   ItemService itemService = ItemService();
+  bool isLoading = false;
   bool onSearch = false;
   String searchQuery = '';
   sortedBy sorted = sortedBy.Default;
+  ScrollController _scrollController = ScrollController();
   Stream<List<Item>> approvedProductStream;
   Stream<List<Item>> pendingProductStream;
+  List<Item> searchedApprovedItem =[];
+  List<Item> searchedPendingItem=[];
 
   @override
   void initState() {
@@ -34,8 +38,38 @@ class _ManageProductState extends State<ManageProduct> {
     }
     approvedProductStream = itemService.getItemsWithStatus([1]);
     pendingProductStream = itemService.getItemsWithStatus([0]);
+    _scrollController.addListener(onListChanged);
     super.initState();
   }
+
+  Future<void> searchItem()async{
+    isLoading = true;
+    searchedApprovedItem = await itemService.getItemListBySearch(searchQuery, status: 1).catchError((e)=>[]);
+    searchedPendingItem = await itemService.getItemListBySearch(searchQuery, status: 0).catchError((e)=>[]);
+    isLoading = false;
+  }
+
+  //TODO Pagination
+  void onListChanged(){
+    if (_scrollController.offset >= _scrollController.position.maxScrollExtent &&
+      !_scrollController.position.outOfRange) {
+        print("MELEBIHI");
+  }
+  }
+
+  Widget _buildProgressIndicator() {
+    return new Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: new Center(
+        child: new Opacity(
+          opacity: isLoading ? 1.0 : 00,
+          child: new CircularProgressIndicator(),
+        ),
+      ),
+    );
+  }
+
+
 
   void sortItem(List<Item> initialList) {
     switch (sorted) {
@@ -73,88 +107,6 @@ class _ManageProductState extends State<ManageProduct> {
     return output;
   }
 
-  Widget negosiasiBottomSheet(Size size, String id, String docId,
-      String sellerPrice, Function callback) {
-    int ukpbjPrice;
-    return StatefulBuilder(builder: (context, setState) {
-      return Container(
-        height: size.height / 2,
-        color: Colors.transparent,
-        child: Container(
-          decoration: BoxDecoration(
-              color: kBackgroundMainColor,
-              borderRadius: BorderRadius.vertical(
-                  top: Radius.circular(size.height / 30))),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: EdgeInsets.all(size.width / 100),
-                child: Text(
-                  "Negosiasi $id",
-                  textAlign: TextAlign.center,
-                  style: kMavenBold,
-                ),
-              ),
-              Container(
-                padding: EdgeInsets.all(size.width / 100),
-                child: Text(
-                  "Harga awal $sellerPrice",
-                  textAlign: TextAlign.center,
-                  style: kMavenBold.copyWith(color: Colors.orange),
-                ),
-              ),
-              SizedBox(
-                height: size.height / 20,
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(
-                    horizontal: size.width * 0.03,
-                    vertical: size.height * 0.015),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text("Penawaran",
-                        style: kCalibriBold.copyWith(
-                          color: kGrayTextColor,
-                          fontSize: size.height * 0.025,
-                        )),
-                  ],
-                ),
-              ),
-              Container(
-                  padding: EdgeInsets.symmetric(horizontal: size.width / 20),
-                  height: size.height / 6,
-                  child: CustomTextField(
-                    keyboardType: TextInputType.number,
-                    callback: (value) {
-                      ukpbjPrice = int.parse(value);
-                      print(ukpbjPrice);
-                    },
-                    hintText: "Harga Penawaran",
-                    maxLength: 100,
-                  )),
-              SizedBox(
-                height: size.height / 100,
-              ),
-              Container(
-                height: size.height / 20,
-                width: size.width / 3,
-                child: CustomRaisedButton(
-                  color: kRedButtonColor,
-                  callback: () {
-                    callback(ukpbjPrice);
-                  },
-                  buttonChild: Text("Submit",
-                      style: kCalibriBold.copyWith(color: Colors.white)),
-                ),
-              )
-            ],
-          ),
-        ),
-      );
-    });
-  }
 
   Widget itemTile(context, Item element, {bool withOption = true}) {
     Size size = MediaQuery.of(context).size;
@@ -345,6 +297,7 @@ class _ManageProductState extends State<ManageProduct> {
                               builder: (context) {
                                 return DeclineBottomSheet(
                                   id: element.name,
+                                  title: "Alasan penghapusan ${element.name}",
                                   callback: (keterangan) async{
                                     await itemService.setItemStatus(element.id, 5, keterangan:keterangan );
                                   },
@@ -425,6 +378,7 @@ class _ManageProductState extends State<ManageProduct> {
                       height: MediaQuery.of(context).size.height / 18,
                       width: MediaQuery.of(context).size.width * 0.7,
                       child: TextField(
+                        textInputAction: TextInputAction.search,
                         decoration: InputDecoration(
                             contentPadding: EdgeInsets.only(top: 5, left: 5),
                             suffixIcon: Icon(Icons.search),
@@ -438,10 +392,11 @@ class _ManageProductState extends State<ManageProduct> {
                               ),
                             ),
                             hintText: 'Search'),
-                        onChanged: (value) {
-                          if (value.isNotEmpty || value != null) {
+                        onSubmitted: (value) async{
+                          if (value.isNotEmpty ) {
                             onSearch = true;
                             searchQuery = value;
+                            await searchItem();
                           } else {
                             onSearch = false;
                             searchQuery = value;
@@ -456,7 +411,14 @@ class _ManageProductState extends State<ManageProduct> {
             ),
             Expanded(
               child: TabBarView(children: [
-                StreamBuilder(
+                isLoading?Center(
+                  child: Container(
+                    height: size.width/3,
+                    width: size.width/3,
+                    child: CircularProgressIndicator(),
+                  ),
+                )
+                :StreamBuilder(
                     stream: approvedProductStream,
                     builder: (context, AsyncSnapshot<List<Item>> snapshot) {
                       if (snapshot.hasError) {
@@ -493,21 +455,22 @@ class _ManageProductState extends State<ManageProduct> {
                         );
                       } else {
                         List<Item> finalItemList = onSearch
-                            ? snapshot.data.where((element) {
-                                return element.name
-                                        .toLowerCase()
-                                        .contains(searchQuery.toLowerCase()) ||
-                                    element.seller
-                                        .toLowerCase()
-                                        .contains(searchQuery.toLowerCase());
-                              }).toList()
+                            ? searchedApprovedItem
                             : snapshot.data;
                         sortItem(finalItemList);
                         return finalItemList.length > 0
-                            ? ListView(
-                                children: finalItemList
-                                    .map((e) => itemTile(context, e, withOption: false))
-                                    .toList())
+                            ? ListView.builder(
+                                itemCount: finalItemList.length,
+                                itemBuilder: (context, index){
+                                  if(index==finalItemList.length){
+                                    return _buildProgressIndicator();
+                                  }
+                                  return itemTile(context,finalItemList[index],withOption: false );
+                                },
+                                controller: _scrollController,)
+                                // children: finalItemList
+                                //     .map((e) => itemTile(context, e, withOption: false))
+                                //     .toList())
                             : Container(
                                 decoration:
                                     BoxDecoration(color: kBackgroundMainColor),
@@ -559,14 +522,15 @@ class _ManageProductState extends State<ManageProduct> {
                         );
                       } else {
                         List<Item> finalItemList = onSearch
-                            ? snapshot.data.where((element) {
-                                return element.name
-                                        .toLowerCase()
-                                        .contains(searchQuery.toLowerCase()) ||
-                                    element.seller
-                                        .toLowerCase()
-                                        .contains(searchQuery.toLowerCase());
-                              }).toList()
+                            ? searchedPendingItem
+                            // snapshot.data.where((element) {
+                            //     return element.name
+                            //             .toLowerCase()
+                            //             .contains(searchQuery.toLowerCase()) ||
+                            //         element.seller
+                            //             .toLowerCase()
+                            //             .contains(searchQuery.toLowerCase());
+                            //   }).toList()
                             : snapshot.data;
                         sortItem(finalItemList);
                         return finalItemList.length > 0

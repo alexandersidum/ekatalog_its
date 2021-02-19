@@ -150,7 +150,7 @@ class SalesOrderDetail extends StatelessWidget {
                               Expanded(
                                   child: Text("Unit :", style: kCalibriBold)),
                               Expanded(
-                                  child: Text(salesOrder.unit.toString(),
+                                  child: Text(salesOrder.namaUnit.toString(),
                                       style: kCalibri)),
                             ],
                           ),
@@ -223,6 +223,7 @@ class SalesOrderDetail extends StatelessWidget {
                                               callback: (keterangan) {
                                                 print(keterangan);
                                                 os.changeOrderStatus(
+                                                  order : salesOrder,
                                                     docId: salesOrder.docId,
                                                     newStatus: 2,
                                                     keterangan: keterangan,

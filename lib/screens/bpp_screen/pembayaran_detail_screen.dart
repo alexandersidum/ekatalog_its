@@ -15,10 +15,10 @@ import 'package:modal_progress_hud/modal_progress_hud.dart';
 class PembayaranDetailScreen extends StatefulWidget {
   SalesOrder order;
   PembayaranDetailScreen({this.order});
-
   @override
   _PembayaranDetailScreenState createState() => _PembayaranDetailScreenState();
 }
+
 
 class _PembayaranDetailScreenState extends State<PembayaranDetailScreen> {
   Seller sellerBilling;
@@ -136,6 +136,7 @@ class _PembayaranDetailScreenState extends State<PembayaranDetailScreen> {
                               : SizedBox()
                         ],
                       ),
+                      SizedBox(height: size.height/50,),
                       Align(
                           alignment: Alignment.centerLeft,
                           child:
@@ -181,13 +182,12 @@ class _PembayaranDetailScreenState extends State<PembayaranDetailScreen> {
                                           salesOrderDocId: widget.order.docId)
                                       .then((isSuccess) {
                                     isSukses = isSuccess;
-                                    print("then pembayaran");
+                                    
                                   });
                                 }
                               }).then((value) =>Navigator.of(context).pop());
                             } else {
-                              //Notif / alert kalau kosong
-                              print("Gambar null");
+                              //Kalau image belum dipilih
                             }
                             
                             setState(() {

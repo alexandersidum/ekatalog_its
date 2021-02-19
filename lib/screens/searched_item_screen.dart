@@ -24,6 +24,7 @@ class _SearchedItemScreenState extends State<SearchedItemScreen> {
   ItemSearch _itemSearch;
   sortedBy sorted = sortedBy.Default;
 
+  //ITEM SEARCH MODE 0 = Kategori , Mode 1 = Search
   @override
   void initState() {
     _itemSearch = context.read<ItemSearch>();
@@ -37,7 +38,40 @@ class _SearchedItemScreenState extends State<SearchedItemScreen> {
     super.initState();
   }
 
+  void manageItems() {
+    switch (sorted) {
+      case sortedBy.HargaTerendah:
+        searchedItem.sort((a, b) {
+          return a.price.compareTo(b.price);
+        });
+        break;
+      case sortedBy.HargaTertinggi:
+        searchedItem.sort((a, b) {
+          return b.price.compareTo(a.price);
+        });
+        break;
+      //TODO Terbaru terlamanya sepertinya kebalik
+      case sortedBy.Terbaru:
+        searchedItem.sort((a, b) {
+          return a.creationDate.compareTo(b.creationDate);
+        });
+        break;
+      case sortedBy.Terlama:
+        searchedItem.sort((a, b) {
+          return b.creationDate.compareTo(a.creationDate);
+        });
+        break;
+      case sortedBy.Default:
+        searchedItem = searchedItem;
+        break;
+      default:
+        searchedItem = searchedItem;
+    }
+    setState(() {});
+  }
+
   fetchItemSearched(String keyword) async {
+    print("Fetching $keyword");
     setState(() {
       isLoading = true;
     });
@@ -98,7 +132,7 @@ class _SearchedItemScreenState extends State<SearchedItemScreen> {
           onPressed: () {},
         ),
         IconButton(
-          icon: Icon(Icons.notifications),
+          icon: Icon(Icons.shopping_cart),
           onPressed: () {},
         ),
       ],
@@ -129,6 +163,9 @@ class _SearchedItemScreenState extends State<SearchedItemScreen> {
   Widget build(BuildContext context) {
     _itemSearch = context.watch<ItemSearch>();
     Size size = MediaQuery.of(context).size;
+
+
+
     return Scaffold(
         appBar: appBar(context),
         body: ModalProgressHUD(
@@ -182,7 +219,9 @@ class _SearchedItemScreenState extends State<SearchedItemScreen> {
                                   value: sorted,
                                   items: dropDownSort(size),
                                   onChanged: (value) {
-                                    updateSortedStatus(value);
+                                    sorted = value;
+                                    manageItems();
+                                    setState(() {});
                                   }),
                             ),
                           ),
@@ -195,7 +234,7 @@ class _SearchedItemScreenState extends State<SearchedItemScreen> {
                         child: Text(
                         isLoading
                             ? ""
-                            : "'${_itemSearch.keyword}' Tidak ditemukan ",
+                            : _itemSearch.mode==0? "Tidak ada Produk dalam kategori ${_itemSearch.keyword}":"'${_itemSearch.keyword}' Tidak ditemukan ",
                         style: kCalibri,
                       ))
                     : StaggeredGridView.countBuilder(

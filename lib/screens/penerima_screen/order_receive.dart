@@ -12,18 +12,18 @@ import 'dart:io';
 import 'package:provider/provider.dart';
 import 'package:e_catalog/components/custom_raised_button.dart';
 
-class OrderConfirmationPP extends StatefulWidget {
+class OrderReceiveScreen extends StatefulWidget {
   @override
-  _OrderConfirmationPPState createState() => _OrderConfirmationPPState();
+  _OrderReceiveScreenState createState() => _OrderReceiveScreenState();
 }
 
-class _OrderConfirmationPPState extends State<OrderConfirmationPP> {
+class _OrderReceiveScreenState extends State<OrderReceiveScreen> {
   OrderServices orderService = OrderServices();
   bool onSearch = false;
   String searchQuery = '';
   sortedBy sorted = sortedBy.Default;
   Stream<List<SalesOrder>> orderStreams;
-  PejabatPengadaan pp ;
+  PejabatPenerima penerima ;
   ImagePicker _imagePicker = ImagePicker();
   File pickedImage;
   TextEditingController keteranganController = TextEditingController();
@@ -31,8 +31,8 @@ class _OrderConfirmationPPState extends State<OrderConfirmationPP> {
 
   @override
   void didChangeDependencies() {
-    pp = Provider.of<Auth>(context, listen: false).getUserInfo as PejabatPengadaan;
-    orderStreams = orderService.getPPSalesOrder(pp.uid, [0,1,2,3,4,5,6,7]);
+    penerima = Provider.of<Auth>(context, listen: false).getUserInfo as PejabatPenerima;
+    orderStreams = orderService.getUnitActiveSalesOrderByStatus(penerima.unit, [3,4]);
     super.didChangeDependencies();
   }
   
@@ -195,7 +195,7 @@ class _OrderConfirmationPPState extends State<OrderConfirmationPP> {
                             fontSize: 14, color: kBlueMainColor),
                       ),
                       Text(
-                        element.getUnit,
+                        element.namaUnit,
                         style: kCalibriBold.copyWith(fontSize: 14),
                       ),
                       Column(
@@ -307,11 +307,13 @@ class _OrderConfirmationPPState extends State<OrderConfirmationPP> {
 
   @override
   Widget build(BuildContext context) {
-    
     Size size = MediaQuery.of(context).size;
-    
     return Scaffold(
-      body: pp!=null?
+      appBar: AppBar( 
+        backgroundColor: kBlueMainColor,
+        title: Text("Penerimaan Barang"),
+      ),
+      body: penerima!=null?
       Column(
         children: [
           Row(

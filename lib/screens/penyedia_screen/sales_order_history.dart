@@ -19,12 +19,12 @@ import 'package:e_catalog/utilities/invoice_generator.dart' as ig;
 import 'package:path_provider/path_provider.dart';
 import 'package:e_catalog/components/pdf_view_screen.dart';
 
-class SalesOrderPenyedia extends StatefulWidget {
+class SalesOrderHistoryPenyedia extends StatefulWidget {
   @override
-  _SalesOrderPenyediaState createState() => _SalesOrderPenyediaState();
+  _SalesOrderHistoryPenyediaState createState() => _SalesOrderHistoryPenyediaState();
 }
 
-class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
+class _SalesOrderHistoryPenyediaState extends State<SalesOrderHistoryPenyedia> {
   OrderServices orderService = OrderServices();
   bool onSearch = false;
   String searchQuery = '';
@@ -58,10 +58,9 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
 
   @override
   void initState() {
-    print("INIT STATES Order");
     seller = Provider.of<Auth>(context, listen: false).getUserInfo;
     orderStreams = orderService
-        .getSellerSalesOrder(seller.uid, [1, 3, 4, 7]).asBroadcastStream();
+        .getSellerSalesOrderHistory(seller.uid).asBroadcastStream();
     super.initState();
   }
 
@@ -74,62 +73,19 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
       child: Column(
         children: [
           Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Container(
-              height: size.width * 0.25,
-              width: size.width * 0.25,
-              margin: EdgeInsets.only(right: 10),
-              child: Image(
-                fit: BoxFit.contain,
-                image: NetworkImage(element.listOrder[0].itemImage[0] != null
-                    ? element.listOrder[0].itemImage[0]
-                    : ""),
-              ),
-            ),
+            // Container(
+            //   height: size.width * 0.25,
+            //   width: size.width * 0.25,
+            //   margin: EdgeInsets.only(right: 10),
+            //   child: Image(
+            //     fit: BoxFit.contain,
+            //     image: NetworkImage(element.listOrder[0].itemImage[0] != null
+            //         ? element.listOrder[0].itemImage[0]
+            //         : ""),
+            //   ),
+            // ),
             Expanded(
               child: Stack(children: [
-                Positioned(
-                    top: 0,
-                    right: 0,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        GestureDetector(
-                          onTap: () {
-                            Navigator.of(context).push(MaterialPageRoute(
-                              builder: (context) => StreamBuilder(
-                                  // stream: orderService.getSellerSalesOrder(
-                                  //     seller.uid, [1, 3, 4, 7]),
-                                  stream: orderService.getSingleSalesOrder(
-                                      docId: element.docId),
-                                  builder: (context,
-                                      AsyncSnapshot<SalesOrder> snapshot) {
-                                    print("REBUILD");
-                                    if (snapshot.data != null) {
-                                      try {
-                                        return SalesOrderDetailPenyedia(
-                                          order: snapshot.data,
-                                          index: index,
-                                        );
-                                      } catch (e) {
-                                        return Container();
-                                      }
-                                    } else {
-                                      return Container();
-                                    }
-                                  }),
-                              fullscreenDialog: true,
-                            ));
-                          },
-                          child: Container(
-                            child: Text(
-                              "Detail",
-                              style: kCalibri,
-                            ),
-                          ),
-                        ),
-                        Container(child: Icon(Icons.chevron_right))
-                      ],
-                    )),
                 Container(
                   padding: EdgeInsets.only(
                       top: size.height / 100, right: size.width / 50),
@@ -161,7 +117,6 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
                             .map((Order e) => orderInfo(size, e))
                             .toList(),
                       ),
-                      buttonListWidget(size, element)
                     ],
                   ),
                 ),
@@ -310,7 +265,7 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text("Sales Order", style: kCalibriBold),
+          title: Text("Riwayat Sales Order", style: kCalibriBold),
           centerTitle: false,
           backgroundColor: kBlueMainColor,
           elevation: 0,

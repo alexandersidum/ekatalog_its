@@ -6,13 +6,16 @@ import 'package:e_catalog/screens/add_product_screen.dart';
 import 'package:e_catalog/screens/admin_screen/manage_category_screen.dart';
 import 'package:e_catalog/screens/admin_screen/manage_user_screen.dart';
 import 'package:e_catalog/screens/bpp_screen/pembayaran_screen.dart';
+import 'package:e_catalog/screens/penerima_screen/order_receive.dart';
 import 'package:e_catalog/screens/penyedia_screen/negotiation_screen_penyedia.dart';
 import 'package:e_catalog/screens/penyedia_screen/pembayaran_screen_penyedia.dart';
 import 'package:e_catalog/screens/penyedia_screen/product_screen.dart';
 import 'package:e_catalog/screens/penyedia_screen/rekening_screen.dart';
+import 'package:e_catalog/screens/penyedia_screen/sales_order_history.dart';
 import 'package:e_catalog/screens/penyedia_screen/sales_order_penyedia.dart';
-import 'package:e_catalog/screens/pp_screen/order_confirmation.dart';
+import 'package:e_catalog/screens/pp_screen/pembelian.dart';
 import 'package:e_catalog/screens/ppk_screen/quotation_screen.dart';
+import 'package:e_catalog/screens/ppk_screen/sales_order_history_ppk.dart';
 import 'package:e_catalog/screens/ppk_screen/sales_order_screen_ppk.dart';
 import 'package:e_catalog/screens/ukpbj_screen/laporan_screen.dart';
 import 'package:e_catalog/screens/ukpbj_screen/manage_product.dart';
@@ -32,10 +35,11 @@ class RoleMenu extends StatelessWidget {
     Account account = Provider.of<Auth>(context).getUserInfo;
     int role = Provider.of<Auth>(context).getUserInfo.role;
     String roleDesc = Provider.of<Auth>(context).getUserInfo.getRole;
+    print(role);
     return Scaffold(
       backgroundColor: kBackgroundMainColor,
       appBar: AppBar(
-        title: Text("Menu $roleDesc", style: kCalibriBold),
+        title: Text(role==1?"Pembelian":"Menu $roleDesc", style: kCalibriBold),
         centerTitle: false,
         backgroundColor: kBlueMainColor,
         elevation: 0,
@@ -53,7 +57,7 @@ class RoleMenu extends StatelessWidget {
         return SizedBox();
         break;
       case 1:
-        return OrderConfirmationPP();
+        return PembelianPP();
         break;
       case 2:
         return MenuPenyedia(size: size, account: account as Seller);
@@ -67,12 +71,15 @@ class RoleMenu extends StatelessWidget {
         );
         break;
       case 5:
-        return Column();
+        return MenuAudit(size : size);
         break;
       case 6:
         return MenuBPP(
           size: size,
         );
+        break;
+      case 7:
+        return MenuPenerima(size : size);
         break;
       case 9:
         return MenuAdmin(
@@ -157,6 +164,10 @@ class MenuPenyedia extends StatelessWidget {
               child: Column(
                   children: ListTile.divideTiles(context: context, tiles: [
                 ListTile(
+                  onTap: () {
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => SalesOrderHistoryPenyedia()));
+                  },
                   title: Text(
                     'Riwayat Penjualan',
                     style: kCalibri,
@@ -295,7 +306,7 @@ class MenuPPK extends StatelessWidget {
                   Navigator.of(context).push(MaterialPageRoute(
                       builder: (context) => StreamProvider<List<SalesOrder>>(
                             create: (context) => OrderServices()
-                                .getSalesOrder(unit: ppk.unit, status: [0]),
+                                .getSalesOrder(ppkCode: ppk.ppkCode, status: [0]),
                             updateShouldNotify: (_, __) => true,
                             child: QuotationScreen(),
                           )));
@@ -309,17 +320,17 @@ class MenuPPK extends StatelessWidget {
               ListTile(
                 onTap: () {
                   Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => StreamProvider<List<SalesOrder>>(
-                            create: (context) => OrderServices().getSalesOrder(
-                                unit: ppk.unit,
-                                status: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-                                //TODO LIMIT DOCUMENT
-                                ),
-                            updateShouldNotify: (_, __) => true,
-                            child: SalesOrderPPK(),
-                          )));
+                      builder: (context) => SalesOrderPPK()));
                 },
                 title: Text('Sales Order', style: kCalibri),
+                trailing: Icon(Icons.keyboard_arrow_right),
+              ),
+              ListTile(
+                onTap: () {
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => SalesOrderHistoryPPK()));
+                },
+                title: Text('Riwayat Sales Order', style: kCalibri),
                 trailing: Icon(Icons.keyboard_arrow_right),
               ),
             ]).toList()),
@@ -476,7 +487,22 @@ class MenuUKPBJ extends StatelessWidget {
                   style: kCalibri,
                 ),
                 trailing: Icon(Icons.keyboard_arrow_right),
-              )
+              ),
+              ListTile(
+                  title: Text(
+                    'Logout',
+                    style: kCalibri,
+                  ),
+                  onTap: () {
+                    Provider.of<Auth>(context, listen: false).signOut(context,
+                        () {
+                      Provider.of<MenuState>(context, listen: false)
+                          .setMenuSelected(0);
+                      Provider.of<Cart>(context, listen: false).clearCart();
+                    });
+                  },
+                  trailing: Icon(Icons.exit_to_app),
+                )
             ]).toList()),
           ),
         ],
@@ -528,6 +554,174 @@ class MenuBPP extends StatelessWidget {
                   
                 },
                 title: Text('Riwayat Pembayaran', style: kCalibri),
+                trailing: Icon(Icons.keyboard_arrow_right),
+              ),
+            ]).toList()),
+          ),
+          Container(
+            padding: EdgeInsets.only(
+                top: size.height / 40,
+                left: size.width / 30,
+                bottom: size.height / 100),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Bantuan',
+              style: kCalibriBold,
+            ),
+          ),
+          Container(
+            color: Colors.white,
+            child: Column(
+                children: ListTile.divideTiles(context: context, tiles: [
+              ListTile(
+                title: Text(
+                  'Kontak Bantuan',
+                  style: kCalibri,
+                ),
+                trailing: Icon(Icons.keyboard_arrow_right),
+              ),
+              ListTile(
+                  title: Text(
+                    'Logout',
+                    style: kCalibri,
+                  ),
+                  onTap: () {
+                    Provider.of<Auth>(context, listen: false).signOut(context,
+                        () {
+                      Provider.of<MenuState>(context, listen: false)
+                          .setMenuSelected(0);
+                      Provider.of<Cart>(context, listen: false).clearCart();
+                    });
+                  },
+                  trailing: Icon(Icons.exit_to_app),
+                )
+            ]).toList()),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class MenuPenerima extends StatelessWidget {
+  const MenuPenerima({
+    Key key,
+    @required this.size,
+  }) : super(key: key);
+
+  final Size size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.only(
+                top: size.height / 40,
+                left: size.width / 30,
+                bottom: size.height / 100),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Penerimaan Barang',
+              style: kCalibriBold,
+            ),
+          ),
+          Container(
+            color: Colors.white,
+            child: Column(
+                children: ListTile.divideTiles(context: context, tiles: [
+              ListTile(
+                onTap: () {
+                  //Navigate ke Pembayaran
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => OrderReceiveScreen()));
+                },
+                title: Text('Penerimaan Barang', style: kCalibri),
+                trailing: Icon(Icons.keyboard_arrow_right),
+              ),
+            ]).toList()),
+          ),
+          Container(
+            padding: EdgeInsets.only(
+                top: size.height / 40,
+                left: size.width / 30,
+                bottom: size.height / 100),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Bantuan',
+              style: kCalibriBold,
+            ),
+          ),
+          Container(
+            color: Colors.white,
+            child: Column(
+                children: ListTile.divideTiles(context: context, tiles: [
+              ListTile(
+                title: Text(
+                  'Kontak Bantuan',
+                  style: kCalibri,
+                ),
+                trailing: Icon(Icons.keyboard_arrow_right),
+              ),
+              ListTile(
+                  title: Text(
+                    'Logout',
+                    style: kCalibri,
+                  ),
+                  onTap: () {
+                    Provider.of<Auth>(context, listen: false).signOut(context,
+                        () {
+                      Provider.of<MenuState>(context, listen: false)
+                          .setMenuSelected(0);
+                      Provider.of<Cart>(context, listen: false).clearCart();
+                    });
+                  },
+                  trailing: Icon(Icons.exit_to_app),
+                )
+            ]).toList()),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class MenuAudit extends StatelessWidget {
+  const MenuAudit({
+    Key key,
+    @required this.size,
+  }) : super(key: key);
+
+  final Size size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Column(
+        children: [
+          Container(
+            padding: EdgeInsets.only(
+                top: size.height / 40,
+                left: size.width / 30,
+                bottom: size.height / 100),
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'Laporan Pengadaan',
+              style: kCalibriBold,
+            ),
+          ),
+          Container(
+            color: Colors.white,
+            child: Column(
+                children: ListTile.divideTiles(context: context, tiles: [
+              ListTile(
+                onTap: () {
+                  //Navigate ke Pembayaran
+                  Navigator.of(context).push(MaterialPageRoute(
+                      builder: (context) => LaporanScreen()));
+                },
+                title: Text('Lihat Laporan', style: kCalibri),
                 trailing: Icon(Icons.keyboard_arrow_right),
               ),
             ]).toList()),
@@ -648,7 +842,7 @@ class MenuAdmin extends StatelessWidget {
                       builder: (context) => ManageCategoryScreen()));
                 },
                 title: Text(
-                  'Manage Kategori Barang',
+                  'Kategori Barang',
                   style: kCalibri,
                 ),
                 trailing: Icon(Icons.keyboard_arrow_right),

@@ -254,7 +254,7 @@ class _CartConfirmationState extends State<CartConfirmation> {
                   Container(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      account.getUnit.toUpperCase(),
+                      account.namaUnit.toUpperCase(),
                       style: kCalibriBold.copyWith(color: kBlueDarkColor),
                     ),
                   ),
@@ -273,11 +273,13 @@ class _CartConfirmationState extends State<CartConfirmation> {
                       shippingAddress: finalShippingAddress,
                       ppName: account.name,
                       ppUid: account.uid,
+                      ppkCode: account.ppkCode,
                       unit: account.unit,
+                      namaUnit : account.namaUnit,
                       onComplete: (isSuccess) {
                         if(isSuccess){
                           cart.clearCart();
-                          Navigator.of(context).pop();
+                          Navigator.of(context).pop(true);
                           print("Create SO $isSuccess");
                         }
                         else{
@@ -362,7 +364,6 @@ class _ShippingBottomSheetState extends State<ShippingBottomSheet> {
   Future<bool> editExistingAddress(
       String uid, ShippingAddress newAddress) async {
     isLoading = true;
-    print("SAMPAI DI EDITEXISTING ${newAddress.namaPenerima}");
     await _orderServices.setShippingAddress(uid, newAddress).then((value) {
       if (value) {
         Navigator.of(context).pop();
@@ -372,7 +373,6 @@ class _ShippingBottomSheetState extends State<ShippingBottomSheet> {
 
   Future<bool> addAddress(String uid, ShippingAddress newAddress) async {
     isLoading = true;
-    print("SAMPAI DI ADDADDRESS ${newAddress.namaPenerima}");
     await _orderServices.createShippingAddress(uid, newAddress).then((value) {
       if (value) {
         Navigator.of(context).pop();

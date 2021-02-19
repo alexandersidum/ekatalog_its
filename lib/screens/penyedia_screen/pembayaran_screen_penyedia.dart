@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:e_catalog/components/photo_detail.dart';
+import 'package:e_catalog/components/custom_alert_dialog.dart';
 
 class PembayaranScreenPenyedia extends StatefulWidget {
   @override
@@ -104,7 +105,8 @@ class _PembayaranScreenPenyediaState extends State<PembayaranScreenPenyedia> {
                           style: kCalibriBold,
                         )),
                         Expanded(
-                            child : Text(order.getStatusPenyedia(), style: kCalibri),
+                          child:
+                              Text(order.getStatusPenyedia(), style: kCalibri),
                         )
                       ],
                     ),
@@ -122,7 +124,7 @@ class _PembayaranScreenPenyediaState extends State<PembayaranScreenPenyedia> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(order.ppName, style: kCalibri),
-                            Text(order.getUnit, style: kCalibriBold),
+                            Text(order.namaUnit, style: kCalibriBold),
                           ],
                         )),
                       ],
@@ -152,44 +154,65 @@ class _PembayaranScreenPenyediaState extends State<PembayaranScreenPenyedia> {
                     SizedBox(
                       height: size.height / 50,
                     ),
-                    order.status==7||order.imageBuktiPembayaran==null ?
-                      SizedBox()
-                    :Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                            child: Text("Bukti Pembayaran :",
-                                style: kCalibriBold)),
-                        Expanded(
-                          child: Align(
-                            alignment: Alignment.centerLeft,
-                            child: GestureDetector(
-                              onTap: () {
-                                Navigator.of(context).push(MaterialPageRoute(
-                                    builder: (context) => PhotoDetail(
-
-                                        imageUrl :order.imageBuktiPembayaran,
-                                        heroTag: "imageBukti",)));
-                              },
-                              child: Hero(
-                                tag: "imageBukti",
-                                child: Container(
-                                  width: size.width / 4,
-                                  height: size.width / 4,
-                                  child: CachedNetworkImage(
-                                    placeholder: (context, url) =>
-                                        CircularProgressIndicator(),
-                                    imageUrl: order.imageBuktiPembayaran,
-                                    errorWidget: (context, url, err) =>
-                                        Icon(Icons.error),
+                    //Kalau masih status menunggu pembayaran atau imagebukti null tidak ditampilkan
+                    order.status == 7 || order.imageBuktiPembayaran == null
+                        ? SizedBox()
+                        : Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                  child: Text("Bukti Pembayaran :",
+                                      style: kCalibriBold)),
+                              Expanded(
+                                child: Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.of(context)
+                                          .push(MaterialPageRoute(
+                                              builder: (context) => PhotoDetail(
+                                                    imageUrl: order
+                                                        .imageBuktiPembayaran,
+                                                    heroTag: "imageBukti",
+                                                  )));
+                                    },
+                                    child: Hero(
+                                      tag: "imageBukti",
+                                      child: Container(
+                                        width: size.width / 4,
+                                        height: size.width / 4,
+                                        child: CachedNetworkImage(
+                                          placeholder: (context, url) =>
+                                              CircularProgressIndicator(),
+                                          imageUrl: order.imageBuktiPembayaran,
+                                          errorWidget: (context, url, err) =>
+                                              Icon(Icons.error),
+                                        ),
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
+                            ],
                           ),
-                        ),
-                      ],
+                    SizedBox(
+                      height: size.height / 50,
                     ),
+                    order.status == 8
+                        ? Row(
+                            children: [
+                              Expanded(
+                                  child: Text("Keterangan :",
+                                      style: kCalibriBold)),
+                              Expanded(
+                                  child: Text(
+                                      order.keteranganPembayaran.isNotEmpty
+                                          ? order.keteranganPembayaran
+                                          : "Tidak ada keterangan",
+                                      style: kCalibri)),
+                            ],
+                          )
+                        : SizedBox(),
                     SizedBox(
                       height: size.height / 50,
                     ),
@@ -199,39 +222,42 @@ class _PembayaranScreenPenyediaState extends State<PembayaranScreenPenyedia> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
-                  order.status==9? SizedBox()
-                  : Container(
-                    height: size.height / 25,
-                    width: size.width / 4,
-                    child: CustomRaisedButton(
-                      buttonChild: Text(
-                        "TOLAK",
-                        style: kCalibriBold.copyWith(color: Colors.white),
-                      ),
-                      callback: () {
-                        showModalBottomSheetApp(
-                            context: context,
-                            builder: (context) {
-                              return DeclineBottomSheet(
-                                id: order.id,
-                                callback: (keterangan) {
-                                  print(keterangan);
-                                  os.konfirmasiPembayaranPenyedia(
-                                      order: order,
-                                      isAccepted: false,
-                                      keterangan: keterangan,
-                                      callback: (bool result) {
-                                        result
-                                            ? print("SUKSES")
-                                            : print("GAGAL");
-                                      });
-                                },
-                              );
-                            });
-                      },
-                      color: kRedButtonColor,
-                    ),
-                  ),
+                  order.status == 9
+                      ? SizedBox()
+                      : Container(
+                          height: size.height / 25,
+                          width: size.width / 4,
+                          child: CustomRaisedButton(
+                            buttonChild: Text(
+                              "TOLAK",
+                              style: kCalibriBold.copyWith(color: Colors.white),
+                            ),
+                            callback: () {
+                              showModalBottomSheetApp(
+                                  context: context,
+                                  builder: (context) {
+                                    return DeclineBottomSheet(
+                                      id: order.id,
+                                      title:
+                                          "Alasan Penolakan Pembayaran ${order.id}",
+                                      callback: (keterangan) {
+                                        print(keterangan);
+                                        os.konfirmasiPembayaranPenyedia(
+                                            order: order,
+                                            isAccepted: false,
+                                            keterangan: keterangan,
+                                            callback: (bool result) {
+                                              result
+                                                  ? print("SUKSES")
+                                                  : print("GAGAL");
+                                            });
+                                      },
+                                    );
+                                  });
+                            },
+                            color: kRedButtonColor,
+                          ),
+                        ),
                   Container(
                     height: size.height / 25,
                     width: size.width / 4,
@@ -242,12 +268,24 @@ class _PembayaranScreenPenyediaState extends State<PembayaranScreenPenyedia> {
                       ),
                       callback: () async {
                         //Fungsi terima quotation
-                        os.konfirmasiPembayaranPenyedia(
-                            order: order,
-                            isAccepted: true,
-                            callback: (bool result) {
-                              result ? print("SUKSES") : print("GAGAL");
-                            });
+                        showDialog(
+                            context: context,
+                            builder: (context) => CustomAlertDialog(
+                                  title: "Konfirmasi Pembayaran",
+                                  content:
+                                      "Apakah anda yakin ingin mengkonfirmasi pembayaran?",
+                                  yesFunction: () async {
+                                    os.konfirmasiPembayaranPenyedia(
+                                        order: order,
+                                        isAccepted: true,
+                                        callback: (bool result) {
+                                          Navigator.of(context).pop();
+                                        });
+                                  },
+                                  noFunction: (){
+                                    Navigator.of(context).pop();
+                                  },
+                                ));
                       },
                       color: kBlueMainColor,
                     ),
@@ -312,6 +350,7 @@ class _PembayaranScreenPenyediaState extends State<PembayaranScreenPenyedia> {
                   child: Column(
                     children: [
                       Container(
+                        color: kBlueMainColor,
                         padding: EdgeInsets.symmetric(
                             horizontal: size.width / 100,
                             vertical: size.height / 200),
@@ -400,8 +439,6 @@ class _PembayaranScreenPenyediaState extends State<PembayaranScreenPenyedia> {
     );
   }
 }
-
-
 
 enum sortedBy {
   Terbaru,

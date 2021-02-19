@@ -174,6 +174,7 @@ class QuotationDetail extends StatelessWidget {
                                       callback: (keterangan) {
                                         print(keterangan);
                                         os.changeOrderStatus(
+                                            order : quotation,
                                             docId: quotation.docId,
                                             newStatus: 2,
                                             keterangan: keterangan,
@@ -202,6 +203,7 @@ class QuotationDetail extends StatelessWidget {
                                 ),
                                 callback: () {
                                   os.changeOrderStatus(
+                                    order : quotation,
                                   docId: quotation.docId,
                                   newStatus: 1,
                                   callback: (bool result) {

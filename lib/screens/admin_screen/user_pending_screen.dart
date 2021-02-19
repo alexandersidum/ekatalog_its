@@ -1,3 +1,4 @@
+import 'package:e_catalog/screens/admin_screen/user_detail_screen.dart';
 import "package:flutter/material.dart";
 import 'package:e_catalog/utilities/account_services.dart';
 import 'package:e_catalog/models/account.dart';
@@ -19,12 +20,9 @@ class _UserPendingScreenState extends State<UserPendingScreen> {
     super.initState();
   }
 
-
   Widget userTile(Account user) {
     return Builder(
-      builder: 
-      (context)=>
-       Container(
+      builder: (context) => Container(
         width: double.infinity,
         child: Card(
           child: Container(
@@ -36,42 +34,82 @@ class _UserPendingScreenState extends State<UserPendingScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     //Kalau penyedia diberi nama perusahaan juga
-                    Text(user.name+(user.role==2?' - '+(user as Seller).namaPerusahaan:""), style: kCalibriBold),
+                    Text(
+                        user.name +
+                            (user.role == 2
+                                ? ' - ' + (user as Seller).namaPerusahaan
+                                : ""),
+                        style: kCalibriBold),
                     Text(user.email, style: kCalibri),
                     Text(user.getRole, style: kCalibriBold),
-                    if(user.role==1)Text((user as PejabatPengadaan).getUnit, style: kCalibriBold),
-                    if(user.role==3)Text((user as PejabatPembuatKomitmen).getUnit, style: kCalibriBold),
+                    if (user.role == 1)
+                      Text((user as PejabatPengadaan).namaUnit,
+                          style: kCalibriBold),
+                    if (user.role == 3)
+                      Text((user as PejabatPembuatKomitmen).namaDivisi,
+                          style: kCalibriBold),
                   ],
                 ),
                 PopupMenuButton(
                   child: Row(
                     children: [
-                      Text("Action", style: kMavenBold.copyWith(color: kBlueMainColor)),
+                      Text("Action",
+                          style: kMavenBold.copyWith(color: kBlueMainColor)),
                       Icon(Icons.more_vert)
                     ],
                   ),
                   // icon: Icon(Icons.more_vert),
-                  itemBuilder: (context){
-                    List <PopupMenuEntry<int>> listMenu = [
+                  itemBuilder: (context) {
+                    List<PopupMenuEntry<int>> listMenu = [
                       PopupMenuItem(
                         value: 1,
-                        child: Text("Accept",style: kCalibri),
+                        child: Text("Accept", style: kCalibri),
                       ),
                       PopupMenuDivider(),
                       PopupMenuItem(
                         value: 2,
-                        child: Text("Decline",style: kCalibri),
+                        child: Text("Block", style: kCalibri),
                       ),
+                      PopupMenuDivider(),
+                            PopupMenuItem(
+                              value: 0,
+                              child: Text("Detail User", style: kCalibri),
+                            ),
                     ];
                     return listMenu;
                   },
-                  onSelected: (value)async{
-                    if(value==1){
-                      bool isSuccess = await _accountService.setAccountStatus(isAccepted : true, uid: user.uid);
-                      if(isSuccess) Scaffold.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('Berhasil Accept', style: kCalibri,))
-                      );
+                  onSelected: (value) async {
+                    if(value==0){
+                        Navigator.of(context).push(MaterialPageRoute(
+                            builder: (context) =>
+                                UserDetailScreen(user: user)));
+                    }
+                    if (value == 1) {
+                      bool isSuccess = user.role == 3
+                          ? await _accountService.acceptPPK(
+                              isAccepted: true, ppk: user)
+                          : await _accountService.setAccountStatus(
+                              isAccepted: true, uid: user.uid);
+                      if (isSuccess)
+                        Scaffold.of(context).showSnackBar(SnackBar(
+                            content: Text(
+                          'Berhasil Accept',
+                          style: kCalibri,
+                        )));
+                    }
+                    if (value == 2) {
+                      bool isSuccess = user.role == 3
+                          ? await _accountService.setPPKBlock(
+                              isBlocked: true, ppk: user)
+                          : await _accountService.setAccountBlock(
+                              isBlocked: true, uid: user.uid);
+                      if (isSuccess)
+                        Scaffold.of(context).showSnackBar(SnackBar(
+                            content: Text(
+                          'Berhasil Block',
+                          style: kCalibri,
+                        )));
+
                     }
                   },
                 )
@@ -88,7 +126,7 @@ class _UserPendingScreenState extends State<UserPendingScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: kBlueMainColor,
-        title: Text("Pending User", style:kCalibriBold),
+        title: Text("Pending User", style: kCalibriBold),
       ),
       body: StreamBuilder(
         stream: streamUserPending,
@@ -98,19 +136,21 @@ class _UserPendingScreenState extends State<UserPendingScreen> {
           }
           if (listUser.connectionState == ConnectionState.active) {
             if (listUser.hasData) {
-              listUser.data.forEach((e) => print(e.name));
-              return Container(
-                child: ListView(
-                  children:
-                      ListTile.divideTiles(
-                        context: context,
-                  tiles:
-                      listUser.data.map((user) => userTile(user)).toList(),
-                ).toList(),
-                ),
-              );
+              if (listUser.data.length <= 0) {
+                return Center(child: Text("No Data", style: kCalibriBold));
+              } else {
+                return Container(
+                  child: ListView(
+                    children: ListTile.divideTiles(
+                      context: context,
+                      tiles:
+                          listUser.data.map((user) => userTile(user)).toList(),
+                    ).toList(),
+                  ),
+                );
+              }
             } else {
-              return Center(child: Text("No Data"));
+              return Center(child: Text("No Data", style: kCalibriBold));
             }
           } else {
             return Center(child: CircularProgressIndicator());

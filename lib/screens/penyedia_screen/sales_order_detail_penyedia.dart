@@ -111,7 +111,7 @@ class SalesOrderDetailState extends State<SalesOrderDetailPenyedia> {
                                 child: Text("Unit :", style: kCalibriBold)),
                             Expanded(
                                 child:
-                                    Text(salesOrder.getUnit, style: kCalibri)),
+                                    Text(salesOrder.namaUnit, style: kCalibri)),
                           ],
                         ),
                         Column(children: orderList(size)),
@@ -206,6 +206,7 @@ class SalesOrderDetailState extends State<SalesOrderDetailPenyedia> {
                                       id: salesOrder.id,
                                       callback: (keterangan) async {
                                         await orderServices.changeOrderStatus(
+                                          order : salesOrder,
                                             docId: salesOrder.docId,
                                             keterangan: keterangan,
                                             newStatus: 5,
@@ -247,10 +248,11 @@ class SalesOrderDetailState extends State<SalesOrderDetailPenyedia> {
                                   if (isTotalDeclined) status = 5;
 
                                   await orderServices.changeOrderStatus(
+                                      order : salesOrder,
                                       docId: salesOrder.docId,
                                       newStatus: status,
                                       callback: (isSuccess) =>
-                                          print(isSuccess));
+                                          Navigator.of(context).pop());
                                 },
                               ),
                             )

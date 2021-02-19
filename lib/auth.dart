@@ -8,23 +8,20 @@ import 'screens/login_screen.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 
-//Kenapa selalu imageurlnya kosong
 //Ubah Password belum
-//Register belum sempurna
-//Signout belum sempurna
 
 class Auth {
   FirebaseAuth _auth = FirebaseAuth.instance;
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
   FirebaseStorage _fstorage = FirebaseStorage.instance;
   User _user;
-  //apa dynamic?
   Account _userInfo;
 
   User get getUser => _user;
   Account get getUserInfo => _userInfo;
 
   Auth() {
+    //Melakukan listen kepada firebaseAuth
     _auth.authStateChanges().listen((currentUser) {
       print('Current User : $currentUser');
       _user = currentUser;
@@ -51,9 +48,12 @@ class Auth {
       int unit,
       String name,
       String namaPerusahaan,
+      String namaUnit,
+      String namaDivisi,
       String lokasiPerusahaan,
       String telepon,
       Function onComplete,
+      String ppkCode,
       File image) async {
     try {
       await _auth
@@ -67,12 +67,16 @@ class Auth {
               'email': result.user.email,
               'name': name,
               'role': role,
-              'unit': unit,
+              if(Account.unitRole.contains(role))'unit': unit,
+              if(Account.unitRole.contains(role))'namaUnit': namaUnit,
               'telepon': telepon,
-              'namaPerusahaan': namaPerusahaan,
-              'alamat': lokasiPerusahaan,
+              if(role==2)'namaPerusahaan': namaPerusahaan,
+              if(role==2)'alamat': lokasiPerusahaan,
               'imageUrl': value != null ? value : "",
               'is_accepted': false,
+              'is_blocked': false,
+              if(Account.unitRole.contains(role)||role==3)'ppkCode' : ppkCode,
+              if(Account.unitRole.contains(role)||role==3)'namaDivisiPPK' : namaDivisi
             }).then((value) => onComplete(AuthResultStatus.successful));
           });
         } else {
@@ -84,12 +88,14 @@ class Auth {
     }
   }
 
+  //Mengupload image foto profil dan mereturn link image
   Future<String> uploadImage(File image) async {
     String fileName = p.basename(image.path);
     Reference storageRef = _fstorage.ref().child('upload/$fileName');
     await storageRef.putFile(image);
     return await storageRef.getDownloadURL();
   }
+
 
   Future<void> signIn(
       String email, String password, Function onComplete) async {
@@ -99,10 +105,8 @@ class Auth {
             .signInWithEmailAndPassword(email: email, password: password)
             .then((value) async {
           if (value.user != null) {
-            print("value user not null");
             await checkUserInfo(value.user.uid);
             if (_userInfo.isBlocked) {
-              print("user is blocked");
               await _auth.signOut();
               onComplete(AuthResultStatus.blocked);
             }
@@ -121,6 +125,7 @@ class Auth {
     }
   }
 
+  //Stream dari informasi user
   Stream<Account> streamUserInfo(uid) {
     return _firestore
         .collection('users')
@@ -153,6 +158,9 @@ class Auth {
           case 6:
             _userInfo = BendaharaPengeluaran.fromDb(document.data());
             break;
+          case 7:
+              _userInfo = PejabatPenerima.fromDb(document.data());
+              break;
           default:
             _userInfo = Account.fromDb(document.data());
         }
@@ -162,14 +170,11 @@ class Auth {
   }
 
   Future<void> checkUserInfo(uid) async {
-    print("Checkuserinfo ");
     await _firestore.collection('users').doc(uid).get().then((value) {
       if (value.exists) {
-        print("Checkuserinfo VALUE EXIST ");
         bool isAccepted = value.data()['is_accepted'];
         int role = value.data()['role'];
         if (!isAccepted) {
-          print("Checkuserinfo VALUE EXIST ");
           _userInfo = Account.generateUnacceptedAccount(value.data());
         } else {
           switch (role) {
@@ -194,6 +199,9 @@ class Auth {
             case 6:
               _userInfo = BendaharaPengeluaran.fromDb(value.data());
               break;
+            case 7:
+              _userInfo = PejabatPenerima.fromDb(value.data());
+              break;
             case 9:
               _userInfo = Admin.fromDb(value.data());
               break;
@@ -216,6 +224,7 @@ class Auth {
   }
 }
 
+//Menghandle exception dari authentikasi firebase berdasarkan kode error
 class AuthExceptionHandler {
   static handleException(e) {
     var status;
@@ -254,9 +263,8 @@ class AuthExceptionHandler {
     return status;
   }
 
-  ///
-  /// Accepts AuthExceptionHandler.errorType
-  ///
+
+  //Menggenerate exception message berdasarkan code exception
   static generateExceptionMessage(exceptionCode) {
     String errorMessage;
     switch (exceptionCode) {

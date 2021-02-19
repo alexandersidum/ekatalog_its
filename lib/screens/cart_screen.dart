@@ -100,7 +100,6 @@ class CartScreen extends StatelessWidget {
                               itemUpdate(element, element.count - 1);
                             },
                             onTextSubmit: (value) {
-                              print(value);
                               itemUpdate(element, int.parse(value));
                             },
                           ),
@@ -177,7 +176,7 @@ class CartScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  "TOTAL",
+                                  "TOTAL include Tax",
                                   style: kMavenBold,
                                 ),
                                 Container(
@@ -208,7 +207,7 @@ class CartScreen extends StatelessWidget {
                               ),
                               //PPK
                               Text(
-                                pp.getUnit,
+                                pp.namaUnit,
                                 style:
                                     kMavenBold.copyWith(color: kBlueDarkColor),
                               ),
@@ -222,12 +221,17 @@ class CartScreen extends StatelessWidget {
                                     textAlign: TextAlign.center,
                                   ),
                                   color: kOrangeButtonColor,
-                                  callback: () {
-                                    Navigator.of(context)
+                                  callback: () async{
+                                    bool isSuccess = await Navigator.of(context)
                                         .push(MaterialPageRoute(
                                       builder: (context) => CartConfirmation(),
                                       fullscreenDialog: true,
                                     ));
+                                    if(isSuccess!=null){
+                                      if(isSuccess)Scaffold.of(context).showSnackBar(
+                                        SnackBar(content:Text("BERHASIL MENGAJUKAN", style:kMavenBold))
+                                      );
+                                    }
                                     // await _orderServices.batchCreateSalesOrder(
                                     //     itemList: itemList,
                                     //     ppName: pp.name,

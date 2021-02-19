@@ -1,27 +1,16 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 
 final kBlueMainColor = Color(0xFF025AB4);
-
 final mBlueMainColor = MaterialColor(0xFF025AB4, color);
-
 final kBlueDarkColor = Color(0xFF131C6B);
-
 final kOrangeButtonColor = Color(0xFFFFC33A);
-
 final kLightBlueButtonColor = Color(0xFF3AD0FF);
-
 final kRedButtonColor = Color(0xFFE14848);
-
 final kGrayTextColor = Color(0xFF625858);
-
 final kLightGrayTextColor = Color(0xFF979797);
-
 final mBlueDarkColor = MaterialColor(0xFF17234d, color);
-
 final kBackgroundMainColor = Color(0xFFf5f5f8);
-
 final kGrayConcreteColor = Color(0xFFbdc3c7).withOpacity(0.5);
 
 Map<int, Color> color = {

@@ -1,25 +1,34 @@
-import 'package:e_catalog/models/item.dart';
-
 class Account {
-  //Belum tau propertinya apa aja
-  //enum untuk role?
-  Account(
-      {this.name,
-      this.email,
-      this.telepon,
-      this.registrationDate,
-      this.role,
-      this.uid,
-      this.imageUrl,
-      this.isBlocked,
-      this.isAccepted,
-      });
+  Account({
+    this.name,
+    this.email,
+    this.telepon,
+    this.registrationDate,
+    this.role,
+    this.uid,
+    this.imageUrl,
+    this.isBlocked,
+    this.isAccepted,
+  });
 
-  List<String> listRole = ['Guest','Pejabat Pengadaan', 'Penyedia', 'Pejabat Pembuat Komitmen', 'UKPBJ', 'Audit', 'BPP'];
+
+  static Map<int, String> mapRole = {
+    0: 'Guest',
+    1: 'Pejabat Pengadaan',
+    2: 'Penyedia',
+    3: 'Pejabat Pembuat Komitmen',
+    4: 'UKPBJ',
+    5: 'Audit',
+    6: 'BPP',
+    7: 'Pejabat Penerima',
+    9 : 'Admin'
+  };
+
+  static List<int> unitRole = [1, 6, 7];
   String name;
   String email;
   String imageUrl;
-  int telepon;
+  String telepon;
   DateTime registrationDate;
   String uid;
   int role;
@@ -31,13 +40,12 @@ class Account {
       email: parsedData['email'],
       name: parsedData['name'],
       imageUrl: parsedData['imageUrl'],
-      registrationDate:
-          DateTime.now(),
+      registrationDate: DateTime.now(),
       role: 0,
-      telepon: null,
+      telepon: parsedData['telepon'],
       uid: parsedData['uid'],
       isAccepted: parsedData['is_accepted'],
-      isBlocked: parsedData['is_blocked'],
+      isBlocked: parsedData['is_blocked'] ?? false,
     );
   }
 
@@ -46,8 +54,7 @@ class Account {
       email: "",
       name: "Pengunjung",
       imageUrl: "",
-      registrationDate:
-          DateTime.now(),
+      registrationDate: DateTime.now(),
       role: 0,
       telepon: null,
       uid: "guest",
@@ -72,49 +79,40 @@ class Account {
   }
 
   factory Account.generateRoleBasedAccount(Map<String, dynamic> parsedData) {
-    switch(parsedData['role']){
+    print("GENERATE ${parsedData["name"]}");
+    print("GENERATE ${parsedData["role"]}");
+    switch (parsedData['role']) {
       case 0:
-            return Account.generateGuest();
-            break;
-          case 1:
-            return PejabatPengadaan.fromDb(parsedData);
-            break;
-          case 2:
-            return Seller.fromDb(parsedData);
-            break;
-          case 3:
-            return PejabatPembuatKomitmen.fromDb(parsedData);
-            break;
-          case 4:
-            return UnitKerjaPengadaan.fromDb(parsedData);
-            break;
-          case 5:
-            return Audit.fromDb(parsedData);
-            break;
-          case 6:
-            return BendaharaPengeluaran.fromDb(parsedData);
-            break;
-          case 9:
-            return Admin.fromDb(parsedData);
-            break;
-          default:
-            return Account.fromDb(parsedData);
-
+        return Account.generateGuest();
+        break;
+      case 1:
+        return PejabatPengadaan.fromDb(parsedData);
+        break;
+      case 2:
+        return Seller.fromDb(parsedData);
+        break;
+      case 3:
+        return PejabatPembuatKomitmen.fromDb(parsedData);
+        break;
+      case 4:
+        return UnitKerjaPengadaan.fromDb(parsedData);
+        break;
+      case 5:
+        return Audit.fromDb(parsedData);
+        break;
+      case 6:
+        return BendaharaPengeluaran.fromDb(parsedData);
+        break;
+      case 9:
+        return Admin.fromDb(parsedData);
+        break;
+      default:
+        return Account.fromDb(parsedData);
     }
-    // return Account(
-    //   email: parsedData['email'],
-    //   name: parsedData['name'],
-    //   imageUrl: parsedData['imageUrl'],
-    //   registrationDate:
-    //       DateTime.parse(parsedData['registrationDate'].toDate().toString()),
-    //   role: parsedData['role'],
-    //   telepon: parsedData['telepon'],
-    //   uid: parsedData['uid'],
-    // );
   }
 
   String get getRole {
-    return this.role==9?"Admin":listRole[this.role];
+    return mapRole[this.role];
   }
 }
 
@@ -124,12 +122,23 @@ class Seller extends Account {
   String namaBank;
   String atasNamaRekening;
   String nomorRekening;
-  static List<String> bankNames = ['BRI', 'BCA', 'Mandiri', 'BNI', 'Bank Jatim', 'BTN','CIMB Niaga', 'Danamon', 'BTPN', 'Panin'];
+  static List<String> bankNames = [
+    'BRI',
+    'BCA',
+    'Mandiri',
+    'BNI',
+    'Bank Jatim',
+    'BTN',
+    'CIMB Niaga',
+    'Danamon',
+    'BTPN',
+    'Panin'
+  ];
 
   Seller(
       {String name,
       String email,
-      int telepon,
+      String telepon,
       String imageUrl,
       DateTime registrationDate,
       String uid,
@@ -150,7 +159,7 @@ class Seller extends Account {
             uid: uid,
             role: role,
             isBlocked: isBlocked,
-            isAccepted : isAccepted);
+            isAccepted: isAccepted);
 
   factory Seller.fromDb(Map<String, dynamic> parsedData) {
     return Seller(
@@ -171,58 +180,25 @@ class Seller extends Account {
       isBlocked: parsedData['is_blocked'],
     );
   }
-
-
-  // Stream<List<Item>> listProduct() {
-  //   return super
-  //       .firestore
-  //       .collection('items')
-  //       .where('sellerUid', isEqualTo: this.uid)
-  //       .orderBy('price')
-  //       .snapshots()
-  //       .map((event) =>
-  //           event.docs.map((doc) => Item.fromDb(doc.data())).toList());
-  // }
 }
 
 class PejabatPengadaan extends Account {
   int unit;
-  static List<String> listUnit = [
-    'Unit Urutan 0',
-    'Unit Urutan 1',
-    'Unit Urutan 2',
-    'Unit Urutan 3',
-    'Unit Urutan 4',
-    'Unit Urutan 5',
-    'Unit Urutan 6',
-    'Unit Urutan 7',
-    'Unit Urutan 8',
-    'Unit Urutan 9',
-  ];
-
-  static Map<int, String> mapUnit = {
-    0:'Unit Urutan 0',
-    1:'Unit Urutan 1',
-    2:'Unit Urutan 2',
-    3:'Unit Urutan 3',
-    4:'Unit Urutan 4',
-    5:'Unit Urutan 5',
-    6:'Unit Urutan 6',
-    7:'Unit Urutan 7',
-    8:'Unit Urutan 8',
-    9:'Unit Urutan 9',
-  };
+  String ppkCode;
+  String namaUnit;
 
   PejabatPengadaan(
       {String name,
       String email,
       String imageUrl,
-      int telepon,
+      String telepon,
       DateTime registrationDate,
       String uid,
       int role,
       bool isBlocked,
       bool isAccepted,
+      this.ppkCode,
+      this.namaUnit,
       this.unit})
       : super(
             name: name,
@@ -232,31 +208,8 @@ class PejabatPengadaan extends Account {
             registrationDate: registrationDate,
             uid: uid,
             isBlocked: isBlocked,
-            isAccepted : isAccepted,
+            isAccepted: isAccepted,
             role: role);
-
-  String get getUnit {
-    switch (this.unit) {
-      case 0:
-        return listUnit[0];
-        break;
-      case 1:
-        return listUnit[1];
-        break;
-      case 2:
-        return listUnit[2];
-        break;
-      case 3:
-        return listUnit[3];
-        break;
-      case 4:
-        return listUnit[4];
-        break;
-      default:
-        return "Unit Tidak terdefinisi";
-        break;
-    }
-  }
 
   factory PejabatPengadaan.fromDb(Map<String, dynamic> parsedData) {
     return PejabatPengadaan(
@@ -271,37 +224,28 @@ class PejabatPengadaan extends Account {
       uid: parsedData['uid'],
       isAccepted: parsedData['is_accepted'],
       isBlocked: parsedData['is_blocked'],
+      ppkCode: parsedData['ppkCode'],
+      namaUnit: parsedData['namaUnit'],
     );
   }
 }
 
 class PejabatPembuatKomitmen extends Account {
-  //TODO Fungsi khusus PPK
-  int unit;
-  List<String> listUnit = [
-    'Unit Urutan 0',
-    'Unit Urutan 1',
-    'Unit Urutan 2',
-    'Unit Urutan 3',
-    'Unit Urutan 4',
-    'Unit Urutan 5',
-    'Unit Urutan 6',
-    'Unit Urutan 7',
-    'Unit Urutan 8',
-    'Unit Urutan 9',
-  ];
+  String namaDivisi;
+  String ppkCode;
 
   PejabatPembuatKomitmen(
       {String name,
       String email,
       String imageUrl,
-      int telepon,
+      String telepon,
       DateTime registrationDate,
       String uid,
+      this.namaDivisi,
       int role,
       bool isBlocked,
       bool isAccepted,
-      this.unit})
+      this.ppkCode})
       : super(
             name: name,
             email: email,
@@ -310,35 +254,11 @@ class PejabatPembuatKomitmen extends Account {
             registrationDate: registrationDate,
             uid: uid,
             isBlocked: isBlocked,
-            isAccepted : isAccepted,
+            isAccepted: isAccepted,
             role: role);
-
-  String get getUnit {
-    switch (this.unit) {
-      case 0:
-        return listUnit[0];
-        break;
-      case 1:
-        return listUnit[1];
-        break;
-      case 2:
-        return listUnit[2];
-        break;
-      case 3:
-        return listUnit[3];
-        break;
-      case 4:
-        return listUnit[4];
-        break;
-      default:
-        return "Unit Tidak terdefinisi";
-        break;
-    }
-  }
 
   factory PejabatPembuatKomitmen.fromDb(Map<String, dynamic> parsedData) {
     return PejabatPembuatKomitmen(
-      unit: parsedData['unit'],
       email: parsedData['email'],
       name: parsedData['name'],
       imageUrl: parsedData['imageUrl'],
@@ -349,18 +269,18 @@ class PejabatPembuatKomitmen extends Account {
       uid: parsedData['uid'],
       isAccepted: parsedData['is_accepted'],
       isBlocked: parsedData['is_blocked'],
+      ppkCode: parsedData['ppkCode'],
+      namaDivisi: parsedData['namaDivisiPPK'],
     );
   }
 }
 
 class UnitKerjaPengadaan extends Account {
-  //TODO Fungsi khusus UKPBJ
- 
   UnitKerjaPengadaan(
       {String name,
       String email,
       String imageUrl,
-      int telepon,
+      String telepon,
       DateTime registrationDate,
       String uid,
       bool isBlocked,
@@ -374,9 +294,8 @@ class UnitKerjaPengadaan extends Account {
             registrationDate: registrationDate,
             uid: uid,
             isBlocked: isBlocked,
-            isAccepted : isAccepted,
+            isAccepted: isAccepted,
             role: role);
-
 
   factory UnitKerjaPengadaan.fromDb(Map<String, dynamic> parsedData) {
     return UnitKerjaPengadaan(
@@ -395,13 +314,11 @@ class UnitKerjaPengadaan extends Account {
 }
 
 class Audit extends Account {
-  //TODO Fungsi khusus Audit
- 
   Audit(
       {String name,
       String email,
       String imageUrl,
-      int telepon,
+      String telepon,
       DateTime registrationDate,
       String uid,
       bool isBlocked,
@@ -415,9 +332,8 @@ class Audit extends Account {
             registrationDate: registrationDate,
             uid: uid,
             isBlocked: isBlocked,
-            isAccepted : isAccepted,
+            isAccepted: isAccepted,
             role: role);
-
 
   factory Audit.fromDb(Map<String, dynamic> parsedData) {
     return Audit(
@@ -438,29 +354,19 @@ class Audit extends Account {
 class BendaharaPengeluaran extends Account {
   //TODO Fungsi khusus BPP
   int unit;
-  List<String> listUnit = [
-    'Unit Urutan 0',
-    'Unit Urutan 1',
-    'Unit Urutan 2',
-    'Unit Urutan 3',
-    'Unit Urutan 4',
-    'Unit Urutan 5',
-    'Unit Urutan 6',
-    'Unit Urutan 7',
-    'Unit Urutan 8',
-    'Unit Urutan 9',
-  ];
+  String namaUnit;
 
   BendaharaPengeluaran(
       {String name,
       String email,
       String imageUrl,
-      int telepon,
+      String telepon,
       DateTime registrationDate,
       String uid,
       bool isBlocked,
       bool isAccepted,
       int role,
+      this.namaUnit,
       this.unit})
       : super(
             name: name,
@@ -470,31 +376,8 @@ class BendaharaPengeluaran extends Account {
             registrationDate: registrationDate,
             uid: uid,
             isBlocked: isBlocked,
-            isAccepted : isAccepted,
+            isAccepted: isAccepted,
             role: role);
-
-  String get getUnit {
-    switch (this.unit) {
-      case 0:
-        return listUnit[0];
-        break;
-      case 1:
-        return listUnit[1];
-        break;
-      case 2:
-        return listUnit[2];
-        break;
-      case 3:
-        return listUnit[3];
-        break;
-      case 4:
-        return listUnit[4];
-        break;
-      default:
-        return "Unit Tidak terdefinisi";
-        break;
-    }
-  }
 
   factory BendaharaPengeluaran.fromDb(Map<String, dynamic> parsedData) {
     return BendaharaPengeluaran(
@@ -509,17 +392,17 @@ class BendaharaPengeluaran extends Account {
       uid: parsedData['uid'],
       isAccepted: parsedData['is_accepted'],
       isBlocked: parsedData['is_blocked'],
+      namaUnit: parsedData['namaUnit'],
     );
   }
 }
 
 class Admin extends Account {
-  
   Admin(
       {String name,
       String email,
       String imageUrl,
-      int telepon,
+      String telepon,
       DateTime registrationDate,
       bool isBlocked,
       bool isAccepted,
@@ -533,9 +416,8 @@ class Admin extends Account {
             registrationDate: registrationDate,
             uid: uid,
             isBlocked: isBlocked,
-            isAccepted : isAccepted,
+            isAccepted: isAccepted,
             role: role);
-
 
   factory Admin.fromDb(Map<String, dynamic> parsedData) {
     return Admin(
@@ -550,5 +432,51 @@ class Admin extends Account {
       isAccepted: parsedData['is_accepted'],
       isBlocked: parsedData['is_blocked'],
     );
+  }
+}
+
+class PejabatPenerima extends Account {
+  int unit;
+  String namaUnit;
+
+  PejabatPenerima(
+      {String name,
+      String email,
+      String imageUrl,
+      String telepon,
+      DateTime registrationDate,
+      String uid,
+      int role,
+      bool isBlocked,
+      bool isAccepted,
+      this.namaUnit,
+      this.unit})
+      : super(
+            name: name,
+            email: email,
+            telepon: telepon,
+            imageUrl: imageUrl,
+            registrationDate: registrationDate,
+            uid: uid,
+            isBlocked: isBlocked,
+            isAccepted: isAccepted,
+            role: role);
+
+
+
+  factory PejabatPenerima.fromDb(Map<String, dynamic> parsedData) {
+    return PejabatPenerima(
+        unit: parsedData['unit'],
+        email: parsedData['email'],
+        name: parsedData['name'],
+        imageUrl: parsedData['imageUrl'],
+        registrationDate:
+            DateTime.parse(parsedData['registrationDate'].toDate().toString()),
+        role: parsedData['role'],
+        telepon: parsedData['telepon'],
+        uid: parsedData['uid'],
+        isAccepted: parsedData['is_accepted'],
+        isBlocked: parsedData['is_blocked'],
+        namaUnit: parsedData['namaUnit'],);
   }
 }

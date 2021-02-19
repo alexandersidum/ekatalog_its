@@ -10,14 +10,14 @@ import 'package:e_catalog/constants.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class SalesOrderPPK extends StatefulWidget {
+class SalesOrderHistoryPPK extends StatefulWidget {
   static const routeId = "SalesOrderPPK";
 
   @override
-  State<StatefulWidget> createState() => SalesOrderPPKState();
+  State<StatefulWidget> createState() => SalesOrderHistoryPPKState();
 }
 
-class SalesOrderPPKState extends State<SalesOrderPPK> {
+class SalesOrderHistoryPPKState extends State<SalesOrderHistoryPPK> {
   sortedBy sorted = sortedBy.Default;
   List<SalesOrder> finalOrderList = [];
   List<SalesOrder> listOrder = [];
@@ -36,8 +36,7 @@ class SalesOrderPPKState extends State<SalesOrderPPK> {
     isLoading = true;
     print("GETSALESORDER");
     //unitnya
-    listOrder = await os.getSalesOrderPPK(
-        status: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+    listOrder = await os.getSalesOrderHistoryPPK(
         ppkCode: (Provider.of<Auth>(context, listen: false).getUserInfo
                 as PejabatPembuatKomitmen)
             .ppkCode);
@@ -54,7 +53,7 @@ class SalesOrderPPKState extends State<SalesOrderPPK> {
     //unitnya
     finalOrderList = await os.getSalesOrderBySearch(
         keyword: keyword,
-        isCompleted: false,
+        isCompleted: true,
         ppkCode: (Provider.of<Auth>(context, listen: false).getUserInfo
                 as PejabatPembuatKomitmen)
             .ppkCode);
@@ -261,7 +260,7 @@ void sortItem(List<SalesOrder> initialList) {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text("Sales Order", style: kCalibriBold),
+          title: Text("Riwayat Sales Order", style: kCalibriBold),
           centerTitle: false,
           backgroundColor: kBlueMainColor,
           elevation: 0,

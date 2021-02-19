@@ -1,8 +1,4 @@
 import 'package:e_catalog/auth.dart';
-import 'package:e_catalog/components/bottom_sheet_decline_info.dart';
-import 'package:e_catalog/components/custom_raised_button.dart';
-import 'package:e_catalog/components/modal_bottom_sheet_app.dart';
-import 'package:e_catalog/components/negotiation_bottom_sheet.dart';
 import 'package:e_catalog/models/account.dart';
 import 'package:e_catalog/models/item.dart';
 import 'package:e_catalog/utilities/item_services.dart';
@@ -15,7 +11,8 @@ import '../item_detail.dart';
 
 class NegotationScreenPenyedia extends StatefulWidget {
   @override
-  _NegotationScreenPenyediaState createState() => _NegotationScreenPenyediaState();
+  _NegotationScreenPenyediaState createState() =>
+      _NegotationScreenPenyediaState();
 }
 
 class _NegotationScreenPenyediaState extends State<NegotationScreenPenyedia> {
@@ -104,7 +101,8 @@ class _NegotationScreenPenyediaState extends State<NegotationScreenPenyedia> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Padding(
-                        padding: EdgeInsets.only(top:size.height/100,right: size.width / 6),
+                        padding: EdgeInsets.only(
+                            top: size.height / 100, right: size.width / 6),
                         child: Text(
                           element.name,
                           style: kCalibriBold.copyWith(
@@ -137,72 +135,29 @@ class _NegotationScreenPenyediaState extends State<NegotationScreenPenyedia> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
-        
-        // Container(
-        //   height: size.height / 27,
-        //   width: size.width / 5,
-        //   child: CustomRaisedButton(
-        //     buttonChild: FittedBox(
-        //       child: Text(
-        //         "TOLAK",
-        //         style: kCalibriBold.copyWith(color: Colors.white),
-        //       ),
-        //     ),
-        //     callback: ()async {
-        //                 bool isSuccess = await itemService
-        //                     .acceptItemNegotiation(item, false);
-        //                 print("MENOLAK $isSuccess");
-        //               },
-        //     color: kRedButtonColor,
-        //   ),
-        // ),
-        // Container(
-        //   height: size.height / 27,
-        //   width: size.width / 5,
-        //   child: CustomRaisedButton(
-        //     buttonChild: FittedBox(
-        //       child: Text(
-        //         "TERIMA",
-        //         style: kCalibriBold.copyWith(color: Colors.white),
-        //       ),
-        //     ),
-        //     callback: ()async {
-        //                 bool isSuccess = await itemService
-        //                     .acceptItemNegotiation(item, true);
-        //                 print("MENERIMA $isSuccess");
-        //               },
-        //     color: kRedButtonColor,
-        //   ),
-        // ),
         TextButton(
-          onPressed: ()async {
-                        bool isSuccess = await itemService
-                            .acceptItemNegotiation(item, true);
-                        print("MENERIMA $isSuccess");
-                      },
-          child: Text("TOLAK",
-          style: kCalibriBold.copyWith(
-            color: kRedButtonColor
-          ),
+          onPressed: () async {
+            bool isSuccess =
+                await itemService.acceptItemNegotiation(item, true);
+          },
+          child: Text(
+            "TOLAK",
+            style: kCalibriBold.copyWith(color: kRedButtonColor),
           ),
         ),
         TextButton(
-          onPressed: ()async {
-                        bool isSuccess = await itemService
-                            .acceptItemNegotiation(item, true);
-                        print("MENERIMA $isSuccess");
-                      },
-          child: Text("TERIMA",
-          style: kCalibriBold.copyWith(
-            color: kBlueMainColor
-          ),
+          onPressed: () async {
+            bool isSuccess =
+                await itemService.acceptItemNegotiation(item, true);
+          },
+          child: Text(
+            "TERIMA",
+            style: kCalibriBold.copyWith(color: kBlueMainColor),
           ),
         )
       ],
     );
   }
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -217,66 +172,71 @@ class _NegotationScreenPenyediaState extends State<NegotationScreenPenyedia> {
       ),
       body: Column(
         children: [
-          Row(
-            children: [
-              Container(
-                margin: EdgeInsets.only(right: size.width / 100),
-                height: size.height / 20,
-                padding: EdgeInsets.only(
-                    right: size.width / 100, left: size.width / 50),
-                decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(5),
-                    color: Colors.white,
-                    border: Border.all(
-                        color: kGrayConcreteColor,
-                        width: 1,
-                        style: BorderStyle.solid)),
-                child: Theme(
-                  data: Theme.of(context).copyWith(canvasColor: Colors.white),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButton(
-                        value: sorted,
-                        items: dropDownSort(size),
-                        onChanged: (value) {
-                          setState(() {
-                            sorted = value;
-                          });
-                        }),
+          Container(
+            padding: EdgeInsets.symmetric(
+                horizontal: size.width / 100, vertical: size.height / 200),
+            color: kBlueMainColor,
+            child: Row(
+              children: [
+                Container(
+                  margin: EdgeInsets.only(right: size.width / 100),
+                  height: size.height / 20,
+                  padding: EdgeInsets.only(
+                      right: size.width / 100, left: size.width / 50),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(5),
+                      color: Colors.white,
+                      border: Border.all(
+                          color: kGrayConcreteColor,
+                          width: 1,
+                          style: BorderStyle.solid)),
+                  child: Theme(
+                    data: Theme.of(context).copyWith(canvasColor: Colors.white),
+                    child: DropdownButtonHideUnderline(
+                      child: DropdownButton(
+                          value: sorted,
+                          items: dropDownSort(size),
+                          onChanged: (value) {
+                            setState(() {
+                              sorted = value;
+                            });
+                          }),
+                    ),
                   ),
                 ),
-              ),
-              Expanded(
-                child: Container(
-                  height: MediaQuery.of(context).size.height / 18,
-                  width: MediaQuery.of(context).size.width * 0.7,
-                  child: TextField(
-                    decoration: InputDecoration(
-                        contentPadding: EdgeInsets.only(top: 5, left: 5),
-                        suffixIcon: Icon(Icons.search),
-                        filled: true,
-                        fillColor: Colors.white,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(5)),
-                          borderSide: BorderSide(
-                            width: 0,
-                            style: BorderStyle.none,
+                Expanded(
+                  child: Container(
+                    height: MediaQuery.of(context).size.height / 18,
+                    width: MediaQuery.of(context).size.width * 0.7,
+                    child: TextField(
+                      decoration: InputDecoration(
+                          contentPadding: EdgeInsets.only(top: 5, left: 5),
+                          suffixIcon: Icon(Icons.search),
+                          filled: true,
+                          fillColor: Colors.white,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.all(Radius.circular(5)),
+                            borderSide: BorderSide(
+                              width: 0,
+                              style: BorderStyle.none,
+                            ),
                           ),
-                        ),
-                        hintText: 'Search'),
-                    onChanged: (value) {
-                      if (value.isNotEmpty || value != null) {
-                        onSearch = true;
-                        searchQuery = value;
-                      } else {
-                        onSearch = false;
-                        searchQuery = value;
-                      }
-                      setState(() {});
-                    },
+                          hintText: 'Search'),
+                      onChanged: (value) {
+                        if (value.isNotEmpty || value != null) {
+                          onSearch = true;
+                          searchQuery = value;
+                        } else {
+                          onSearch = false;
+                          searchQuery = value;
+                        }
+                        setState(() {});
+                      },
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
           Expanded(
             child: StreamBuilder(
@@ -322,7 +282,7 @@ class _NegotationScreenPenyediaState extends State<NegotationScreenPenyedia> {
                                     .contains(searchQuery.toLowerCase());
                           }).toList()
                         : snapshot.data;
-                     sortItem(finalItemList);
+                    sortItem(finalItemList);
 
                     return finalItemList.length > 0
                         ? ListView(

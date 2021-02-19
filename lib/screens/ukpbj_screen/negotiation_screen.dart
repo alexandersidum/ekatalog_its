@@ -244,6 +244,7 @@ class _NegotationScreenPPKState extends State<NegotationScreenPPK> {
       body: Column(
         children: [
           Container(
+            color: kBlueMainColor,
             padding: EdgeInsets.symmetric(horizontal : size.width/100, vertical:size.height/200),
             child: Row(
               children: [

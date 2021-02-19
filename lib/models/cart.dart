@@ -55,9 +55,7 @@ class Cart with ChangeNotifier {
 class LineItem {
   Item item;
   int count;
-
   LineItem(this.item, this.count);
-
   void changeCount(int count) => this.count = count;
   void addCount() => count++;
   void minCount() => count > 1 ? count-- : null;

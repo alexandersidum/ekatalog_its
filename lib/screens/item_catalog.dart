@@ -364,7 +364,7 @@ class UpperContainer extends SliverPersistentHeaderDelegate {
                       filled: true,
                       fillColor: Colors.white,
                       border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(5)),
+                        borderRadius: BorderRadius.all(Radius.circular(2)),
                         borderSide: BorderSide(
                           width: 0,
                           style: BorderStyle.none,
@@ -375,16 +375,29 @@ class UpperContainer extends SliverPersistentHeaderDelegate {
               ),
               Stack(children: [
                 Container(
-                  width: size.width / 10,
-                  padding: EdgeInsets.only(left: size.width / 50),
+                  width: size.width / 8,
+                  padding: EdgeInsets.only(left: size.width / 20,),
                   child: FittedBox(
                       child: Icon(
-                    Icons.mail,
+                    Icons.shopping_cart,
                     color: Colors.white,
                     size: size.height,
                   )),
                 )
-              ])
+              ]),
+              SizedBox(width:size.width/40),
+              // Stack(children: [
+              //   Container(
+              //     width: size.width / 10,
+              //     padding: EdgeInsets.only(left: size.width / 50),
+              //     child: FittedBox(
+              //         child: Icon(
+              //       Icons.notifications,
+              //       color: Colors.white,
+              //       size: size.height,
+              //     )),
+              //   )
+              // ])
             ],
           ),
         ),

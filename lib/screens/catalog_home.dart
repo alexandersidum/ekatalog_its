@@ -1,21 +1,14 @@
 import 'package:e_catalog/models/item.dart';
-import 'package:e_catalog/models/account.dart';
 import 'package:e_catalog/models/menu_state.dart';
 import 'package:e_catalog/screens/cart_screen.dart';
 import 'package:e_catalog/screens/item_catalog.dart';
-import 'package:e_catalog/screens/mail_screen.dart';
 import 'package:e_catalog/screens/profile.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:e_catalog/auth.dart';
 import 'package:e_catalog/utilities/item_services.dart';
 import 'package:e_catalog/constants.dart';
-import 'package:e_catalog/models/menu_state.dart';
 
-//BottomNavbar belum diimplementasikan
-//Single item atau detail item page belum
-//Belum menyediakan appbar untuk page selain katalog item
-//filter bottomsheet belum
 
 class CatalogHome extends StatefulWidget {
   static const routeId = 'CatalogHome';
@@ -29,7 +22,7 @@ class CatalogHomeState extends State<CatalogHome> {
     BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
     BottomNavigationBarItem(
         icon: Icon(Icons.shopping_cart), label: 'Keranjang'),
-    BottomNavigationBarItem(icon: Icon(Icons.mail), label: 'Mail'),
+    // BottomNavigationBarItem(icon: Icon(Icons.mail), label: 'Mail'),
     BottomNavigationBarItem(icon: Icon(Icons.account_circle), label: 'Account'),
   ];
 
@@ -38,8 +31,6 @@ class CatalogHomeState extends State<CatalogHome> {
       key: PageStorageKey('catalog'),
     ),
     CartScreen(key: PageStorageKey('cart')),
-    MailScreen(key:PageStorageKey('mail')),
-    // AddProductScreen(key: PageStorageKey('add_product')),
     Profile(key: PageStorageKey('profile')),
   ];
 
@@ -53,13 +44,6 @@ class CatalogHomeState extends State<CatalogHome> {
     AppBar(
       title: Text("Keranjang",
       style: kCalibriBold),
-      centerTitle: false,
-      backgroundColor: kBlueMainColor,
-      elevation: 0,
-    ),
-    AppBar(
-      title: Text("Mail",
-      style: kCalibriBold,),
       centerTitle: false,
       backgroundColor: kBlueMainColor,
       elevation: 0,
@@ -79,10 +63,9 @@ class CatalogHomeState extends State<CatalogHome> {
   IconData actionIcon = Icons.search;
   int selectedIndex;
 
-  //For saving the page key and state
+  //Menyimpan Page Key dan State
   final PageStorageBucket bucket = PageStorageBucket();
 
-  //Customizeable appbar untuk merebuild page jika icon ditekan
   //Tidak digunakan kalau searchnya di body
   AppBar appBar(BuildContext context) {
     return AppBar(
@@ -158,14 +141,12 @@ class CatalogHomeState extends State<CatalogHome> {
         // ),
         StreamProvider<List<Item>>(
           create: (context) => ItemService(
-            uid: _auth.getUser.uid,
           ).getLatestApprovedItems(),
           updateShouldNotify: (_, __) => true,
         ),
         
         StreamProvider<List<Category>>(
           create: (context) => ItemService(
-            uid: _auth.getUser.uid,
           ).getStreamCategory(),
         ),
       ],

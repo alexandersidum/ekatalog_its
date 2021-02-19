@@ -33,7 +33,7 @@ class _PembayaranScreenState extends State<PembayaranScreen> {
   void didChangeDependencies() {
     bpp = Provider.of<Auth>(context, listen: false).getUserInfo
         as BendaharaPengeluaran;
-    orderStreams = orderService.getBPPSalesOrder(bpp.unit, [7,8,9]);
+    orderStreams = orderService.getBPPSalesOrder(bpp.unit, [7, 8, 9]);
     super.didChangeDependencies();
   }
 
@@ -91,33 +91,43 @@ class _PembayaranScreenState extends State<PembayaranScreen> {
             //         : ""),
             //   ),
             // ),
-            element.imageBuktiPenerimaan!=null?Container(
-              height: size.width * 0.25,
-              width: size.width * 0.25,
-              margin: EdgeInsets.only(right: 10),
-              child: (element.imageBuktiPenerimaan.trim().isNotEmpty)?GestureDetector(
-                onTap: (){Navigator.of(context).push(MaterialPageRoute(builder : (context)=>PhotoDetail(heroTag:"imageBuktiPenerimaan", imageUrl: element.imageBuktiPenerimaan,)));
-                },child: Hero(
-                                tag: "imageBuktiPenerimaan",
-                                child: Container(
-                                  width: size.width / 4,
-                                  height: size.width / 4,
-                                  child: CachedNetworkImage(
-                                    placeholder: (context, url) =>
-                                        CircularProgressIndicator(),
-                                    imageUrl: element.imageBuktiPenerimaan,
-                                    errorWidget: (context, url, err) =>
-                                        Icon(Icons.error),
-                                  ),
+            element.imageBuktiPenerimaan != null
+                ? Container(
+                    height: size.width * 0.25,
+                    width: size.width * 0.25,
+                    margin: EdgeInsets.only(right: 10),
+                    child: (element.imageBuktiPenerimaan.trim().isNotEmpty)
+                        ? GestureDetector(
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                  builder: (context) => PhotoDetail(
+                                        heroTag: element.docId,
+                                        imageUrl: element.imageBuktiPenerimaan,
+                                      )));
+                            },
+                            child: Hero(
+                              tag: element.docId,
+                              child: Container(
+                                width: size.width / 4,
+                                height: size.width / 4,
+                                child: CachedNetworkImage(
+                                  placeholder: (context, url) =>
+                                      CircularProgressIndicator(),
+                                  imageUrl: element.imageBuktiPenerimaan,
+                                  errorWidget: (context, url, err) =>
+                                      Icon(Icons.error),
                                 ),
                               ),
-              ):Center(child: Text("No image", style:kCalibri)),
-            ):Container(
-              height: size.width * 0.25,
-              width: size.width * 0.25,
-              margin: EdgeInsets.only(right: 10),
-              child: Center(child: Text("No image", style:kCalibri)),
-            ),
+                            ),
+                          )
+                        : Center(child: Text("No image", style: kCalibri)),
+                  )
+                : Container(
+                    height: size.width * 0.25,
+                    width: size.width * 0.25,
+                    margin: EdgeInsets.only(right: 10),
+                    child: Center(child: Text("No image", style: kCalibri)),
+                  ),
             Expanded(
               child: Stack(children: [
                 // Positioned(
@@ -157,7 +167,6 @@ class _PembayaranScreenState extends State<PembayaranScreen> {
                               color: kBlueMainColor),
                         ),
                       ),
-                      
                       Text(
                         element.getStatusPenyedia(),
                         style: kCalibriBold.copyWith(
@@ -169,42 +178,47 @@ class _PembayaranScreenState extends State<PembayaranScreen> {
                             fontSize: 14, color: kBlueMainColor),
                       ),
                       Text(
-                        element.getUnit,
+                        element.namaUnit,
                         style: kCalibriBold.copyWith(fontSize: 14),
                       ),
                       Text(
-                        element.status==7?"Barang sudah diterima, silahkan melakukan pembayaran"
-                        :element.status==8?"Pembayaran sudah dilakukan, menunggu konfirmasi penyedia"
-                        :element.status==9?"Pembayaran ditolak penyedia, silahkan followup"
-                        :"Error mengambil data",
-                        style: kCalibri.copyWith(fontSize: 13, color: kRedButtonColor),
+                        element.status == 7
+                            ? "Barang sudah diterima, silahkan melakukan pembayaran"
+                            : element.status == 8
+                                ? "Pembayaran sudah dilakukan, menunggu konfirmasi penyedia"
+                                : element.status == 9
+                                    ? "Pembayaran ditolak penyedia, silahkan followup"
+                                    : "Error mengambil data",
+                        style: kCalibri.copyWith(
+                            fontSize: 13, color: kRedButtonColor),
                       ),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.baseline,
                         children: [
-                           Expanded(
-                             flex : 2,
-                             child: Text("Produk :  ", style: kCalibriBold)),
                           Expanded(
-                            flex : 5,
+                              flex: 2,
+                              child: Text("Produk :  ", style: kCalibriBold)),
+                          Expanded(
+                              flex: 5,
                               child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: produkInfo(element.listOrder),
-                          )),
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: produkInfo(element.listOrder),
+                              )),
                         ],
                       ),
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.baseline,
                         children: [
-                           Expanded(
-                             flex : 2,
-                             child: Text("Total :  ", style: kCalibriBold)),
                           Expanded(
-                              flex : 5,
-                              child : Text(NumberFormat.currency(
-                                            name: "Rp ", decimalDigits: 0)
-                                        .format(element.totalPrice), style: kCalibriBold)
-                              ),
+                              flex: 2,
+                              child: Text("Total :  ", style: kCalibriBold)),
+                          Expanded(
+                              flex: 5,
+                              child: Text(
+                                  NumberFormat.currency(
+                                          name: "Rp ", decimalDigits: 0)
+                                      .format(element.totalPrice),
+                                  style: kCalibriBold)),
                         ],
                       ),
                       buttonListWidget(size, element)
@@ -218,8 +232,6 @@ class _PembayaranScreenState extends State<PembayaranScreen> {
       ),
     );
   }
-
-
 
   void sortItem(List<SalesOrder> initialList) {
     switch (sorted) {
@@ -241,33 +253,33 @@ class _PembayaranScreenState extends State<PembayaranScreen> {
         initialList = initialList;
     }
     // return initialList;
-
   }
 
   Widget buttonListWidget(Size size, SalesOrder order) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical : size.height/60),
+      padding: EdgeInsets.symmetric(vertical: size.height / 60),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           order.status == 7 || order.status == 9
               ? Container(
-                    width: size.width/2,
-                    height: size.height/20,
-                    // padding: EdgeInsets.symmetric(horizontal:size.width/10, vertical: size.height/50),
-                    child: CustomRaisedButton(
-                      buttonChild: FittedBox(
-                                            child: Text("Lakukan Pembayaran",
-                            style: kCalibriBold.copyWith(color: Colors.white)),
-                      ),
-                      color: kBlueMainColor,
-                      callback: (){
-                        Navigator.of(context).push(MaterialPageRoute(
-                          builder: (context)=>PembayaranDetailScreen(order: order,)));
-                      },
+                  width: size.width / 2,
+                  height: size.height / 20,
+                  // padding: EdgeInsets.symmetric(horizontal:size.width/10, vertical: size.height/50),
+                  child: CustomRaisedButton(
+                    buttonChild: FittedBox(
+                      child: Text("Lakukan Pembayaran",
+                          style: kCalibriBold.copyWith(color: Colors.white)),
                     ),
-                  )
-                
+                    color: kBlueMainColor,
+                    callback: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (context) => PembayaranDetailScreen(
+                                order: order,
+                              )));
+                    },
+                  ),
+                )
               : SizedBox()
         ],
       ),

@@ -14,16 +14,20 @@ class OrderServices {
   String unitPath = 'unit';
   String miscPath = 'misc';
   String usersPath = 'users';
+  String ppkPath = 'ppk_info';
+  List<int> completeStatus = [2, 5, 6, 10];
 
   Future<bool> uploadPembayaranBPP(
       {String salesOrderDocId, String keterangan, String imageBuktiUrl}) async {
+        var activeDocRef =
+        _firestore.collection(salesOrderPath).doc("active").collection("order");
+
     Map<String, dynamic> input = {
       "status": 8,
       "keteranganPembayaran": keterangan != null ? keterangan : "",
       "imageBuktiUrl": imageBuktiUrl
     };
-    return _firestore
-        .collection(salesOrderPath)
+    return activeDocRef
         .doc(salesOrderDocId)
         .update(input)
         .then((value) => true)
@@ -72,65 +76,103 @@ class OrderServices {
       Function callback}) async {
     //STEP TERAKHIR JADI DIMASUKKAN LAPORAN
     bool output = false;
-    var salesOrderRef = _firestore.collection(salesOrderPath);
     var unitRef = _firestore.collection(unitPath);
-    Map<String, dynamic> input = {"status": isAccepted ? 10 : 9};
+    int status = isAccepted ? 10 : 9;
+    Map<String, dynamic> input = {"status": status};
     if (keterangan != null) input["keterangan"] = keterangan;
 
-    await _firestore.runTransaction((transaction) async {
-      await transaction.update(salesOrderRef.doc(order.docId), input);
-      if (isAccepted) {
-        await transaction.set(
-            unitRef
-                .doc(order.unit.toString())
-                .collection("laporan")
-                .doc(order.creationDate.year.toString()),
-            {
-              'pengeluaran': FieldValue.increment(order.totalPrice),
-              'jumlahPengadaan': FieldValue.increment(1),
-              'pembelianTerakhir': order.id
-            },
-            SetOptions(merge: true));
-      }
-    }).then((value) {
-      output = true;
-      callback(true);
-    }).catchError((Object error) {
-      print(error);
-      output = false;
-      callback(false);
-    });
+    changeOrderStatus(
+        docId: order.docId,
+        keterangan: keterangan,
+        newStatus: status,
+        order: order,
+        callback: (isSuccess) async {
+          if (isSuccess) {
+            await _firestore.runTransaction((transaction) async {
+              if (isAccepted) {
+                await transaction.set(
+                    unitRef
+                        .doc(order.unit.toString())
+                        .collection("laporan")
+                        .doc(order.creationDate.year.toString()),
+                    {
+                      'pengeluaran': FieldValue.increment(order.totalPrice),
+                      'jumlahPengadaan': FieldValue.increment(1),
+                      'pembelianTerakhir': order.id
+                    },
+                    SetOptions(merge: true));
+              }
+            }).then((value) {
+              output = true;
+              callback(true);
+            }).catchError((Object error) {
+              output = false;
+              callback(false);
+            });
+          }
+        });
     return output;
   }
 
-  Stream<List<SalesOrder>> getSalesOrder({int unit, List<int> status}) {
+  Stream<List<SalesOrder>> getSalesOrder({String ppkCode, List<int> status}) {
     //Sales order sesuai unit
-    return _firestore
-        .collection(salesOrderPath)
-        .where("unit", isEqualTo: unit)
-        .where('status', whereIn: status).orderBy("creationDate", descending: true).limit(20)
+    var docRef =
+        _firestore.collection(salesOrderPath).doc("active").collection("order");
+    return docRef
+        .where("ppkCode", isEqualTo: ppkCode)
+        .where('status', whereIn: status)
+        .orderBy("creationDate", descending: true)
+        .limit(20)
         .snapshots()
         .map((QuerySnapshot snapshot) => snapshot.docs
             .map((DocumentSnapshot e) => SalesOrder.fromDb(e.data(), e.id))
             .toList());
   }
 
-  Future<List<SalesOrder>> getSalesOrderPPK({List<int> unit, List<int> status}) async{
+  Future<List<SalesOrder>> getSalesOrderPPK(
+      {String ppkCode, List<int> status}) async {
     //Sales order sesuai unit
-    return await _firestore
-        .collection(salesOrderPath)
-        .where("unit", isEqualTo: unit)
-        .where('status', whereIn: status).orderBy("creationDate", descending: true).limit(20).get().then((e){
-          return e.docs
-            .map((DocumentSnapshot e) => SalesOrder.fromDb(e.data(), e.id))
-            .toList();
-        }).catchError((e){return null;});
+    var docRef =
+        _firestore.collection(salesOrderPath).doc("active").collection("order");
+    return await docRef
+        .where("ppkCode", isEqualTo: ppkCode)
+        .where('status', whereIn: status)
+        .orderBy("creationDate", descending: true)
+        .limit(20)
+        .get()
+        .then((e) {
+      return e.docs
+          .map((DocumentSnapshot e) => SalesOrder.fromDb(e.data(), e.id))
+          .toList();
+    }).catchError((e) {
+      return null;
+    });
+  }
+
+  Future<List<SalesOrder>> getSalesOrderHistoryPPK(
+      {String ppkCode}) async {
+    //Sales order sesuai unit
+    var docRef =
+        _firestore.collection(salesOrderPath).doc("completed").collection("order");
+    return await docRef
+        .where("ppkCode", isEqualTo: ppkCode)
+        .orderBy("creationDate", descending: true)
+        .limit(20)
+        .get()
+        .then((e) {
+      return e.docs
+          .map((DocumentSnapshot e) => SalesOrder.fromDb(e.data(), e.id))
+          .toList();
+    }).catchError((e) {
+      return null;
+    });
   }
 
   Stream<SalesOrder> getSingleSalesOrder({String docId}) {
     //Sales order sesuai unit
-    return _firestore
-        .collection(salesOrderPath)
+    var docRef =
+        _firestore.collection(salesOrderPath).doc("active").collection("order");
+    return docRef
         .doc(docId)
         .snapshots()
         .map((e) => SalesOrder.fromDb(e.data(), e.id));
@@ -138,8 +180,9 @@ class OrderServices {
 
   Stream<List<SalesOrder>> getBPPSalesOrder(int unit, List<int> status) {
     //Sales order buat bpp
-    return _firestore
-        .collection(salesOrderPath)
+    var docRef =
+        _firestore.collection(salesOrderPath).doc("active").collection("order");
+    return docRef
         .where("unit", isEqualTo: unit)
         .where("status", whereIn: status)
         .snapshots()
@@ -150,10 +193,36 @@ class OrderServices {
 
   Stream<List<SalesOrder>> getPPSalesOrder(String ppUid, List<int> status) {
     //Sales order buat pp
-    return _firestore
-        .collection(salesOrderPath)
+    var docRef =
+        _firestore.collection(salesOrderPath).doc("active").collection("order");
+    return docRef
         .where("ppUid", isEqualTo: ppUid)
         .where("status", whereIn: status)
+        .snapshots()
+        .map((QuerySnapshot snapshot) => snapshot.docs
+            .map((DocumentSnapshot e) => SalesOrder.fromDb(e.data(), e.id))
+            .toList());
+  }
+
+  Stream<List<SalesOrder>> getUnitActiveSalesOrder(int unit) {
+    //Sales order buat pp
+    var docRef =
+        _firestore.collection(salesOrderPath).doc("active").collection("order");
+    return docRef
+        .where("unit", isEqualTo: unit)
+        .snapshots()
+        .map((QuerySnapshot snapshot) => snapshot.docs
+            .map((DocumentSnapshot e) => SalesOrder.fromDb(e.data(), e.id))
+            .toList());
+  }
+
+  Stream<List<SalesOrder>> getUnitActiveSalesOrderByStatus(int unit, List<int> status) {
+    //Sales order buat pp
+    var docRef =
+        _firestore.collection(salesOrderPath).doc("active").collection("order");
+    return docRef
+        .where("unit", isEqualTo: unit)
+        .where("status", whereIn : status)
         .snapshots()
         .map((QuerySnapshot snapshot) => snapshot.docs
             .map((DocumentSnapshot e) => SalesOrder.fromDb(e.data(), e.id))
@@ -163,10 +232,25 @@ class OrderServices {
   Stream<List<SalesOrder>> getSellerSalesOrder(
       String sellerUid, List<int> status) {
     //Sales order sesuai seller dan status
-    return _firestore
-        .collection(salesOrderPath)
+    var docRef =
+        _firestore.collection(salesOrderPath).doc("active").collection("order");
+    return docRef
         .where("sellerUid", isEqualTo: sellerUid)
         .where("status", whereIn: status)
+        .orderBy('creationDate', descending: true)
+        .snapshots()
+        .map((QuerySnapshot snapshot) => snapshot.docs
+            .map((DocumentSnapshot e) => SalesOrder.fromDb(e.data(), e.id))
+            .toList());
+  }
+
+  Stream<List<SalesOrder>> getSellerSalesOrderHistory(
+      String sellerUid) {
+    //Sales order sesuai seller dan status
+    var docRef =
+        _firestore.collection(salesOrderPath).doc("completed").collection("order");
+    return docRef
+        .where("sellerUid", isEqualTo: sellerUid)
         .orderBy('creationDate', descending: true)
         .snapshots()
         .map((QuerySnapshot snapshot) => snapshot.docs
@@ -185,7 +269,6 @@ class OrderServices {
         .set(newAddress.toMap(), SetOptions(merge: true))
         .catchError((Object error) {
       isSuccess = false;
-      print("ERROR setShippingAddress");
     });
     return isSuccess;
   }
@@ -264,41 +347,49 @@ class OrderServices {
       String keterangan,
       Function callback}) async {
     bool output = false;
-    var docRef = _firestore.collection(salesOrderPath);
-    if(buktiPenerimaan!=null){
+    var docRef =
+        _firestore.collection(salesOrderPath).doc("active").collection("order");
+    if (buktiPenerimaan != null) {
       await uploadBuktiPenerimaan(buktiPenerimaan, (url) async {
-      if (url != null) {
-        await docRef
-            .doc(docId)
-            .update(keterangan != null
-                ? {"status": newStatus, "keterangan": keterangan, "bukti_penerimaan":url}
-                : {"status": newStatus, "bukti_penerimaan":url})
-            .then((value) {
-          output = true;
-          callback(true);
-        }).catchError((Object error) {
+        if (url != null) {
+          await docRef
+              .doc(docId)
+              .update(keterangan != null
+                  ? {
+                      "status": newStatus,
+                      "keterangan": keterangan,
+                      "bukti_penerimaan": url
+                    }
+                  : {"status": newStatus, "bukti_penerimaan": url})
+              .then((value) {
+            output = true;
+            callback(true);
+          }).catchError((Object error) {
+            output = false;
+            callback(false);
+          });
+        } else {
           output = false;
           callback(false);
-        });
-      }else{
+        }
+      });
+    } else {
+      await docRef
+          .doc(docId)
+          .update(keterangan != null
+              ? {
+                  "status": newStatus,
+                  "keterangan": keterangan,
+                  "bukti_penerimaan": ""
+                }
+              : {"status": newStatus, "bukti_penerimaan": ""})
+          .then((value) {
+        output = true;
+        callback(true);
+      }).catchError((Object error) {
         output = false;
         callback(false);
-      }
-    });
-    }
-    else{
-      await docRef
-            .doc(docId)
-            .update(keterangan != null
-                ? {"status": newStatus, "keterangan": keterangan, "bukti_penerimaan":""}
-                : {"status": newStatus, "bukti_penerimaan":""})
-            .then((value) {
-          output = true;
-          callback(true);
-        }).catchError((Object error) {
-          output = false;
-          callback(false);
-        });
+      });
     }
     return output;
   }
@@ -307,22 +398,73 @@ class OrderServices {
       {String docId,
       int newStatus,
       String keterangan,
-      Function callback}) async {
+      Function callback,
+      SalesOrder order}) async {
     bool output = false;
-    var docRef = _firestore.collection(salesOrderPath);
-    await docRef
-        .doc(docId)
-        .update(keterangan != null
-            ? {"status": newStatus, "keterangan": keterangan}
-            : {"status": newStatus})
-        .then((value) {
-      output = true;
-      callback(true);
-    }).catchError((Object error) {
-      print(error);
-      output = false;
-      callback(false);
-    });
+    var activeDocRef =
+        _firestore.collection(salesOrderPath).doc("active").collection("order");
+    var completedDocRef = _firestore
+        .collection(salesOrderPath)
+        .doc("completed")
+        .collection("order");
+    if (completeStatus.contains(newStatus)) {
+      await _firestore
+          .runTransaction((transaction) async {
+            transaction
+                .set(completedDocRef.doc(order.docId), order.toMap())
+                .update(
+                    completedDocRef.doc(order.docId),
+                    keterangan != null
+                        ? {"status": newStatus, "keterangan": keterangan}
+                        : {"status": newStatus});
+            transaction.delete(activeDocRef.doc(order.docId));
+          })
+          .then((e) => callback(true))
+          .catchError((e) => callback(false));
+    } else {
+      await activeDocRef
+          .doc(docId)
+          .update(keterangan != null
+              ? {"status": newStatus, "keterangan": keterangan}
+              : {"status": newStatus})
+          .then((value) {
+        output = true;
+        callback(true);
+      }).catchError((Object error) {
+        output = false;
+        callback(false);
+      });
+    }
+    return output;
+  }
+
+  //Untuk change status salesorder yang selesai dibatalkan / selesai
+  Future<bool> changeOrderStatusCompleted(
+      {String docId,
+      int newStatus,
+      String keterangan,
+      Function callback,
+      SalesOrder order}) async {
+    bool output = false;
+    var activeDocRef =
+        _firestore.collection(salesOrderPath).doc("active").collection("order");
+    var completedDocRef = _firestore
+        .collection(salesOrderPath)
+        .doc("completed")
+        .collection("order");
+    await _firestore
+        .runTransaction((transaction) async {
+          transaction
+              .set(completedDocRef.doc(order.docId), order.toMap())
+              .update(
+                  completedDocRef.doc(order.docId),
+                  keterangan != null
+                      ? {"status": newStatus, "keterangan": keterangan}
+                      : {"status": newStatus});
+          transaction.delete(activeDocRef.doc(order.docId));
+        })
+        .then((e) => callback(true))
+        .catchError((e) => callback(false));
     return output;
   }
 
@@ -331,25 +473,14 @@ class OrderServices {
       int newTotalPrice,
       List<Order> newOrderList,
       Function callback}) async {
-    var docRef = _firestore.collection(salesOrderPath);
+    var docRef = _firestore.collection(salesOrderPath).doc("active").collection("order");
     bool output = false;
-    // bool isTotalDeclined = true;
-    // bool isPartialDeclined = false;
-
-    // newOrderList.forEach((element) {
-    //   if (element.status == 0) isTotalDeclined = false;
-    //   else if (element.status == 1) isPartialDeclined = true;
-    // });
 
     Map<String, dynamic> input = {
       "listOrder": newOrderList.map((e) => e.toMap()).toList()
     };
     if (newTotalPrice != null) input['totalPrice'] = newTotalPrice;
-    // if (isTotalDeclined) input['status'] = 5;
-    // else if (isPartialDeclined) input['status'] = 3;
-    // else {input['status'] = 4;}
     await docRef.doc(docId).update(input).then((value) {
-      print("SAKSES");
       output = true;
       callback(true);
     });
@@ -365,104 +496,41 @@ class OrderServices {
     });
   }
 
-  // Future<void> batchCreateSalesOrder(
-  //     {List<LineItem> itemList,
-  //     String ppName,
-  //     String ppUid,
-  //     int unit,
-  //     ShippingAddress shippingAddress,
-  //     Function onComplete}) async {
-  //   var docRef = _firestore.collection(salesOrderPath);
-  //   try {
-  //     String ppkName;
-  //     String ppkUid;
-  //     await _firestore
-  //         .collection(miscPath)
-  //         .doc('ppk_info')
-  //         .get()
-  //         .then((value) async {
-  //       if (!value.exists) {
-  //         throw ("PPK INFO NOT EXIST");
-  //       } else {
-  //         await _firestore
-  //             .collection(usersPath)
-  //             .doc(value.data()[unit.toString()])
-  //             .get()
-  //             .then((value) {
-  //           if (!value.exists) {
-  //             throw ("PPK USER INFO NOT EXIST");
-  //           }
-  //           //TODO thrower jika gagal
-  //           ppkUid = value.id;
-  //           ppkName = value.data()['name'];
-  //         });
-  //       }
-  //     });
-  //     itemList.forEach((element) async {
-  //       var order = SalesOrder(
-  //           id: await getLatestSalesOrderID(),
-  //           ppName: ppName,
-  //           ppUid: ppUid,
-  //           unit: unit,
-  //           creationDate: DateTime.now(),
-  //           ppkName: ppkName,
-  //           ppkUid: ppkUid,
-  //           seller: element.item.seller,
-  //           sellerUid: element.item.sellerUid,
-  //           status: 0,
-  //           address: shippingAddress.address,
-  //           namaAlamat: shippingAddress.namaAlamat,
-  //           namaPenerima: shippingAddress.namaPenerima,
-  //           teleponPenerima: shippingAddress.teleponPenerima,
-  //           totalPrice: ((element.item.price * element.count) *
-  //                   (1 + element.item.taxPercentage / 100))
-  //               .round());
-  //       _firestore.runTransaction((transaction) async {
-  //         transaction.set(docRef.doc(), order.toMap());
-  //       }).catchError((err) {
-  //         onComplete(false);
-  //         throw ("Error Creating Sales Order");
-  //       });
-  //     });
-  //     onComplete(true);
-  //   } catch (error) {
-  //     print(error);
-  //     onComplete(false);
-  //   }
-  // }
 
   Future<void> batchCreateSalesOrderGroup(
       {List<LineItem> itemList,
       String ppName,
       String ppUid,
+      String ppkCode,
       int unit,
+      String namaUnit,
       ShippingAddress shippingAddress,
       Function onComplete}) async {
-    var docRef = _firestore.collection(salesOrderPath);
-    var ppkInfoRef = _firestore.collection(miscPath).doc('ppk_info');
+    var ppkInfoRef = _firestore.collection(ppkPath).doc(ppkCode);
+    var docRef =
+        _firestore.collection(salesOrderPath).doc("active").collection("order");
     var groupedItemMap = groupBy(itemList, (LineItem lineItem) {
       return lineItem.item.sellerUid;
     });
     String ppkName;
     String ppkUid;
-
     Future.forEach(groupedItemMap.entries,
         (MapEntry<String, List<LineItem>> element) async {
       DocumentSnapshot ppkSnap = await ppkInfoRef.get();
       if (!ppkSnap.exists) {
-        print("PPK TIDAK ADA");
-        throw Exception("PPK INFO TIDAK EXIST!");
+        throw Exception("Belum ada PPK yang diassign");
       }
       //ambil data ppk dulu
-      ppkUid = ppkSnap.data()[unit.toString()]['ppkUid'];
-      ppkName = ppkSnap.data()[unit.toString()]['ppkName'];
-
+      ppkUid = ppkSnap.data()['ppk_uid'];
+      ppkName = ppkSnap.data()['ppk_name'];
+      if(ppkUid==null||ppkName==null){
+        throw Exception("Belum ada PPK yang diassign");
+      }
       int totalPrice = 0;
       List<LineItem> list = element.value;
       List<Order> orderlist = [];
       //hitung total price so
       list.forEach((element) {
-        print("lineitem foreach");
         totalPrice = totalPrice +
             ((element.item.price * element.count) *
                     (1 + (element.item.taxPercentage / 100)))
@@ -481,16 +549,15 @@ class OrderServices {
             orderPrice: ((lineItem.item.price * lineItem.count) *
                     (1 + lineItem.item.taxPercentage / 100))
                 .round());
-        print(order.itemName);
         orderlist.add(order);
       });
-
       var order = SalesOrder(
           id: await getLatestSalesOrderID().catchError((Object onError) {
-            print("GAGAL NGAMBIL ORDER ID");
+            throw Exception("Error mengambil id Sales Order");
           }),
           ppName: ppName,
           ppUid: ppUid,
+          ppkCode :ppkCode,
           sellerUid: element.key,
           seller: element.value[0].item.seller,
           unit: unit,
@@ -498,25 +565,38 @@ class OrderServices {
           ppkName: ppkName,
           ppkUid: ppkUid,
           status: 0,
+          namaUnit: namaUnit,
           address: shippingAddress.address,
           namaAlamat: shippingAddress.namaAlamat,
           namaPenerima: shippingAddress.namaPenerima,
           teleponPenerima: shippingAddress.teleponPenerima,
           totalPrice: totalPrice,
           listOrder: orderlist);
-      print("ADD");
       await docRef.add(order.toMap());
     }).then((value) => onComplete(true)).catchError((Object error) {
       onComplete(false);
-      print("Error");
     });
   }
 
-  Future<List<SalesOrder>> getSalesOrderBySearch(String keyword, List<int> status)async {
+  Future<List<SalesOrder>> getSalesOrderBySearch(
+      {String keyword, bool isCompleted, String ppkCode}) async {
+    //Unit diganti kode ppk
+    var docRef = isCompleted
+        ? _firestore
+            .collection(salesOrderPath)
+            .doc("completed")
+            .collection("order")
+        : _firestore
+            .collection(salesOrderPath)
+            .doc("active")
+            .collection("order");
     List<String> keywords = keyword.trim().toLowerCase().split(" ");
-    keywords.forEach((element) {print(element);});
-    return await _firestore
-        .collection(salesOrderPath).where('keyword', arrayContainsAny: keywords).where('status', whereIn: status).get()
-        .then((value) => value.docs.map((e) => SalesOrder.fromDb(e.data(), e.id)).toList()).catchError((Object err)=>List<SalesOrder>());
+    return await docRef
+        .where("ppkCode", isEqualTo: ppkCode)
+        .where('keyword', arrayContainsAny: keywords)
+        .get()
+        .then((value) =>
+            value.docs.map((e) => SalesOrder.fromDb(e.data(), e.id)).toList())
+        .catchError((Object err) => List<SalesOrder>());
   }
 }

@@ -157,7 +157,6 @@ class ItemDetailState extends State<ItemDetail> {
 
     if (item == null) item = ModalRoute.of(context).settings.arguments;
     List<String> imageUrls = item.image.cast<String>();
-    itemService.keywordGenerator(item.name).forEach((element) {print(element);});
     Size size = MediaQuery.of(context).size;
     return Scaffold(
         appBar: AppBar(
@@ -195,7 +194,6 @@ class ItemDetailState extends State<ItemDetail> {
                         //Diganti images dari item nanti
                         items: imageUrls.map((url) {
                           if(url!=null){
-                            print("IMAGE");
                             return Builder(builder: (context) {
                             return Container(
                               margin: EdgeInsets.all(2),
@@ -378,7 +376,6 @@ class ItemDetailState extends State<ItemDetail> {
                     callback: () async {
                       bool isSuccess =
                           await itemService.setItemStatus(item.id, 5);
-                      print(isSuccess);
                     },
                     color: kRedButtonColor,
                   ),
@@ -415,7 +412,7 @@ class ItemDetailState extends State<ItemDetail> {
                 ),
                 callback: () async {
                   bool isSuccess = await itemService.acceptItemProposal(item);
-                  isSuccess ? Navigator.of(context).pop() : print("GAGAL");
+                  if(isSuccess) Navigator.of(context).pop(); 
                 },
                 color: kBlueMainColor,
               ),
@@ -497,7 +494,7 @@ class TopInfo extends StatelessWidget {
               InkWell(
                 onTap: () {
                   Navigator.pushNamed(context, SellerCatalog.routeId,
-                      arguments: item.seller);
+                      arguments: item.sellerUid);
                 },
                 child: Container(
                   padding: EdgeInsets.symmetric(

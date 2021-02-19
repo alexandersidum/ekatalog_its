@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:e_catalog/components/custom_raised_button.dart';
 import 'package:e_catalog/components/custom_text_field.dart';
 import 'package:e_catalog/components/modal_bottom_sheet_app.dart';
@@ -24,7 +23,6 @@ class _ManageCategoryScreenState extends State<ManageCategoryScreen> {
   File pickedImage;
   TextEditingController categoryName = TextEditingController();
   final GlobalKey<ScaffoldState> _scaffoldKey = new GlobalKey<ScaffoldState>();
-  final _formKey = GlobalKey<FormState>();
 
   @override
   void initState() {
@@ -98,11 +96,7 @@ class _ManageCategoryScreenState extends State<ManageCategoryScreen> {
                 color: kOrangeButtonColor,
                 callback: ()async{
                   await _service.addCategory(categoryName.text, pickedImage).then((isSuccess){
-                      _scaffoldKey.currentState.showSnackBar(
-                        SnackBar(
-                          behavior: SnackBarBehavior.floating,
-                          content: Text(isSuccess?'Berhasil':"Gagal", style: kCalibri,))
-                      );
+                      // Kalau sukses tambah kategori
                   });
                 },
                 buttonChild: Text("TAMBAH KATEGORI", style: kCalibriBold.copyWith(color: Colors.black)),

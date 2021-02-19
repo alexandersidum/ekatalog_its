@@ -184,10 +184,12 @@ class QuotationScreenState extends State<QuotationScreen> {
                                   context: context,
                                   builder: (context) {
                                     return DeclineBottomSheet(
+                                      title: "Alasan Penolakan ${quotation.id}",
                                       id: quotation.id,
                                       callback: (keterangan) {
                                         print(keterangan);
                                         os.changeOrderStatus(
+                                          order : quotation,
                                             docId: quotation.docId,
                                             newStatus: 2,
                                             keterangan: keterangan,
@@ -214,6 +216,7 @@ class QuotationScreenState extends State<QuotationScreen> {
                             callback: () async {
                               //Fungsi terima quotation
                               os.changeOrderStatus(
+                                order : quotation,
                                   docId: quotation.docId,
                                   newStatus: 1,
                                   callback: (bool result) {
@@ -281,8 +284,7 @@ class QuotationScreenState extends State<QuotationScreen> {
         child: Column(
           children: [
             Container(
-              
-                      color: kBlueMainColor,
+               color: kBlueMainColor,
               padding: EdgeInsets.symmetric(horizontal : size.width/100, vertical:size.height/200),
               child: Row(
                 children: [

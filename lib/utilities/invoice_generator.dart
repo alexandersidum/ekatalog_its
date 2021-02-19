@@ -14,7 +14,7 @@ Future<Uint8List> generateInvoice(
 
   final invoice = Invoice(
     salesOrder: salesOrder,
-    orders: salesOrder.listOrder,
+    orders: salesOrder.listOrder.where((e)=>e.status==0).toList(),
     paymentInfo:
         '4509 Wiseman Street\nKnoxville, Tennessee(TN), 37929\n865-372-0425',
     baseColor: PdfColors.blueGrey800,
@@ -89,7 +89,6 @@ class Invoice {
           pw.SizedBox(height: 20),
           _contentFooter(context),
           pw.SizedBox(height: 20),
-          _termsAndConditions(context),
         ],
       ),
     );

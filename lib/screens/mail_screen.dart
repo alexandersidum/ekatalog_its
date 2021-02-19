@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:e_catalog/auth.dart';
 import 'package:e_catalog/constants.dart';
+
+
+//Belum
 
 class MailScreen extends StatelessWidget {
   MailScreen({Key key}) : super(key: key);
@@ -16,12 +17,12 @@ class MailScreen extends StatelessWidget {
             children: ListTile.divideTiles(context: context, tiles: [
       ListTile(
         leading: Icon(Icons.message),
-        title: Text('Pesan', style: kCalibri),
+        title: Text('Pesan (Coming Soon)', style: kCalibri),
         trailing: Icon(Icons.keyboard_arrow_right),
       ),
       ListTile(
         leading: Icon(Icons.notifications),
-        title: Text('Notifikasi', style: kCalibri),
+        title: Text('Notifikasi (Coming Soon)', style: kCalibri),
         trailing: Icon(Icons.keyboard_arrow_right),
       ),
     ]).toList()));

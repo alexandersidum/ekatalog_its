@@ -3,12 +3,37 @@ import "sales_order.dart";
 class Unit {
 
 String namaUnit;
+String ppkCode;
 String unitId;
 String namaPPK;
 String ppkUid;
 List<Report> listLaporan;
 
-Unit({this.listLaporan, this.namaPPK, this.namaUnit, this.ppkUid, this.unitId});
+Unit({this.listLaporan, this.namaPPK, this.namaUnit, this.ppkUid, this.unitId, this.ppkCode});
+
+factory Unit.fromDb(Map<String, dynamic> data, String id){
+  return Unit(
+    namaUnit: data['namaUnit'],
+    ppkCode : data['ppkCode'],
+    unitId : id,
+  );
+}
+}
+
+class DivisiPPK {
+
+String namaDivisi;
+String ppkCode;
+
+DivisiPPK({this.namaDivisi, this.ppkCode});
+
+factory DivisiPPK.fromDb(Map<String, dynamic> data, String id){
+  print(data['nama']);
+  return DivisiPPK(
+    namaDivisi: data['nama'],
+    ppkCode : id,
+  );
+}
 
 }
 

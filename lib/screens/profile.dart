@@ -18,13 +18,13 @@ class Profile extends StatelessWidget {
         info = "Pengunjung";
         break;
       case 1:
-        info = (accountInfo as PejabatPengadaan).getUnit;
+        info = (accountInfo as PejabatPengadaan).namaUnit;
         break;
       case 2:
         info = (accountInfo as Seller).namaPerusahaan;
         break;
       case 3:
-        info = (accountInfo as PejabatPembuatKomitmen).getUnit;
+        info = (accountInfo as PejabatPembuatKomitmen).namaDivisi;
         break;
       case 4:
         info = "Unit Kerja Pengadaan Barang dan Jasa";
@@ -33,7 +33,10 @@ class Profile extends StatelessWidget {
         info = "Auditor";
         break;
       case 6:
-        info = (accountInfo as BendaharaPengeluaran).getUnit;
+        info = (accountInfo as BendaharaPengeluaran).namaUnit;
+        break;
+      case 7:
+        info = (accountInfo as PejabatPenerima).namaUnit;
         break;
       default:
         info = "Pengunjung";
@@ -59,7 +62,7 @@ class Profile extends StatelessWidget {
         return SizedBox();
         break;
       case 1:
-        menuText = 'Menu PP';
+        menuText = 'Pembelian';
         break;
       case 2:
         menuText = 'Menu Penyedia';
@@ -76,12 +79,15 @@ class Profile extends StatelessWidget {
       case 6:
         menuText = 'Menu BPP';
         break;
+      case 7:
+        menuText = 'Menu Penerima';
+        break;
       default:
         return SizedBox();
     }
     return ListTile(
-        leading: Icon(Icons.menu,
-        
+        leading: Icon(
+          Icons.menu,
         ),
         title: Text(menuText, style: kCalibri),
         trailing: Icon(Icons.keyboard_arrow_right),
@@ -125,9 +131,7 @@ class Profile extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        constraints: BoxConstraints(
-                          maxWidth: size.width/1.7
-                        ),
+                        constraints: BoxConstraints(maxWidth: size.width / 1.7),
                         child: Text(
                           accountInfo.name,
                           overflow: TextOverflow.ellipsis,
@@ -180,7 +184,8 @@ class Profile extends StatelessWidget {
                       onTap: () {
                         Provider.of<Auth>(context, listen: false)
                             .signOut(context, () {
-                          Provider.of<MenuState>(context, listen: false).setMenuSelected(0);
+                          Provider.of<MenuState>(context, listen: false)
+                              .setMenuSelected(0);
                           Provider.of<Cart>(context, listen: false).clearCart();
                         });
                       }),

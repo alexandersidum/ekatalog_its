@@ -201,6 +201,7 @@ class RekeningPenyediaState extends State<RekeningPenyediaScreen> {
             child: DropdownButtonHideUnderline(
               child: DropdownButton(
                   isExpanded: true,
+                  hint: Text("Pilih bank"),
                   dropdownColor: Colors.white,
                   value: selectedBank,
                   items: bankList
