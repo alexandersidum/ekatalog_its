@@ -34,8 +34,7 @@ class RoleMenu extends StatelessWidget {
   Widget build(BuildContext context) {
     Account account = Provider.of<Auth>(context).getUserInfo;
     int role = Provider.of<Auth>(context).getUserInfo.role;
-    String roleDesc = Provider.of<Auth>(context).getUserInfo.getRole;
-    print(role);
+    String roleDesc = account.getRole;
     return Scaffold(
       backgroundColor: kBackgroundMainColor,
       appBar: AppBar(

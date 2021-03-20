@@ -172,6 +172,7 @@ void sortItem(List<SalesOrder> initialList) {
                       ],
                     ),
                     Row(
+                      textBaseline : TextBaseline.alphabetic,
                       crossAxisAlignment: CrossAxisAlignment.baseline,
                       children: [
                         Expanded(child: Text("Status :", style: kCalibriBold)),
@@ -181,6 +182,7 @@ void sortItem(List<SalesOrder> initialList) {
                       ],
                     ),
                     Row(
+                      textBaseline : TextBaseline.alphabetic,
                       crossAxisAlignment: CrossAxisAlignment.baseline,
                       children: [
                         Expanded(child: Text("Produk :", style: kCalibriBold)),

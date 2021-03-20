@@ -1,23 +1,19 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_catalog/auth.dart';
 import 'package:e_catalog/components/bottom_sheet_decline_info.dart';
 import 'package:e_catalog/components/modal_bottom_sheet_app.dart';
 import 'package:e_catalog/constants.dart';
 import 'package:e_catalog/models/account.dart';
-import 'package:e_catalog/models/item.dart';
 import 'package:e_catalog/models/sales_order.dart';
-import 'package:e_catalog/screens/item_detail.dart';
 import 'package:e_catalog/screens/penyedia_screen/sales_order_detail_penyedia.dart';
 import 'package:e_catalog/utilities/order_services.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:provider/provider.dart';
 import 'package:e_catalog/utilities/invoice_generator.dart' as ig;
-import 'package:path_provider/path_provider.dart';
 import 'package:e_catalog/components/pdf_view_screen.dart';
+import 'package:path_provider/path_provider.dart';
 
 class SalesOrderPenyedia extends StatefulWidget {
   @override
@@ -33,8 +29,8 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
   Seller seller;
 
   createInvoice(SalesOrder salesOrder) async {
-    final String dir = "/storage/emulated/0/Download";
-    final String path = '$dir/example.pdf';
+    Directory directory = await getApplicationDocumentsDirectory();
+    final String path = '${directory.path}/temp_so.pdf';
     final File file = File(path);
     Uint8List invoice = await ig.generateInvoice(PdfPageFormat.a4, salesOrder);
     await file.writeAsBytes(invoice);
@@ -237,7 +233,8 @@ class _SalesOrderPenyediaState extends State<SalesOrderPenyedia> {
         TextButton(
           child: Text("Print", style: kCalibriBold.copyWith(color: kBlueMainColor)),
           onPressed: () {
-            createInvoice(order);
+              createInvoice(order);
+            
           },
         ),
         TextButton(

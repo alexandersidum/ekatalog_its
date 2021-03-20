@@ -17,7 +17,7 @@ import '../constants.dart';
 class AddProductScreen extends StatefulWidget {
   Item item;
   bool isEdit;
-  AddProductScreen({Key key, this.item, this.isEdit=false}) : super(key: key);
+  AddProductScreen({Key key, this.item, this.isEdit = false}) : super(key: key);
 
   static const routeId = 'AddProduct';
 
@@ -41,7 +41,11 @@ class AddProductScreenState extends State<AddProductScreen> {
   bool isLoading = false;
   ImagePicker imagePicker = ImagePicker();
   List<File> pickedImage = List(3);
-  List<ImageEditInfo> pickedImageInfo = [ImageEditInfo(), ImageEditInfo(), ImageEditInfo()];
+  List<ImageEditInfo> pickedImageInfo = [
+    ImageEditInfo(),
+    ImageEditInfo(),
+    ImageEditInfo()
+  ];
   List<String> listKategori = [];
   //TODO Validator
   TextEditingController _nameController = TextEditingController();
@@ -49,31 +53,30 @@ class AddProductScreenState extends State<AddProductScreen> {
   TextEditingController _stockController = TextEditingController();
   TextEditingController _taxPercentageController = TextEditingController();
   TextEditingController _descriptionController = TextEditingController();
+  var _scaffoldKey = new GlobalKey<ScaffoldState>();
 
   Future<File> urlToFile(String imageUrl) async {
-    var rng = Random(); 
-    Directory tempDir =
-        await getTemporaryDirectory();
-    String tempPath = tempDir.path; 
-    File file = File('$tempPath' +
-        (rng.nextInt(100)).toString() +'.png'); 
-    http.Response response = await http.get(imageUrl); 
+    var rng = Random();
+    Directory tempDir = await getTemporaryDirectory();
+    String tempPath = tempDir.path;
+    File file = File('$tempPath' + (rng.nextInt(100)).toString() + '.png');
+    http.Response response = await http.get(imageUrl);
     return await file.writeAsBytes(response.bodyBytes);
   }
 
-  void getNetworkImage(List<String> imageUrls)async{
+  void getNetworkImage(List<String> imageUrls) async {
     setState(() {
       isLoading = true;
     });
     int index = 0;
-    await Future.forEach(imageUrls, (element) async{
-        if(element!=null) {
-          pickedImage[index] = await urlToFile(element);
-          pickedImageInfo[index] = ImageEditInfo(
-            imageFile: pickedImage[index],
-            existingUrl: imageUrls[index],
-          );
-        }
+    await Future.forEach(imageUrls, (element) async {
+      if (element != null) {
+        pickedImage[index] = await urlToFile(element);
+        pickedImageInfo[index] = ImageEditInfo(
+          imageFile: pickedImage[index],
+          existingUrl: imageUrls[index],
+        );
+      }
       index++;
     });
     await getCategory();
@@ -82,11 +85,13 @@ class AddProductScreenState extends State<AddProductScreen> {
     });
   }
 
-  Future<void> getCategory()async{
+  Future<void> getCategory() async {
     setState(() {
       isLoading = true;
     });
-    listKategori = await db.getCategory().then((listCategory)=>listCategory.map((e)=>e.name).toList());
+    listKategori = await db
+        .getCategory()
+        .then((listCategory) => listCategory.map((e) => e.name).toList());
     setState(() {
       isLoading = false;
     });
@@ -104,8 +109,7 @@ class AddProductScreenState extends State<AddProductScreen> {
       _sellerPriceController.text = item.price.toString();
       selectedCategory = item.category;
       getNetworkImage(item.image);
-    }
-    else{
+    } else {
       getCategory();
     }
     super.initState();
@@ -122,7 +126,7 @@ class AddProductScreenState extends State<AddProductScreen> {
     setState(() {});
   }
 
-  Future<void> proposeItem(Seller seller) async {
+  Future<void> proposeItem(Seller seller, BuildContext context) async {
     try {
       Item item = Item(
         name: _nameController.text,
@@ -147,18 +151,24 @@ class AddProductScreenState extends State<AddProductScreen> {
           },
           item: item);
     } catch (error) {
+      isLoading = false;
+      setState(() {});
+      _scaffoldKey.currentState.showSnackBar(SnackBar(
+          content: Text(
+        'Error',
+        style: kCalibri,
+      )));
       //TODO Melakukan apa kalo eror
     }
   }
 
-  Future<void> editItem(Seller seller, Item currentItem) async {
+  Future<void> editItem(Seller seller, Item currentItem, BuildContext context) async {
     try {
       Item item = currentItem;
       item.name = _nameController.text;
       item.category = selectedCategory;
       item.description = _descriptionController.text;
       item.stock = int.parse(_stockController.text);
-      
       await db.editItem(
           images: pickedImageInfo,
           callback: (bool isSuccess) {
@@ -167,7 +177,13 @@ class AddProductScreenState extends State<AddProductScreen> {
           },
           item: item);
     } catch (error) {
-      //TODO Melakukan apa kalo eror
+      isLoading = false;
+      setState(() {});
+      _scaffoldKey.currentState.showSnackBar(SnackBar(
+          content: Text(
+        'Error',
+        style: kCalibri,
+      )));
     }
   }
 
@@ -177,11 +193,15 @@ class AddProductScreenState extends State<AddProductScreen> {
     Size size = MediaQuery.of(context).size;
 
     return GestureDetector(
-      onTap: (){FocusScope.of(context).unfocus();},
+      onTap: () {
+        FocusScope.of(context).unfocus();
+      },
       child: Scaffold(
+        key: _scaffoldKey,
         backgroundColor: kBackgroundMainColor,
         appBar: AppBar(
-          title: Text(widget.isEdit?"Ubah Produk":"Tambah Produk", style: kCalibriBold),
+          title: Text(widget.isEdit ? "Ubah Produk" : "Tambah Produk",
+              style: kCalibriBold),
           centerTitle: false,
           backgroundColor: kBlueMainColor,
           elevation: 0,
@@ -241,13 +261,17 @@ class AddProductScreenState extends State<AddProductScreen> {
                         ),
                         child: DropdownButtonHideUnderline(
                           child: DropdownButton(
-                              hint: Text("Pilih Kategori", style:kCalibri),
+                              hint: Text("Pilih Kategori", style: kCalibri),
                               isExpanded: true,
                               dropdownColor: Colors.white,
-                              value: listKategori.contains(selectedCategory)?selectedCategory:null,
+                              value: listKategori.contains(selectedCategory)
+                                  ? selectedCategory
+                                  : null,
                               items: listKategori
                                   .map((kategori) => DropdownMenuItem<String>(
-                                        child: FittedBox(child: Text(kategori, style: kCalibri)),
+                                        child: FittedBox(
+                                            child: Text(kategori,
+                                                style: kCalibri)),
                                         value: kategori,
                                       ))
                                   .toList(),
@@ -272,51 +296,52 @@ class AddProductScreenState extends State<AddProductScreen> {
                           maxLine: 8,
                         ),
                       ),
-                      widget.isEdit? SizedBox()
-                      :Row(
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: Column(
+                      widget.isEdit
+                          ? SizedBox()
+                          : Row(
                               children: [
-                                labelText(
-                                    leadText: "Harga Satuan",
-                                    trailText: "Rupiah"),
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: size.width * 0.03),
-                                  child: CustomTextField(
-                                    maxLength: 100,
-                                    controller: _sellerPriceController,
-                                    hintText: 'Harga',
-                                    keyboardType: TextInputType.number,
-                                    color: Colors.white,
+                                Expanded(
+                                  flex: 2,
+                                  child: Column(
+                                    children: [
+                                      labelText(
+                                          leadText: "Harga Satuan",
+                                          trailText: "Rupiah"),
+                                      Container(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: size.width * 0.03),
+                                        child: CustomTextField(
+                                          maxLength: 100,
+                                          controller: _sellerPriceController,
+                                          hintText: 'Harga',
+                                          keyboardType: TextInputType.number,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Expanded(
+                                  flex: 1,
+                                  child: Column(
+                                    children: [
+                                      labelText(leadText: "Pajak(%)"),
+                                      Container(
+                                        padding: EdgeInsets.symmetric(
+                                            horizontal: size.width * 0.03),
+                                        child: CustomTextField(
+                                          maxLength: 100,
+                                          controller: _taxPercentageController,
+                                          hintText: 'Pajak',
+                                          keyboardType: TextInputType.number,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],
                             ),
-                          ),
-                          Expanded(
-                            flex: 1,
-                            child: Column(
-                              children: [
-                                labelText(leadText: "Pajak(%)"),
-                                Container(
-                                  padding: EdgeInsets.symmetric(
-                                      horizontal: size.width * 0.03),
-                                  child: CustomTextField(
-                                    maxLength: 100,
-                                    controller: _taxPercentageController,
-                                    hintText: 'Pajak',
-                                    keyboardType: TextInputType.number,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
                       labelText(
                         leadText: "Jumlah Stok",
                       ),
@@ -375,10 +400,12 @@ class AddProductScreenState extends State<AddProductScreen> {
                           ),
                           callback: () {
                             //TODO fungsi pengajuan item
+
                             setState(() {
                               isLoading = true;
-                              widget.isEdit?editItem(seller, widget.item):
-                              proposeItem(seller);
+                              widget.isEdit
+                                  ? editItem(seller, widget.item, context)
+                                  : proposeItem(seller, context);
                             });
                           },
                           color: kOrangeButtonColor,

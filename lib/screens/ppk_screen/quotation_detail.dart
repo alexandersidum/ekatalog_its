@@ -101,6 +101,7 @@ class QuotationDetail extends StatelessWidget {
                       ),
                       SizedBox(height: size.height / 100),
                       Row(
+                        textBaseline : TextBaseline.alphabetic,
                         crossAxisAlignment: CrossAxisAlignment.baseline,
                         children: [
                           Expanded(child: Text("Produk :", style: kCalibriBold)),

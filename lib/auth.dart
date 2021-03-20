@@ -28,6 +28,17 @@ class Auth {
     });
   }
 
+  Stream<Account> get streamAccount{
+    return _auth.authStateChanges().asyncMap((user)async{
+      if(user!=null){
+        return await checkUserInfo(user?.uid);
+      }
+      else{
+        return null;
+      }
+    });
+  }
+
   Future<bool> checkAuth() async {
     if (_auth.currentUser != null) {
       await checkUserInfo(_auth.currentUser.uid);
@@ -169,7 +180,7 @@ class Auth {
     });
   }
 
-  Future<void> checkUserInfo(uid) async {
+  Future<Account> checkUserInfo(uid) async {
     await _firestore.collection('users').doc(uid).get().then((value) {
       if (value.exists) {
         bool isAccepted = value.data()['is_accepted'];
@@ -210,6 +221,7 @@ class Auth {
           }
         }
       }
+      return _userInfo;
     });
   }
 

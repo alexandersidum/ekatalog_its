@@ -12,9 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:e_catalog/auth.dart';
 import 'package:image_picker/image_picker.dart';
 
-//VALIDATOR REGISTRASI BELUM PASSWORD EMAIL DLL
-//TODO Fungsi Loading Submit
-//TODO Konfirmasi password dibenarkan
+
 class RegistrationScreen extends StatefulWidget {
   static const routeId = 'regisScreen';
 

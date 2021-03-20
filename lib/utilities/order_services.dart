@@ -7,6 +7,24 @@ import 'package:collection/collection.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:path/path.dart' as p;
 
+// Status SalesOrder
+// 0 : Belum Disetujui PPK
+// 1 : Disetujui PPK 
+// 2 : Ditolak PPK
+// 3 : Disanggupi sebagian
+// 4 : Disanggupi dan Segera Dikirim 
+// 5 : Dibatalkan Penyedia
+// 6 : Dibatalkan PPK
+// 7 : Menunggu Pembayaran
+// 8 : Menunggu Konfirmasi Pembayaran 
+// 9 : Pembayaran ditolak penyedia
+// 10 : Selesai
+
+// Status subOrder
+// 0 : Belum direspon
+// 1: Disanggupi
+// 2 : Dibatalkan
+
 class OrderServices {
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
   FirebaseStorage _fstorage = FirebaseStorage.instance;
@@ -518,13 +536,13 @@ class OrderServices {
         (MapEntry<String, List<LineItem>> element) async {
       DocumentSnapshot ppkSnap = await ppkInfoRef.get();
       if (!ppkSnap.exists) {
-        throw Exception("Belum ada PPK yang diassign");
+        throw Exception("PPK Not Assigned");
       }
       //ambil data ppk dulu
       ppkUid = ppkSnap.data()['ppk_uid'];
       ppkName = ppkSnap.data()['ppk_name'];
       if(ppkUid==null||ppkName==null){
-        throw Exception("Belum ada PPK yang diassign");
+        throw Exception("PPK Not Assigned");
       }
       int totalPrice = 0;
       List<LineItem> list = element.value;

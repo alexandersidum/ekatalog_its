@@ -80,6 +80,7 @@ class _LaporanScreenState extends State<LaporanScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
+                        textBaseline: TextBaseline.alphabetic,
                         crossAxisAlignment: CrossAxisAlignment.baseline,
                         children: [
                           Expanded(
@@ -93,6 +94,7 @@ class _LaporanScreenState extends State<LaporanScreen> {
                         ],
                       ),
                       Row(
+                        textBaseline: TextBaseline.alphabetic,
                         crossAxisAlignment: CrossAxisAlignment.baseline,
                         children: [
                           Expanded(
@@ -105,6 +107,7 @@ class _LaporanScreenState extends State<LaporanScreen> {
                         ],
                       ),
                       Row(
+                        textBaseline: TextBaseline.alphabetic,
                         crossAxisAlignment: CrossAxisAlignment.baseline,
                         children: [
                           Expanded(
@@ -116,6 +119,7 @@ class _LaporanScreenState extends State<LaporanScreen> {
                         ],
                       ),
                       Row(
+                        textBaseline: TextBaseline.alphabetic,
                         crossAxisAlignment: CrossAxisAlignment.baseline,
                         children: [
                           Expanded(
@@ -127,6 +131,7 @@ class _LaporanScreenState extends State<LaporanScreen> {
                         ],
                       ),
                       Row(
+                        textBaseline: TextBaseline.alphabetic,
                         crossAxisAlignment: CrossAxisAlignment.baseline,
                         children: [
                           Expanded(
@@ -141,6 +146,7 @@ class _LaporanScreenState extends State<LaporanScreen> {
                         ],
                       ),
                       Row(
+                        textBaseline: TextBaseline.alphabetic,
                         crossAxisAlignment: CrossAxisAlignment.baseline,
                         children: [
                           Expanded(
@@ -378,7 +384,7 @@ class _LaporanScreenState extends State<LaporanScreen> {
                                 children: [
                                   Container(
                                     padding: EdgeInsets.only(
-                                        top: size.height / 40,
+                                        top: size.height / 100,
                                         left: size.width / 30,
                                         bottom: size.height / 100),
                                     alignment: Alignment.centerLeft,
@@ -397,6 +403,7 @@ class _LaporanScreenState extends State<LaporanScreen> {
                                               context: context,
                                               tiles: [
                                             ListTile(
+                                              dense: true,
                                               title: Text('Nama Unit',
                                                   style: kCalibri),
                                               trailing: Text(
@@ -404,12 +411,14 @@ class _LaporanScreenState extends State<LaporanScreen> {
                                                   style: kCalibri),
                                             ),
                                             ListTile(
+                                              dense: true,
                                               title: Text('Nama PPK',
                                                   style: kCalibri),
                                               trailing: Text(selectedUnit.namaPPK,
                                                   style: kCalibri),
                                             ),
                                             ListTile(
+                                              dense: true,
                                               title: Text('Total Pengadaan',
                                                   style: kCalibri),
                                               trailing: Text(
@@ -419,6 +428,7 @@ class _LaporanScreenState extends State<LaporanScreen> {
                                                   style: kCalibri),
                                             ),
                                             ListTile(
+                                              dense: true,
                                               title: Text('Total Pengeluaran',
                                                   style: kCalibri),
                                               trailing: Text(

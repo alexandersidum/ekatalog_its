@@ -145,8 +145,31 @@ class AccountService {
           transaction
               .update(ppkRef, {'ppk_name': isAccepted ? ppk.name : null});
         })
-        .then((e) => output = true)
+        .then((e) async{
+          try{
+            await updatePPKUnit(ppk);
+          }
+          catch(e){
+            throw("Gagal");
+          }
+          output = true;
+        })
         .catchError((e) => output = false);
+    return output;
+  }
+
+  Future<bool> updatePPKUnit(PejabatPembuatKomitmen ppk) async {
+    bool output = false;
+    var unitRef = _firestore.collection(unitPath);
+    await unitRef.where('ppkCode',isEqualTo: ppk.ppkCode).get().then((snap)async{
+      await Future.forEach(snap.docs,(DocumentSnapshot doc)async{
+        await unitRef.doc(doc.id).set({
+          "namaPPK":ppk.name,
+          "ppkCode":ppk.ppkCode,
+          "ppkUid":ppk.uid,
+        },SetOptions(merge: true));
+      });
+    });
     return output;
   }
 

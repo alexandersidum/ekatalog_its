@@ -15,6 +15,7 @@ import 'screens/catalog_home.dart';
 import 'auth.dart';
 import 'models/cart.dart';
 import 'package:flutter/services.dart';
+import 'package:e_catalog/screens/landing_screen.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,8 +47,9 @@ class MyApp extends StatelessWidget {
         theme: ThemeData.light().copyWith(
           canvasColor: Colors.transparent,
         ),
-        initialRoute: LoginScreen.routeId,
+        initialRoute: LandingScreen.routeId,
         routes: {
+          LandingScreen.routeId : (context)=>LandingScreen(),
           LoginScreen.routeId : (context)=>LoginScreen(),
           RegistrationScreen.routeId : (context)=>RegistrationScreen(),
           CatalogHome.routeId : (context)=>CatalogHome(),

@@ -23,6 +23,8 @@ class SalesOrder{
   String keteranganPembayaran;
   String ppkCode;
 
+  static List<int> completedStatusList = [2,5,6,10];
+
   SalesOrder({this.id, this.docId, this.listOrder, this.ppkName, 
   this.creationDate, this.totalPrice, this.seller, 
   this.sellerUid, this.status, this.ppName, this.ppUid, this.namaUnit,

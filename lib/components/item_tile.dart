@@ -3,6 +3,7 @@ import 'package:e_catalog/models/item.dart';
 import 'package:e_catalog/screens/item_detail.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ItemTile extends StatelessWidget {
   final Item item;
@@ -32,12 +33,18 @@ class ItemTile extends StatelessWidget {
                   child: ClipRRect(
                     borderRadius:
                         BorderRadius.vertical(top: Radius.circular(10)),
-                    child: FadeInImage(
-                      placeholder:
-                          AssetImage('assets/item_placeholder_300x300.png'),
-                      image: NetworkImage(
-                        item.image[0].toString(),
-                      ),
+                    // child: FadeInImage(
+                    //   placeholder:
+                    //       AssetImage('assets/item_placeholder_300x300.png'),
+                    //   image: NetworkImage(
+                    //     item.image[0].toString(),
+                    //   ),
+                    //   fit: BoxFit.cover,
+                    // ),
+                    child: CachedNetworkImage(
+                      imageUrl: item.image[0].toString(),
+                      errorWidget: (context, url, _)=>Image(image : AssetImage('assets/item_placeholder_300x300.png')),
+                      placeholder: (context, url)=>CircularProgressIndicator(),
                       fit: BoxFit.cover,
                     ),
                   )),

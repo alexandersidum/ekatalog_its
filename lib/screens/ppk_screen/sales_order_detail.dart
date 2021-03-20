@@ -10,7 +10,6 @@ import 'package:intl/intl.dart';
 class SalesOrderDetail extends StatelessWidget {
   OrderServices os = OrderServices();
   final SalesOrder salesOrder;
-
   SalesOrderDetail({Key key, this.salesOrder}) : super(key: key);
 
   List<Widget> produkInfo(List<Order> listOrder) {
@@ -101,6 +100,7 @@ class SalesOrderDetail extends StatelessWidget {
                           ),
                           SizedBox(height: size.height / 100),
                           Row(
+                            textBaseline : TextBaseline.alphabetic,
                             crossAxisAlignment: CrossAxisAlignment.baseline,
                             children: [
                               Expanded(
@@ -112,6 +112,7 @@ class SalesOrderDetail extends StatelessWidget {
                           ),
                           SizedBox(height: size.height / 100),
                           Row(
+                            textBaseline : TextBaseline.alphabetic,
                             crossAxisAlignment: CrossAxisAlignment.baseline,
                             children: [
                               Expanded(
@@ -145,6 +146,7 @@ class SalesOrderDetail extends StatelessWidget {
                           ),
                           SizedBox(height: size.height / 100),
                           Row(
+                            textBaseline : TextBaseline.alphabetic,
                             crossAxisAlignment: CrossAxisAlignment.baseline,
                             children: [
                               Expanded(
@@ -201,7 +203,7 @@ class SalesOrderDetail extends StatelessWidget {
                           SizedBox(
                             height: size.height / 50,
                           ),
-                          Row(
+                          !SalesOrder.completedStatusList.contains(salesOrder.status)?Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Expanded(
@@ -243,7 +245,7 @@ class SalesOrderDetail extends StatelessWidget {
                                 ),
                               ),
                             ],
-                          )
+                          ):SizedBox()
                         ],
                       ),
                     )

@@ -30,88 +30,96 @@ class _UserPendingScreenState extends State<UserPendingScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    //Kalau penyedia diberi nama perusahaan juga
-                    Text(
-                        user.name +
-                            (user.role == 2
-                                ? ' - ' + (user as Seller).namaPerusahaan
-                                : ""),
-                        style: kCalibriBold),
-                    Text(user.email, style: kCalibri),
-                    Text(user.getRole, style: kCalibriBold),
-                    if (user.role == 1)
-                      Text((user as PejabatPengadaan).namaUnit,
-                          style: kCalibriBold),
-                    if (user.role == 3)
-                      Text((user as PejabatPembuatKomitmen).namaDivisi,
-                          style: kCalibriBold),
-                  ],
-                ),
-                PopupMenuButton(
-                  child: Row(
+                Expanded(
+                  flex: 4,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text("Action",
-                          style: kMavenBold.copyWith(color: kBlueMainColor)),
-                      Icon(Icons.more_vert)
+                      //Kalau penyedia diberi nama perusahaan juga
+                      Text(
+                          user.name +
+                              (user.role == 2
+                                  ? ' - ' + (user as Seller).namaPerusahaan
+                                  : ""),
+                          style: kCalibriBold),
+                      Text(user.email, style: kCalibri),
+                      Text(user.getRole, style: kCalibriBold),
+                      if (user.role == 1)
+                        Text((user as PejabatPengadaan).namaUnit,
+                            style: kCalibriBold),
+                      if (user.role == 3)Container(
+                        child: Text((user as PejabatPembuatKomitmen).namaDivisi,
+                                style: kCalibriBold,
+                                overflow: TextOverflow.ellipsis,),
+                      ),
+                        
                     ],
                   ),
-                  // icon: Icon(Icons.more_vert),
-                  itemBuilder: (context) {
-                    List<PopupMenuEntry<int>> listMenu = [
-                      PopupMenuItem(
-                        value: 1,
-                        child: Text("Accept", style: kCalibri),
-                      ),
-                      PopupMenuDivider(),
-                      PopupMenuItem(
-                        value: 2,
-                        child: Text("Block", style: kCalibri),
-                      ),
-                      PopupMenuDivider(),
-                            PopupMenuItem(
-                              value: 0,
-                              child: Text("Detail User", style: kCalibri),
-                            ),
-                    ];
-                    return listMenu;
-                  },
-                  onSelected: (value) async {
-                    if(value==0){
-                        Navigator.of(context).push(MaterialPageRoute(
-                            builder: (context) =>
-                                UserDetailScreen(user: user)));
-                    }
-                    if (value == 1) {
-                      bool isSuccess = user.role == 3
-                          ? await _accountService.acceptPPK(
-                              isAccepted: true, ppk: user)
-                          : await _accountService.setAccountStatus(
-                              isAccepted: true, uid: user.uid);
-                      if (isSuccess)
-                        Scaffold.of(context).showSnackBar(SnackBar(
-                            content: Text(
-                          'Berhasil Accept',
-                          style: kCalibri,
-                        )));
-                    }
-                    if (value == 2) {
-                      bool isSuccess = user.role == 3
-                          ? await _accountService.setPPKBlock(
-                              isBlocked: true, ppk: user)
-                          : await _accountService.setAccountBlock(
-                              isBlocked: true, uid: user.uid);
-                      if (isSuccess)
-                        Scaffold.of(context).showSnackBar(SnackBar(
-                            content: Text(
-                          'Berhasil Block',
-                          style: kCalibri,
-                        )));
+                ),
+                Expanded(
+                  child: PopupMenuButton(
+                    child: Row(
+                      children: [
+                        Text("Action",
+                            style: kMavenBold.copyWith(color: kBlueMainColor)),
+                        Icon(Icons.more_vert)
+                      ],
+                    ),
+                    // icon: Icon(Icons.more_vert),
+                    itemBuilder: (context) {
+                      List<PopupMenuEntry<int>> listMenu = [
+                        PopupMenuItem(
+                          value: 1,
+                          child: Text("Accept", style: kCalibri),
+                        ),
+                        PopupMenuDivider(),
+                        PopupMenuItem(
+                          value: 2,
+                          child: Text("Block", style: kCalibri),
+                        ),
+                        PopupMenuDivider(),
+                              PopupMenuItem(
+                                value: 0,
+                                child: Text("Detail User", style: kCalibri),
+                              ),
+                      ];
+                      return listMenu;
+                    },
+                    onSelected: (value) async {
+                      if(value==0){
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (context) =>
+                                  UserDetailScreen(user: user)));
+                      }
+                      if (value == 1) {
+                        bool isSuccess = user.role == 3
+                            ? await _accountService.acceptPPK(
+                                isAccepted: true, ppk: user)
+                            : await _accountService.setAccountStatus(
+                                isAccepted: true, uid: user.uid);
+                        if (isSuccess)
+                          Scaffold.of(context).showSnackBar(SnackBar(
+                              content: Text(
+                            'Berhasil Accept',
+                            style: kCalibri,
+                          )));
+                      }
+                      if (value == 2) {
+                        bool isSuccess = user.role == 3
+                            ? await _accountService.setPPKBlock(
+                                isBlocked: true, ppk: user)
+                            : await _accountService.setAccountBlock(
+                                isBlocked: true, uid: user.uid);
+                        if (isSuccess)
+                          Scaffold.of(context).showSnackBar(SnackBar(
+                              content: Text(
+                            'Berhasil Block',
+                            style: kCalibri,
+                          )));
 
-                    }
-                  },
+                      }
+                    },
+                  ),
                 )
               ],
             ),
